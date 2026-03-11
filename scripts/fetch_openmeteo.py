@@ -60,8 +60,8 @@ DAILY_VARS = ",".join([
     "temperature_2m_min",
     "snowfall_sum",           # cm
     "snow_depth",             # m  → we convert to cm
-    "precipitation_sum",      # mm
-    "rain_sum",               # mm
+    "precipitation_sum",      # mm (total — rain derived as precip − snowfall in processing)
+    # rain_sum removed — not available in ERA5-Land; derived downstream
     "sunshine_duration",      # seconds → we convert to hours
     "windspeed_10m_max",      # km/h
     "weathercode",            # WMO weather interpretation code

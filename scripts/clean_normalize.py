@@ -157,7 +157,7 @@ def merge_resort(resort):
         fresh_snow_cm  = bd["snowfall_sum"][i]                   # already cm
         base_depth_cm  = round((bd["snow_depth"][i] or 0) * 100, 1)   # m → cm
         precip_mm      = bd["precipitation_sum"][i] or 0
-        rain_mm        = bd["rain_sum"][i] or 0
+        rain_mm        = max(0.0, round(precip_mm - snowfall_cm * 0.7, 2))  # derived: precip − snow water equiv
         sunshine_h     = round((bd["sunshine_duration"][i] or 0) / 3600, 2)  # s → h
         wind_kmh       = bd["windspeed_10m_max"][i] or 0
         weathercode    = bd["weathercode"][i] or 0
