@@ -92,9 +92,9 @@
   .fc-val.good { color: var(--brand); font-weight: bold; }
 
   /* ── HEATMAP ── */
-  .hm-season-row { display: grid; grid-template-columns: 80px 1fr; gap: 1rem; align-items: center; font-size: 0.8rem; margin-bottom: 0.5rem; }
+  .hm-season-row { display: grid; grid-template-columns: 70px 1fr; gap: 0.5rem; align-items: center; font-size: 0.8rem; margin-bottom: 0.75rem; }
   .hm-months-container { display: flex; gap: 4px; width: 100%; }
-  .hm-month-block { display: flex; flex-direction: column; flex-grow: 1; }
+  .hm-month-block { display: flex; flex-direction: column; flex-grow: 1; min-width: 0; }
   .hm-month-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; margin-bottom: 2px; text-align: center; letter-spacing: 0.05em; }
   .hm-grid { display: flex; gap: 2px; height: 24px; width: 100%; }
   .hm-cell { flex-grow: 1; height: 100%; border-radius: 2px; position: relative; cursor: crosshair; }
@@ -104,6 +104,13 @@
     background: var(--text-main); color: var(--bg-main); padding: 6px 10px; border-radius: 4px; 
     font-size: 0.8rem; white-space: nowrap; z-index: 10; pointer-events: none; margin-bottom: 4px; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  }
+  .hm-cell-future {
+    background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.05) 4px, rgba(255,255,255,0.05) 8px) !important;
+    border: 1px solid var(--grid-line); opacity: 0.4; cursor: not-allowed;
+  }
+  [data-theme="light"] .hm-cell-future, [data-theme="print"] .hm-cell-future {
+    background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.05) 4px, rgba(0,0,0,0.05) 8px) !important;
   }
 
   /* ── TABLE ── */
@@ -125,6 +132,10 @@
     header { flex-direction: column; gap: 0.8rem; padding: 1rem !important; } 
     #toc { justify-content: center; width: 100%; flex-wrap: wrap; } 
     .fc-body { grid-template-columns: 1fr; }
+    .hm-months-container { flex-direction: column; gap: 1rem; }
+    .hm-month-label { text-align: left; border-bottom: 1px solid var(--grid-line); padding-bottom: 2px; }
+    .hm-season-row { grid-template-columns: 1fr; gap: 0.2rem; align-items: start; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; }
+    .hm-season-row > div:first-child { text-align: left !important; font-size: 1rem; color: var(--text-main) !important; }
   }
   @media print { 
     body { background: white !important; color: black !important; } 
@@ -169,7 +180,7 @@
   <!-- ── FORECAST (HIGH RESOLUTION) ── -->
   <section id="powder-alarm">
     <h2>MeteoSwiss Tactical Forecast (72h) 📡</h2>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 1.5rem;">High-resolution aggregate from ICON-CH1/Seamless models.</p>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 1.5rem;">High-resolution aggregate from ICON-CH1/Seamless models. The only place we predict the future.</p>
     <div id="forecast-container" class="grid-layout">
       <div style="color: var(--text-muted); font-style: italic;">Awaiting payload...</div>
     </div>
@@ -211,14 +222,14 @@
         <button class="control-btn active" data-res="7">7 Days</button>
       </div>
     </div>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Segmented by month. Green = pristine. Red = slush/ice risk. Grey = void.</p>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Strict Dec 1 to Apr 30 rendering. Future dates are explicitly hashed out.</p>
     <div id="heatmap-container" style="display: flex; flex-direction: column; gap: 2rem;"></div>
   </section>
 
   <!-- ── SNOWPACK CANVAS (MOVING AVERAGES) ── -->
   <section id="snowpack">
     <h2>Snowpack Evolution (Summit) 🏔️</h2>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Drag over canvas to inspect depths. Use moving averages to filter sensor noise.</p>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Drag over canvas to inspect depths. Historical Mean projects future expectations based on past seasons.</p>
     
     <div style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 1rem;">
       <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; align-items: center;">
@@ -281,7 +292,8 @@
       return; 
     }
     sb.innerHTML = `<span class="badge" style="background:var(--brand);color:white;">✓ Online</span>`;
-    ts.innerText = `Matrix Updated: ${SKI_DATA.records[SKI_DATA.records.length - 1].date}`;
+    const latestDataDate = SKI_DATA.records[SKI_DATA.records.length - 1].date;
+    ts.innerText = `Matrix Updated: ${latestDataDate}`;
 
     // ── DATA ENGINE (Global Prep) ──
     const byDate = {}, byResort = {}, dates = [];
@@ -293,7 +305,7 @@
     });
     dates.sort();
 
-    // Context Engine: Gets average snow depth for a specific MM-DD across all seasons
+    // Context Engine
     const getHistoricalAverage = (resort, mmdd) => {
       if(!byResort[resort]) return null;
       const valid = byResort[resort]
@@ -308,22 +320,16 @@
     const fc = document.getElementById('forecast-container');
     if (FORECAST_DATA && FORECAST_DATA.resorts && Object.keys(FORECAST_DATA.resorts).length > 0) {
       fc.innerHTML = ''; 
-      
       const dayNames = ['Today', 'Tomorrow', 'Day 3'];
       
       Object.entries(FORECAST_DATA.resorts).forEach(([resort, hourly]) => {
         let cardsHtml = '';
-        
-        // Split hourly into 3x 24h chunks
         for (let i = 0; i < 3; i++) {
-          const start = i * 24;
-          const end = start + 24;
-          
+          const start = i * 24, end = start + 24;
           if (!hourly.temperature_2m || hourly.temperature_2m.length <= start) break;
           
           const tArr = hourly.temperature_2m.slice(start, end);
-          const tMin = Math.min(...tArr);
-          const tMax = Math.max(...tArr);
+          const tMin = Math.min(...tArr), tMax = Math.max(...tArr);
           const snow = hourly.snowfall ? hourly.snowfall.slice(start, end).reduce((a,b)=>a+b,0) : 0;
           const rain = hourly.rain ? hourly.rain.slice(start, end).reduce((a,b)=>a+b,0) : 0;
           const gust = hourly.windgusts_10m ? Math.max(...hourly.windgusts_10m.slice(start, end)) : 0;
@@ -341,29 +347,18 @@
               <div class="fc-stat"><span>❄️ Snow</span> <span class="fc-val ${snowClass}">${snow.toFixed(1)} cm</span></div>
               <div class="fc-stat"><span>🌧️ Rain</span> <span class="fc-val ${rainClass}">${rain.toFixed(1)} mm</span></div>
               <div class="fc-stat"><span>💨 Gusts</span> <span class="fc-val ${gustClass}">${gust.toFixed(0)} km/h</span></div>
-              <div class="fc-stat"><span>🏔️ Freezing</span> <span class="fc-val">${fz} m</span></div>
+              <div class="fc-stat"><span>🏔️ Freez</span> <span class="fc-val">${fz} m</span></div>
             </div>
           `;
         }
 
-        // Aggregate 72h warnings for the header
         const totSnow = hourly.snowfall ? hourly.snowfall.slice(0, 72).reduce((a,b)=>a+b,0) : 0;
         const maxGust = hourly.windgusts_10m ? Math.max(...hourly.windgusts_10m.slice(0,72)) : 0;
         let warning = '';
         if (maxGust > 70) warning = `<span style="color:#ef4444; font-size:0.8rem;">⚠️ High Wind Hold Risk</span>`;
         else if (totSnow > 15) warning = `<span style="color:var(--brand); font-size:0.8rem;">❄️ Dump Alert (${totSnow.toFixed(0)}cm)</span>`;
 
-        fc.innerHTML += `
-          <div class="fc-card">
-            <div class="fc-header">
-              <span>${resort}</span>
-              ${warning}
-            </div>
-            <div class="fc-body">
-              ${cardsHtml}
-            </div>
-          </div>
-        `;
+        fc.innerHTML += `<div class="fc-card"><div class="fc-header"><span>${resort}</span>${warning}</div><div class="fc-body">${cardsHtml}</div></div>`;
       });
     } else if (FORECAST_DATA && FORECAST_DATA.error) {
       fc.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">API Failure: ${FORECAST_DATA.error}</div>`;
@@ -377,8 +372,7 @@
       if(!dStr) { dStr = dates[dates.length - 1]; dp.value = dStr; } 
       if(!byDate[dStr]) { dtb.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 2rem;">No matrix data available for ${dStr}</td></tr>`; return; }
       
-      const mmdd = dStr.slice(5); // e.g. "02-15"
-
+      const mmdd = dStr.slice(5);
       dtb.innerHTML = byDate[dStr].map(r => {
         const tb = r.base?.temperature_2m_max ?? r.temperature_2m_max, ts = r.summit?.temperature_2m_max;
         const rawSn = r.summit?.snow_depth ?? r.snow_depth;
@@ -387,90 +381,93 @@
         const fmt = (t) => t !== null && t !== undefined ? `${t.toFixed(1)}°C` : '—'; 
         const warn = (r.flags && r.flags.length) ? `<span title="Data Flag: ${r.flags.join(',')}" style="cursor:help;">⚠️</span> ` : '';
 
-        // Context Engine Diff
         let snHtml = '—';
         if (rawSn !== null && rawSn !== undefined) {
           const snCm = rawSn * 100;
           const histAvg = getHistoricalAverage(r.resort, mmdd);
           snHtml = `<span>${snCm.toFixed(0)} cm</span>`;
-          
           if (histAvg !== null) {
             const diff = snCm - histAvg;
-            let dClass = 'diff-neu'; let dSign = '';
+            let dClass = 'diff-neu', dSign = '';
             if (diff >= 5) { dClass = 'diff-pos'; dSign = '+'; }
             else if (diff <= -5) { dClass = 'diff-neg'; }
             snHtml += `<span class="diff-badge ${dClass}" title="vs ${histAvg.toFixed(0)}cm Hist Avg">${dSign}${diff.toFixed(0)}cm</span>`;
           }
         }
 
-        return `<tr>
-          <td style="font-weight:bold;text-transform:capitalize;">${warn}${r.resort}</td>
-          <td>${fmt(tb)}</td>
-          <td>${fmt(ts)}</td>
-          <td>${snHtml}</td>
-          <td>${fs>0?`<span style="color:#3b82f6;font-weight:bold;">+${fs.toFixed(1)}cm</span>`:'0'}</td>
-          <td><div style="display:flex;align-items:center;gap:0.5rem;"><div style="width:12px;height:12px;border-radius:50%;background:${getColor(sc)}"></div>${sc!==null?(sc*10).toFixed(1)+'/10':'—'}</div></td>
-        </tr>`;
+        return `<tr><td style="font-weight:bold;text-transform:capitalize;">${warn}${r.resort}</td><td>${fmt(tb)}</td><td>${fmt(ts)}</td><td>${snHtml}</td><td>${fs>0?`<span style="color:#3b82f6;font-weight:bold;">+${fs.toFixed(1)}cm</span>`:'0'}</td><td><div style="display:flex;align-items:center;gap:0.5rem;"><div style="width:12px;height:12px;border-radius:50%;background:${getColor(sc)}"></div>${sc!==null?(sc*10).toFixed(1)+'/10':'—'}</div></td></tr>`;
       }).join('');
     };
     dp.addEventListener('change', e => renderTable(e.target.value)); 
     renderTable(dp.value);
 
-    // ── HEATMAPS (Month Grouping) ──
+    // ── HEATMAPS (Strict Dec-Apr Architecture) ──
     let hmRes = 7;
     const hc = document.getElementById('heatmap-container');
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const targetMonths = [
+      {m: 12, name: 'Dec', d: 31}, {m: 1, name: 'Jan', d: 31}, 
+      {m: 2, name: 'Feb', d: 29}, {m: 3, name: 'Mar', d: 31}, 
+      {m: 4, name: 'Apr', d: 30}
+    ];
     
     document.querySelectorAll('#heatmap-controls .control-btn').forEach(btn => {
       btn.onclick = (e) => {
         document.querySelectorAll('#heatmap-controls .control-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        hmRes = parseInt(e.target.dataset.res);
-        renderHeatmaps();
+        e.target.classList.add('active'); hmRes = parseInt(e.target.dataset.res); renderHeatmaps();
       };
     });
 
+    const getSeasonYears = (resortData) => {
+      const years = new Set(resortData.map(r => {
+        const y = parseInt(r.date.slice(0,4)), m = parseInt(r.date.slice(5,7));
+        return m >= 10 ? y : y - 1;
+      }));
+      return Array.from(years).sort().reverse();
+    };
+
     const renderHeatmaps = () => {
       hc.innerHTML = '';
-      resorts.forEach(resort => {
-        const seasons = {};
-        byResort[resort].forEach(r => {
-          const d = new Date(r.date), y = d.getFullYear(), m = d.getMonth()+1;
-          const ss = m>=10 ? `${y}/${String(y+1).slice(2)}` : `${y-1}/${String(y).slice(2)}`;
-          if(!seasons[ss]) seasons[ss] = {};
-          if(!seasons[ss][m]) seasons[ss][m] = [];
-          seasons[ss][m].push(r);
-        });
+      Object.keys(byResort).forEach(resort => {
+        const rData = byResort[resort];
+        const dataMap = {};
+        rData.forEach(r => dataMap[r.date] = r);
         
         let html = `<div><h3 style="margin:0 0 0.5rem 0; font-size:1rem; text-transform:capitalize;">${resort}</h3>`;
         
-        Object.keys(seasons).sort().reverse().forEach(ss => {
-          html += `<div class="hm-season-row">`;
-          html += `<div style="text-align:right; font-weight:bold; color:var(--text-muted);">${ss}</div>`;
-          html += `<div class="hm-months-container">`;
+        const seasons = getSeasonYears(rData);
+        seasons.forEach(startYear => {
+          const ss = `${startYear}/${String(startYear+1).slice(2)}`;
+          html += `<div class="hm-season-row"><div style="text-align:right; font-weight:bold; color:var(--text-muted);">${ss}</div><div class="hm-months-container">`;
           
-          // Render months chronologically (Oct, Nov, Dec, Jan, Feb, Mar, Apr)
-          const targetMonths = [10, 11, 12, 1, 2, 3, 4]; 
-          targetMonths.forEach(m => {
-            const days = seasons[ss][m];
-            if (!days) return; // Skip if month completely missing
-            days.sort((a,b)=>a.date.localeCompare(b.date));
+          targetMonths.forEach(mo => {
+            const y = mo.m === 12 ? startYear : startYear + 1;
+            // Handle leap years perfectly for Feb
+            const daysInMonth = mo.m === 2 ? new Date(y, 2, 0).getDate() : mo.d; 
             
             const blocks = [];
-            for(let i=0; i<days.length; i+=hmRes) {
-              const ch = days.slice(i, i+hmRes);
-              const vs = ch.map(c=>c.scores?.score_universal??c.score_universal).filter(s=>s!==null&&s!==undefined); 
+            for(let day=1; day<=daysInMonth; day+=hmRes) {
+              const chunkDays = [];
+              for(let i=0; i<hmRes && (day+i)<=daysInMonth; i++) {
+                const dStr = `${y}-${String(mo.m).padStart(2,'0')}-${String(day+i).padStart(2,'0')}`;
+                chunkDays.push(dStr);
+              }
+              
+              const startStr = chunkDays[0], endStr = chunkDays[chunkDays.length-1];
+              let isFuture = startStr > latestDataDate;
+              
+              const vs = chunkDays.map(d => dataMap[d]?.scores?.score_universal ?? dataMap[d]?.score_universal).filter(s=>s!==null&&s!==undefined);
+              const snowTot = chunkDays.reduce((a,d) => a+(dataMap[d]?.summit?.snowfall_sum ?? dataMap[d]?.snowfall_sum ?? 0), 0);
               const scoreAvg = vs.length > 0 ? vs.reduce((a,c)=>a+c,0)/vs.length : null;
-              const snowTot = ch.reduce((a,c)=>a+(c.summit?.snowfall_sum??c.snowfall_sum??0),0);
-              blocks.push({ d: `${ch[0].date} to ${ch[ch.length-1].date}`, s: scoreAvg, f: snowTot });
+              
+              blocks.push({ d: `${startStr} to ${endStr}`, s: scoreAvg, f: snowTot, isFuture });
             }
             
-            html += `<div class="hm-month-block">
-              <div class="hm-month-label">${monthNames[m-1]}</div>
-              <div class="hm-grid">
-                ${blocks.map(w=>`<div class="hm-cell" style="background:${getColor(w.s)}; border: 1px solid ${w.s===null?'var(--border-color)':'transparent'};" title="${w.d} | Score: ${w.s!==null?(w.s*10).toFixed(1):'—'} | Snow: ${w.f.toFixed(1)}cm"></div>`).join('')}
-              </div>
-            </div>`;
+            html += `<div class="hm-month-block"><div class="hm-month-label">${mo.name}</div><div class="hm-grid">
+              ${blocks.map(w => {
+                if (w.isFuture) return `<div class="hm-cell hm-cell-future" title="Future (${w.d})"></div>`;
+                return `<div class="hm-cell" style="background:${getColor(w.s)}; border: 1px solid ${w.s===null?'var(--border-color)':'transparent'};" title="${w.d} | Score: ${w.s!==null?(w.s*10).toFixed(1):'—'} | Snow: ${w.f.toFixed(1)}cm"></div>`;
+              }).join('')}
+            </div></div>`;
           });
           html += `</div></div>`;
         });
@@ -479,23 +476,19 @@
     };
     renderHeatmaps();
 
-    // ── SNOWPACK CANVAS (Strict Null Void & Moving Average Filter) ──
+    // ── SNOWPACK CANVAS (Strict Dec-Apr Engine) ──
     const cvs = document.getElementById('snow-canvas'), ctx = cvs.getContext('2d');
-    const cc = document.getElementById('canvas-controls');
-    const legend = document.getElementById('canvas-legend');
-    const avgBtn = document.getElementById('toggle-avg-btn');
-    let act = resorts[0];
-    let hoverDayOffset = null;
-    let maWindow = 1; // Default Raw
-    let showHistoricalAvg = true;
+    const cc = document.getElementById('canvas-controls'), legend = document.getElementById('canvas-legend'), avgBtn = document.getElementById('toggle-avg-btn');
+    let act = Object.keys(byResort)[0], hoverDayOffset = null, maWindow = 1, showHistoricalAvg = true;
     
+    // Strict 151/152 day mapping (Dec 1 to May 1)
     const monthMarkers = [
-      { label: "Dec 1", off: 30 }, { label: "Jan 1", off: 61 },
-      { label: "Feb 1", off: 92 }, { label: "Mar 1", off: 120 },
-      { label: "Apr 1", off: 151 }, { label: "May 1", off: 181 }
+      { label: "Dec 1", off: 0 }, { label: "Jan 1", off: 31 },
+      { label: "Feb 1", off: 62 }, { label: "Mar 1", off: 90 }, // Approx for drawing
+      { label: "Apr 1", off: 121 }, { label: "May 1", off: 151 }
     ];
 
-    resorts.forEach(r => {
+    Object.keys(byResort).forEach(r => {
       const b = document.createElement('button'); b.innerText = r.toUpperCase(); b.className = 'control-btn';
       if(r===act) b.classList.add('active');
       b.onclick = () => { Array.from(cc.children).forEach(c=>c.classList.remove('active')); b.classList.add('active'); act=r; window.repaintCanvas(); };
@@ -505,15 +498,11 @@
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.onclick = (e) => {
         document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-        e.target.classList.add('active');
-        maWindow = parseInt(e.target.dataset.ma);
-        window.repaintCanvas();
+        e.target.classList.add('active'); maWindow = parseInt(e.target.dataset.ma); window.repaintCanvas();
       };
     });
-
     avgBtn.onclick = () => { showHistoricalAvg = !showHistoricalAvg; avgBtn.classList.toggle('active', showHistoricalAvg); window.repaintCanvas(); };
 
-    // Moving Average Engine (Respects Nulls)
     const applyMA = (data, window) => {
       if (window === 1) return data;
       const res = [];
@@ -534,43 +523,43 @@
       
       const linesRaw = {}; let maxD = 100;
       
-      // Extraction
       rd.forEach(r => {
         const d = new Date(r.date), y = d.getFullYear(), m = d.getMonth()+1;
-        const ss = m>=10 ? `${y}/${String(y+1).slice(2)}` : `${y-1}/${String(y).slice(2)}`;
-        const start = new Date(m>=10?y:y-1, 10, 1), off = Math.floor((d-start)/86400000);
+        // Purge summer artifacts from drawing memory entirely just in case
+        if (m > 5 && m < 12) return; 
+        
+        const startYear = m === 12 ? y : y - 1;
+        const ss = `${startYear}/${String(startYear+1).slice(2)}`;
+        
+        // Exact UTC days difference from Dec 1 to handle leap years properly in JS
+        const start = new Date(Date.UTC(startYear, 11, 1));
+        const current = new Date(Date.UTC(y, m-1, d.getDate()));
+        const off = Math.floor((current - start) / 86400000);
+        
+        if (off < 0 || off > 152) return; // Strict clamp
         
         const rawDep = r.summit?.snow_depth ?? r.snow_depth;
         if (!linesRaw[ss]) linesRaw[ss] = []; 
-        
-        if (rawDep !== null && rawDep !== undefined) {
-          linesRaw[ss].push({x:off, y:rawDep*100});
-        } else {
-          linesRaw[ss].push({x:off, y:null}); 
-        }
+        linesRaw[ss].push({x:off, y: (rawDep !== null && rawDep !== undefined) ? rawDep*100 : null});
       });
       
       const seasonKeys = Object.keys(linesRaw).sort();
       const currentSeason = seasonKeys[seasonKeys.length - 1];
       const lines = {};
 
-      // Fill missing days internally to ensure MA works temporally, then apply MA
       seasonKeys.forEach(ss => {
-        // Sort and map sparse arrays into a dense array of 185 days
-        const dense = new Array(186).fill(null).map((_, i) => ({x: i, y: null}));
-        linesRaw[ss].forEach(pt => { if(pt.x >= 0 && pt.x <= 185) dense[pt.x].y = pt.y; });
-        
+        const dense = new Array(153).fill(null).map((_, i) => ({x: i, y: null}));
+        linesRaw[ss].forEach(pt => { if(pt.x >= 0 && pt.x <= 152) dense[pt.x].y = pt.y; });
         const smoothed = applyMA(dense, maWindow);
         smoothed.forEach(pt => { if (pt.y !== null && pt.y > maxD) maxD = pt.y; });
         lines[ss] = smoothed;
       });
-
       maxD = Math.ceil(maxD/50)*50;
       
-      // Compute True Historical Mean
+      // Historical Average Projects Forward
       const avgData = [];
       if (showHistoricalAvg) {
-        for(let i=0; i<=185; i++) {
+        for(let i=0; i<=152; i++) {
           let sum = 0, count = 0;
           seasonKeys.forEach(ss => {
             const pt = lines[ss][i];
@@ -581,49 +570,34 @@
         }
       }
       
-      // Legend
       let legendHtml = seasonKeys.map((s, idx) => {
         const c = s === currentSeason ? getStyleVar('--snow-stroke') : seasonColors[idx % seasonColors.length];
         return `<div class="legend-item"><div class="legend-color" style="background:${c}"></div>${s}</div>`;
       }).join('');
-      if (showHistoricalAvg) {
-        legendHtml += `<div class="legend-item"><div class="legend-color legend-dotted"></div>Mean (${maWindow}d)</div>`;
-      }
+      if (showHistoricalAvg) legendHtml += `<div class="legend-item"><div class="legend-color legend-dotted"></div>Hist. Mean Projects Forward</div>`;
       legend.innerHTML = legendHtml;
 
       const pX = 120, pY = 80, w = cvs.width-pX*2, h = cvs.height-pY*2 - 40; 
-      const mapX = x => pX+(x/180)*w, mapY = y => pY+h-(y/maxD)*h;
+      const mapX = x => pX+(x/152)*w, mapY = y => pY+h-(y/maxD)*h;
       
       ctx.strokeStyle = getStyleVar('--grid-line'); ctx.fillStyle = getStyleVar('--text-muted'); ctx.font = 'bold 24px system-ui'; ctx.textBaseline = 'middle';
-      
-      // Y-Axis
       ctx.textAlign = 'right'; 
       for(let i=0; i<=maxD; i+=50) { 
         const y = pY+h-(i/maxD)*h; 
         ctx.beginPath(); ctx.moveTo(pX,y); ctx.lineTo(pX+w,y); ctx.lineWidth = 2; ctx.stroke(); 
         ctx.fillText(`${i} cm`, pX-20, y); 
       }
-
-      // X-Axis
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
       monthMarkers.forEach(m => {
         const x = mapX(m.off);
-        if (x <= pX+w) {
-          ctx.beginPath(); ctx.moveTo(x, pY); ctx.lineTo(x, pY+h); ctx.lineWidth = 2; ctx.stroke();
-          ctx.fillText(m.label, x, pY+h + 15);
-        }
+        if (x <= pX+w) { ctx.beginPath(); ctx.moveTo(x, pY); ctx.lineTo(x, pY+h); ctx.lineWidth = 2; ctx.stroke(); ctx.fillText(m.label, x, pY+h + 15); }
       });
       
-      // Draw Path Engine
       const drawPath = (pts, strokeColor, lineWidth, isDashed = false) => {
-        ctx.beginPath();
-        let isDrawing = false;
+        ctx.beginPath(); let isDrawing = false;
         pts.forEach(p => {
           if (p.y === null) { isDrawing = false; } 
-          else {
-            if (!isDrawing) { ctx.moveTo(mapX(p.x), mapY(p.y)); isDrawing = true; } 
-            else { ctx.lineTo(mapX(p.x), mapY(p.y)); }
-          }
+          else { if (!isDrawing) { ctx.moveTo(mapX(p.x), mapY(p.y)); isDrawing = true; } else { ctx.lineTo(mapX(p.x), mapY(p.y)); } }
         });
         ctx.strokeStyle = strokeColor; ctx.lineWidth = lineWidth; ctx.lineJoin = 'round';
         if (isDashed) ctx.setLineDash([12, 12]); else ctx.setLineDash([]);
@@ -636,12 +610,10 @@
         drawPath(lines[ss], c, lw);
       });
 
-      if (showHistoricalAvg && avgData.length > 1) {
-        drawPath(avgData, getStyleVar('--text-main'), 5, true);
-      }
+      if (showHistoricalAvg && avgData.length > 1) drawPath(avgData, getStyleVar('--text-main'), 5, true);
 
-      // Tooltip
-      if (hoverDayOffset !== null && hoverDayOffset >= 0 && hoverDayOffset <= 185) {
+      // Interactive Tooltip
+      if (hoverDayOffset !== null && hoverDayOffset >= 0 && hoverDayOffset <= 152) {
         const hx = mapX(hoverDayOffset);
         ctx.beginPath(); ctx.moveTo(hx, pY); ctx.lineTo(hx, pY+h);
         ctx.strokeStyle = getStyleVar('--text-main'); ctx.lineWidth = 2; ctx.setLineDash([5, 5]); ctx.stroke(); ctx.setLineDash([]);
@@ -651,9 +623,7 @@
           const pt = lines[ss][hoverDayOffset];
           if (pt && pt.y !== null) {
             readouts.push({ s: ss, y: pt.y, c: ss === currentSeason ? getStyleVar('--snow-stroke') : seasonColors[idx % seasonColors.length], isAvg: false });
-            ctx.beginPath(); ctx.arc(hx, mapY(pt.y), 6, 0, 2*Math.PI);
-            ctx.fillStyle = getStyleVar('--bg-main'); ctx.fill();
-            ctx.lineWidth = 3; ctx.strokeStyle = readouts[readouts.length-1].c; ctx.stroke();
+            ctx.beginPath(); ctx.arc(hx, mapY(pt.y), 6, 0, 2*Math.PI); ctx.fillStyle = getStyleVar('--bg-main'); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = readouts[readouts.length-1].c; ctx.stroke();
           }
         });
 
@@ -661,8 +631,7 @@
           const aPt = avgData[hoverDayOffset];
           if (aPt && aPt.y !== null) {
             readouts.push({ s: "Mean", y: aPt.y, c: getStyleVar('--text-main'), isAvg: true });
-            ctx.beginPath(); ctx.arc(hx, mapY(aPt.y), 6, 0, 2*Math.PI);
-            ctx.fillStyle = getStyleVar('--text-main'); ctx.fill();
+            ctx.beginPath(); ctx.arc(hx, mapY(aPt.y), 6, 0, 2*Math.PI); ctx.fillStyle = getStyleVar('--text-main'); ctx.fill();
           }
         }
 
@@ -671,37 +640,28 @@
           const boxW = 180, boxH = 20 + (readouts.length * 30);
           let boxX = hx + 15; if (boxX + boxW > pX + w) boxX = hx - boxW - 15;
           if (boxX < pX) boxX = pX; 
-          
-          ctx.fillRect(boxX, pY, boxW, boxH);
-          ctx.strokeStyle = getStyleVar('--border-color'); ctx.strokeRect(boxX, pY, boxW, boxH);
-          
+          ctx.fillRect(boxX, pY, boxW, boxH); ctx.strokeStyle = getStyleVar('--border-color'); ctx.strokeRect(boxX, pY, boxW, boxH);
           ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = '22px system-ui';
           readouts.sort((a,b)=>b.y-a.y).forEach((r, i) => {
-            ctx.fillStyle = r.c;
-            ctx.fillText(r.isAvg ? `┄` : `■`, boxX + 15, pY + 15 + (i*30));
-            ctx.fillStyle = getStyleVar('--text-main');
-            ctx.fillText(`${r.s}: ${r.y.toFixed(0)}cm`, boxX + 45, pY + 15 + (i*30));
+            ctx.fillStyle = r.c; ctx.fillText(r.isAvg ? `┄` : `■`, boxX + 15, pY + 15 + (i*30));
+            ctx.fillStyle = getStyleVar('--text-main'); ctx.fillText(`${r.s}: ${r.y.toFixed(0)}cm`, boxX + 45, pY + 15 + (i*30));
           });
         }
       }
     };
     
     cvs.addEventListener('mousemove', (e) => {
-      const rect = cvs.getBoundingClientRect();
-      const scaleX = cvs.width / rect.width;
-      const mouseX = (e.clientX - rect.left) * scaleX;
-      const pX = 120, w = cvs.width - pX * 2;
-      hoverDayOffset = Math.round(((mouseX - pX) / w) * 180);
+      const rect = cvs.getBoundingClientRect(), scaleX = cvs.width / rect.width;
+      const mouseX = (e.clientX - rect.left) * scaleX, pX = 120, w = cvs.width - pX * 2;
+      hoverDayOffset = Math.round(((mouseX - pX) / w) * 152);
       window.repaintCanvas();
     });
     cvs.addEventListener('mouseleave', () => { hoverDayOffset = null; window.repaintCanvas(); });
     cvs.addEventListener('touchmove', (e) => {
       if (e.touches.length > 0) {
-        const rect = cvs.getBoundingClientRect();
-        const scaleX = cvs.width / rect.width;
-        const mouseX = (e.touches[0].clientX - rect.left) * scaleX;
-        const pX = 120, w = cvs.width - pX * 2;
-        hoverDayOffset = Math.round(((mouseX - pX) / w) * 180);
+        const rect = cvs.getBoundingClientRect(), scaleX = cvs.width / rect.width;
+        const mouseX = (e.touches[0].clientX - rect.left) * scaleX, pX = 120, w = cvs.width - pX * 2;
+        hoverDayOffset = Math.round(((mouseX - pX) / w) * 152);
         window.repaintCanvas();
       }
     }, {passive: true});
