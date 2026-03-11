@@ -135,7 +135,7 @@ def main():
         sys.exit(0)
 
     # ── Step 1: Fetch ────────────────────────────────────────────────────
-    fetch_cmd = [sys.executable, str(SCRIPTS / "fetch_openmeteo.py")]
+    fetch_cmd = [sys.executable, str(SCRIPTS / "fetch_openmeteo.py"), "--probe"]
     if args.end_date:
         fetch_cmd += ["--end-date", args.end_date]
     run(fetch_cmd, "Fetch Open-Meteo ERA5-Land data")
