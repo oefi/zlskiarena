@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
 Step 2 — Clean, Normalize & QC Pipeline
+Enforces the Strict Winter Mandate (Dec 1 - May 1). Drops summer slop.
 Merges base and summit data while rigorously checking for missing API variables.
 """
 
 import json
 from pathlib import Path
+from datetime import datetime
 
 RAW_DIR  = Path(__file__).parent.parent / "data" / "raw"
 OUT_DIR  = Path(__file__).parent.parent / "data" / "processed"
@@ -24,6 +26,12 @@ def extract_daily(raw_json):
     extracted = []
 
     for i, d in enumerate(daily.get("time", [])):
+        # STRICT WINTER MANDATE: Keep only Dec 1 through May 1. Purge the rest.
+        d_obj = datetime.strptime(d, "%Y-%m-%d")
+        m = d_obj.month
+        if m not in [12, 1, 2, 3, 4] and not (m == 5 and d_obj.day == 1):
+            continue
+
         # Bomb-proof array indexing
         def safe_val(key):
             arr = daily.get(key)
