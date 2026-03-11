@@ -45,12 +45,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      # ── FIX 1: Cache the data directory to avoid full re-downloads ──
       - name: Cache Processed Data
         uses: actions/cache@v4
         with:
           path: data/
-          # The key hashes the script so if you change the data logic, it busts the cache
           key: ski-data-${{ hashFiles('scripts/clean_normalize.py') }}-${{ github.run_id }}
           restore-keys: |
             ski-data-${{ hashFiles('scripts/clean_normalize.py') }}-
