@@ -26,15 +26,14 @@
   [data-font="sm"] { --font-base: 14px; }
   [data-font="lg"] { --font-base: 18px; }
 
-  /* Theme Engine: Strict Contrast Ratios */
   [data-theme="light"] {
-    --brand: #2563eb; /* Deeper blue for white text contrast */
+    --brand: #2563eb; 
     --bg-main: #f8fafc; --bg-header: rgba(255, 255, 255, 0.85); --bg-card: #ffffff;
     --text-main: #0f172a; --text-muted: #475569; --border-color: #cbd5e1;
     --grid-line: rgba(0, 0, 0, 0.1); color-scheme: light;
   }
   [data-theme="grey"] {
-    --brand: #3b82f6; /* Vibrant blue for dark mode pop */
+    --brand: #3b82f6; 
     --bg-main: #374151; --bg-header: rgba(55, 65, 81, 0.85); --bg-card: #4b5563;
     --text-main: #f3f4f6; --text-muted: #d1d5db; --border-color: #6b7280;
     --grid-line: rgba(255, 255, 255, 0.15); color-scheme: dark;
@@ -79,7 +78,6 @@
   #toc a { padding: 0.3rem 0.6rem; border-radius: 4px; transition: background 0.2s, color 0.2s; }
   #toc a:hover { background: var(--border-color); opacity: 1; }
 
-  /* Button Engineering */
   .control-btn { 
     padding: 0.4rem 0.8rem; height: 36px;
     background: var(--bg-main); color: var(--text-main); 
@@ -91,13 +89,11 @@
   .control-btn:active:not(:disabled) { transform: translateY(1px); }
   .control-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
   .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  
   .control-btn.active { background: var(--brand); color: #ffffff; border-color: var(--brand); }
-  
   .control-btn.toggle-btn { border: 1px dashed var(--text-muted); color: var(--text-muted); background: transparent; }
   .control-btn.toggle-btn.active { background: var(--text-main); color: var(--bg-main); border-style: solid; border-color: var(--text-main); }
 
-  /* Form Elements */
+  /* Forms & Sliders */
   input[type="date"] {
     height: 36px; padding: 0 0.5rem;
     background: var(--bg-main); color: var(--text-main); 
@@ -106,6 +102,16 @@
     color-scheme: inherit; outline: none; transition: border-color 0.2s;
   }
   input[type="date"]:focus-visible { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+  
+  input[type="range"] {
+    accent-color: var(--brand); cursor: pointer; height: 6px; 
+    background: var(--border-color); border-radius: 3px; outline: none; -webkit-appearance: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: var(--brand); cursor: pointer; transition: transform 0.1s;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
   /* ── FORECAST CARDS ── */
   .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
@@ -123,12 +129,12 @@
   .hm-month-block { display: flex; flex-direction: column; flex-grow: 1; min-width: 0; }
   .hm-month-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; margin-bottom: 2px; text-align: center; letter-spacing: 0.05em; }
   .hm-grid { display: flex; gap: 2px; height: 24px; width: 100%; }
-  .hm-cell { flex-grow: 1; height: 100%; border-radius: 2px; position: relative; cursor: crosshair; }
+  .hm-cell { flex-grow: 1; height: 100%; border-radius: 2px; position: relative; cursor: crosshair; transition: background 0.3s ease; }
   .hm-cell:hover { opacity: 0.7; }
   .hm-cell[title]:hover::after { 
     content: attr(title); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); 
     background: var(--text-main); color: var(--bg-main); padding: 6px 10px; border-radius: 4px; 
-    font-size: 0.8rem; white-space: nowrap; z-index: 10; pointer-events: none; margin-bottom: 4px; 
+    font-size: 0.8rem; white-space: pre-line; z-index: 10; pointer-events: none; margin-bottom: 4px; 
     box-shadow: 0 4px 6px rgba(0,0,0,0.2); font-variant-numeric: tabular-nums;
   }
   .hm-cell-future {
@@ -141,7 +147,7 @@
 
   /* ── TABLE ── */
   table { width: 100%; border-collapse: collapse; font-size: 0.9rem; min-width: 700px; font-variant-numeric: tabular-nums; }
-  th, td { padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border-color); text-align: left; white-space: nowrap; }
+  th, td { padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border-color); text-align: left; white-space: nowrap; transition: background 0.2s; }
   th { color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
   .diff-badge { font-size: 0.75rem; padding: 0.1rem 0.3rem; border-radius: 3px; margin-left: 0.4rem; font-weight: bold; }
   .diff-pos { background: rgba(77, 127, 255, 0.15); color: var(--brand); }
@@ -150,7 +156,7 @@
   
   .quality-badge { cursor: help; display: flex; align-items: center; gap: 0.5rem; padding: 0.2rem 0.5rem; border-radius: 4px; transition: background 0.2s; width: max-content; }
   .quality-badge:hover { background: var(--border-color); }
-  .quality-tooltip { display: none; position: absolute; background: var(--text-main); color: var(--bg-main); padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; z-index: 50; white-space: pre-line; box-shadow: 0 4px 6px rgba(0,0,0,0.2); margin-top: 25px; right: 0; min-width: 200px; }
+  .quality-tooltip { display: none; position: absolute; background: var(--text-main); color: var(--bg-main); padding: 0.5rem; border-radius: 4px; font-size: 0.75rem; z-index: 50; white-space: pre-line; box-shadow: 0 4px 6px rgba(0,0,0,0.2); margin-top: 25px; right: 0; min-width: 200px; line-height: 1.6; }
   .quality-badge:hover .quality-tooltip { display: block; }
 
   /* ── CANVAS ── */
@@ -173,6 +179,7 @@
     section { border: 1px solid #ccc; break-inside: avoid; margin-bottom: 1rem; padding: 1rem; } 
     header { display: none !important; } 
     canvas { filter: grayscale(100%); border-color: #000; } 
+    #algo-controls { display: none !important; }
   }
 </style>
 </head>
@@ -183,8 +190,8 @@
   <h1 style="margin: 0; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.05em;">🎿 ZL Skiarena</h1>
   <nav id="toc" style="display: flex; gap: 0.5rem; font-size: 0.85rem; font-weight: 600;">
     <a href="#powder-alarm" style="text-decoration: none; color: inherit; opacity: 0.8;">Forecast</a>
-    <a href="#drilldown" style="text-decoration: none; color: inherit; opacity: 0.8;">Telemetry</a>
     <a href="#heatmap" style="text-decoration: none; color: inherit; opacity: 0.8;">Matrix</a>
+    <a href="#drilldown" style="text-decoration: none; color: inherit; opacity: 0.8;">Telemetry</a>
     <a href="#snowpack" style="text-decoration: none; color: inherit; opacity: 0.8;">Evolution</a>
   </nav>
   <div style="display: flex; gap: 1.5rem; align-items: center;">
@@ -217,10 +224,47 @@
     </div>
   </section>
 
+  <!-- ── HEATMAP (DYNAMIC WEIGHT ENGINE) ── -->
+  <section id="heatmap">
+    <div class="flex-between" style="margin-bottom: 1rem;">
+      <h2 style="margin:0; border:none; padding:0;">Seasonal Quality Matrix 🔥</h2>
+      <div id="heatmap-controls" style="display: flex; gap: 0.5rem;">
+        <button class="control-btn" data-res="1">1 Day</button>
+        <button class="control-btn" data-res="3">3 Days</button>
+        <button class="control-btn active" data-res="7">7 Days</button>
+      </div>
+    </div>
+    
+    <!-- Dynamic Score UI -->
+    <div id="algo-controls" style="display: flex; gap: 1.5rem; flex-wrap: wrap; background: var(--bg-main); padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
+      <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 0.4rem;">
+        <label style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:bold; color:var(--text-muted);">
+          <span>❄️ Powder Factor</span> <span id="lbl-pow">50%</span>
+        </label>
+        <input type="range" id="w-pow" min="0" max="100" value="50">
+      </div>
+      <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 0.4rem;">
+        <label style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:bold; color:var(--text-muted);">
+          <span>☀️ Bluebird Factor</span> <span id="lbl-sun">50%</span>
+        </label>
+        <input type="range" id="w-sun" min="0" max="100" value="50">
+      </div>
+      <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 0.4rem;">
+        <label style="display:flex; justify-content:space-between; font-size:0.75rem; font-weight:bold; color:var(--text-muted);">
+          <span>🛡️ Comfort Factor</span> <span id="lbl-comf">50%</span>
+        </label>
+        <input type="range" id="w-comf" min="0" max="100" value="50">
+      </div>
+    </div>
+
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Strict Dec 1 to Apr 30 rendering. Matrix dynamically updates based on your algorithm weights.</p>
+    <div id="heatmap-container" style="display: flex; flex-direction: column; gap: 2rem;"></div>
+  </section>
+
   <!-- ── DAILY TELEMETRY (CONTEXT AWARE) ── -->
   <section id="drilldown">
     <div class="flex-between" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
-      <h2 style="margin:0; border:none; padding:0;">Daily Telemetry & Historical Context 📅</h2>
+      <h2 style="margin:0; border:none; padding:0;">Daily Telemetry & Diagnostics 📅</h2>
       <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
         <button id="btn-prev-day" class="control-btn" title="Previous Day">◀ Prev</button>
         <input type="date" id="date-picker">
@@ -237,29 +281,15 @@
             <th>Summit Temp</th>
             <th>Snow Depth <span style="text-transform:none; font-weight:normal; opacity:0.7;">(vs Hist. Avg)</span></th>
             <th>New Snow (24h)</th>
-            <th style="text-align: right;">Quality <span style="opacity:0.6; font-size:0.65rem; font-weight:normal;">(Hover)</span></th>
+            <th style="text-align: right;">Algorithmic Score <span style="opacity:0.6; font-size:0.65rem; font-weight:normal;">(Hover)</span></th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
     </div>
     <div style="margin-top: 1rem; padding: 0.75rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.8rem; color: var(--text-muted);">
-      ⚠️ <strong>Data Integrity Protocol:</strong> Missing API data is strictly rendered as <code>—</code>. We do not fake numbers. Historical Context dynamically averages this exact calendar day across all recorded seasons.
+      ⚠️ <strong>Data Integrity Protocol:</strong> Missing API data is rendered as <code>—</code>. Historical Context dynamically averages this exact calendar day across all seasons. Mother Nature Vetoes (Rain, >75km/h wind) bypass your custom weights.
     </div>
-  </section>
-
-  <!-- ── HEATMAP (MONTHLY BINS) ── -->
-  <section id="heatmap">
-    <div class="flex-between" style="margin-bottom: 1rem;">
-      <h2 style="margin:0; border:none; padding:0;">Seasonal Quality Matrix 🔥</h2>
-      <div id="heatmap-controls" style="display: flex; gap: 0.5rem;">
-        <button class="control-btn" data-res="1">1 Day</button>
-        <button class="control-btn" data-res="3">3 Days</button>
-        <button class="control-btn active" data-res="7">7 Days</button>
-      </div>
-    </div>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Strict Dec 1 to Apr 30 rendering. Future dates are explicitly hashed out.</p>
-    <div id="heatmap-container" style="display: flex; flex-direction: column; gap: 2rem;"></div>
   </section>
 
   <!-- ── SNOWPACK CANVAS (MOVING AVERAGES) ── -->
@@ -293,21 +323,13 @@
 </main>
 
 <footer style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border-color); margin-top: 2rem;">
-  Zwei Länder Skiarena Dashboard &middot; Operational Matrix
+  Zwei Länder Skiarena Dashboard &middot; Dynamic Algorithmic Engine
 </footer>
 
 <script>
   // ── CORE SYSTEM ──
-  function setLocalTheme(t) { 
-    document.documentElement.dataset.theme = t; 
-    localStorage.setItem('zl_theme', t); 
-    if(window.repaintCanvas) window.repaintCanvas(); 
-  }
-  function setLocalFont(f) { 
-    document.documentElement.dataset.font = f; 
-    localStorage.setItem('zl_font', f); 
-  }
-  
+  function setLocalTheme(t) { document.documentElement.dataset.theme = t; localStorage.setItem('zl_theme', t); if(window.repaintCanvas) window.repaintCanvas(); }
+  function setLocalFont(f) { document.documentElement.dataset.font = f; localStorage.setItem('zl_font', f); }
   document.documentElement.dataset.theme = localStorage.getItem('zl_theme') || 'night';
   document.documentElement.dataset.font = localStorage.getItem('zl_font') || 'md';
 
@@ -330,12 +352,8 @@
     for (let i = SKI_DATA.records.length - 1; i >= 0; i--) {
       const r = SKI_DATA.records[i];
       const t = r.base?.temperature_2m_max ?? r.temperature_2m_max;
-      if (t !== null && t !== undefined) {
-        trueLatestDate = r.date;
-        break;
-      }
+      if (t !== null && t !== undefined) { trueLatestDate = r.date; break; }
     }
-    
     if (trueLatestDate) {
       SKI_DATA.records = SKI_DATA.records.filter(r => r.date <= trueLatestDate);
       latestDataDate = trueLatestDate;
@@ -350,17 +368,11 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     
-    // ── KEYBOARD ACCESSIBILITY (Emojis) ──
+    // Keyboard Accessibility
     document.querySelectorAll('.theme-toggles span, .font-resizers span').forEach(el => {
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          el.click();
-        }
-      });
+      el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }});
     });
 
-    // ── STATUS MOUNT ──
     const sb = document.getElementById('status-badge'), ts = document.getElementById('update-time');
     if (!SKI_DATA || !SKI_DATA.records || SKI_DATA.records.length === 0) { 
       sb.innerHTML = `<span class="badge" style="background:#ef4444;color:white;">⚠ Data Missing</span>`; 
@@ -369,7 +381,7 @@
     sb.innerHTML = `<span class="badge" style="background:var(--brand);color:white;">✓ Online</span>`;
     ts.innerText = `Matrix Updated: ${latestDataDate}`;
 
-    // ── DATA ENGINE (Global Prep) ──
+    // ── DATA ENGINE ──
     const byDate = {}, byResort = {}, dates = [];
     SKI_DATA.records.forEach(r => {
       if(!byDate[r.date]) { byDate[r.date] = []; dates.push(r.date); }
@@ -379,34 +391,67 @@
     });
     dates.sort();
 
-    // Context Engine
     const getHistoricalAverage = (resort, mmdd) => {
       if(!byResort[resort]) return null;
-      const valid = byResort[resort]
-        .filter(r => r.date.endsWith(mmdd))
-        .map(r => r.summit?.snow_depth ?? r.snow_depth)
-        .filter(v => v !== null && v !== undefined);
+      const valid = byResort[resort].filter(r => r.date.endsWith(mmdd)).map(r => r.summit?.snow_depth ?? r.snow_depth).filter(v => v !== null && v !== undefined);
       if (valid.length === 0) return null;
       return (valid.reduce((a,b) => a+b, 0) / valid.length) * 100;
     };
 
-    // Diagnostic Engine
-    const generateQualityAutopsy = (r) => {
-      const msgs = [];
-      const gusts = r.summit?.wind_gusts_10m_max ?? r.wind_gusts_10m_max ?? 0;
-      const bTemp = r.base?.temperature_2m_max ?? r.temperature_2m_max ?? 0;
-      const bRain = r.base?.precipitation_sum ?? r.precipitation_sum ?? 0;
-      const sSnow = r.summit?.snowfall_sum ?? r.snowfall_sum ?? 0;
+    // ── ALGORITHMIC SCORING ENGINE (Frontend Dynamics) ──
+    const uiPow = document.getElementById('w-pow'), lblPow = document.getElementById('lbl-pow');
+    const uiSun = document.getElementById('w-sun'), lblSun = document.getElementById('lbl-sun');
+    const uiComf = document.getElementById('w-comf'), lblComf = document.getElementById('lbl-comf');
+    
+    const getWeights = () => ({
+      pow: parseInt(uiPow.value) / 100,
+      sun: parseInt(uiSun.value) / 100,
+      comf: parseInt(uiComf.value) / 100
+    });
 
-      if (gusts > 60) msgs.push(`🚩 Wind Penalty (${gusts.toFixed(0)} km/h)`);
-      if (bRain > 2 && bTemp > 0 && sSnow < 2) msgs.push(`🌧️ Rain Penalty (Base Temp > 0°C)`);
-      if (bTemp > 5) msgs.push(`🔥 Slush Risk (Base > 5°C)`);
-      if (msgs.length === 0) {
-        if (sSnow > 10) msgs.push(`❄️ Powder Day Detected`);
-        else msgs.push(`✓ Stable Conditions`);
-      }
-      return msgs.join('\n');
+    const computeDynamicScore = (r, weights) => {
+      const sSnow = r.summit?.snowfall_sum ?? r.snowfall_sum ?? 0;
+      const bRain = r.base?.precipitation_sum ?? r.precipitation_sum ?? 0;
+      const bTemp = r.base?.temperature_2m_max ?? r.temperature_2m_max ?? null;
+      const sGust = r.summit?.wind_gusts_10m_max ?? r.wind_gusts_10m_max ?? 0;
+      const sunSecs = r.sunshine_duration ?? 0;
+      const sunHours = sunSecs / 3600;
+
+      // 1. Powder Factor (Max 20cm fresh)
+      const fPowder = Math.min(sSnow / 20.0, 1.0);
+      
+      // 2. Sun Factor (Max 8hrs sun)
+      const fSun = Math.min(sunHours / 8.0, 1.0);
+
+      // 3. Comfort Factor (Decays on slush, frostbite, or wind)
+      let fComfort = 1.0;
+      if (sGust > 30) fComfort -= (sGust - 30) / 50; 
+      if (bTemp !== null && bTemp > 2) fComfort -= (bTemp - 2) / 10; 
+      if (bTemp !== null && bTemp < -15) fComfort -= Math.abs(bTemp + 15) / 15; 
+      fComfort = Math.max(0, Math.min(1, fComfort));
+
+      const totalWeight = weights.pow + weights.sun + weights.comf;
+      if (totalWeight === 0) return { score: 0.5, metrics: { fPowder, fSun, fComfort, fatal: [] } };
+
+      let rawScore = ((fPowder * weights.pow) + (fSun * weights.sun) + (fComfort * weights.comf)) / totalWeight;
+      const fatal = [];
+
+      // Mother Nature Vetoes
+      if (bRain > 2 && bTemp > 0 && sSnow < 2) { rawScore *= 0.2; fatal.push("Rain Penalty"); }
+      if (sGust > 75) { rawScore *= 0.3; fatal.push("Wind Hold Penalty"); }
+
+      return { score: rawScore, metrics: { fPowder, fSun, fComfort, fatal } };
     };
+
+    const updateUIAfterAlgorithmShift = () => {
+      lblPow.innerText = `${uiPow.value}%`;
+      lblSun.innerText = `${uiSun.value}%`;
+      lblComf.innerText = `${uiComf.value}%`;
+      renderHeatmaps();
+      renderTable(document.getElementById('date-picker').value);
+    };
+
+    [uiPow, uiSun, uiComf].forEach(el => el.addEventListener('input', updateUIAfterAlgorithmShift));
 
     // ── FORECAST ENGINE ──
     const fc = document.getElementById('forecast-container');
@@ -432,16 +477,7 @@
           const snowClass = snow > 5 ? 'good' : '';
           const rainClass = rain > 1 ? 'alert' : '';
 
-          cardsHtml += `
-            <div class="fc-day">
-              <div class="fc-day-title">${dayNames[i]}</div>
-              <div class="fc-stat"><span>🌡️ Temp</span> <span class="fc-val">${tMin.toFixed(0)}° / ${tMax.toFixed(0)}°C</span></div>
-              <div class="fc-stat"><span>❄️ Snow</span> <span class="fc-val ${snowClass}">${snow.toFixed(1)} cm</span></div>
-              <div class="fc-stat"><span>🌧️ Rain</span> <span class="fc-val ${rainClass}">${rain.toFixed(1)} mm</span></div>
-              <div class="fc-stat"><span>💨 Gusts</span> <span class="fc-val ${gustClass}">${gust.toFixed(0)} km/h</span></div>
-              <div class="fc-stat"><span>🏔️ Freez</span> <span class="fc-val">${fz} m</span></div>
-            </div>
-          `;
+          cardsHtml += `<div class="fc-day"><div class="fc-day-title">${dayNames[i]}</div><div class="fc-stat"><span>🌡️ Temp</span> <span class="fc-val">${tMin.toFixed(0)}° / ${tMax.toFixed(0)}°C</span></div><div class="fc-stat"><span>❄️ Snow</span> <span class="fc-val ${snowClass}">${snow.toFixed(1)} cm</span></div><div class="fc-stat"><span>🌧️ Rain</span> <span class="fc-val ${rainClass}">${rain.toFixed(1)} mm</span></div><div class="fc-stat"><span>💨 Gusts</span> <span class="fc-val ${gustClass}">${gust.toFixed(0)} km/h</span></div><div class="fc-stat"><span>🏔️ Freez</span> <span class="fc-val">${fz} m</span></div></div>`;
         }
 
         const totSnow = hourly.snowfall ? hourly.snowfall.slice(0, 72).reduce((a,b)=>a+b,0) : 0;
@@ -452,13 +488,7 @@
 
         const meta = STATIC_METADATA[resort.toLowerCase()] || {base:'?', summit:'?'};
 
-        fc.innerHTML += `<div class="fc-card">
-          <div class="fc-header">
-            <span>${resort} <span style="opacity:0.6; font-size:0.75rem; font-weight:normal; text-transform:lowercase;">(${meta.base}m - ${meta.summit}m)</span></span>
-            ${warning}
-          </div>
-          <div class="fc-body">${cardsHtml}</div>
-        </div>`;
+        fc.innerHTML += `<div class="fc-card"><div class="fc-header"><span>${resort} <span style="opacity:0.6; font-size:0.75rem; font-weight:normal; text-transform:lowercase;">(${meta.base}m - ${meta.summit}m)</span></span>${warning}</div><div class="fc-body">${cardsHtml}</div></div>`;
       });
     } else if (FORECAST_DATA && FORECAST_DATA.error) {
       fc.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">API Failure: ${FORECAST_DATA.error}</div>`;
@@ -466,15 +496,12 @@
 
     // ── TELEMETRY DRILLDOWN ──
     const dp = document.getElementById('date-picker'), dtb = document.querySelector('#daily-table tbody');
-    const btnPrev = document.getElementById('btn-prev-day');
-    const btnNext = document.getElementById('btn-next-day');
-    const btnLatest = document.getElementById('btn-latest-day');
+    const btnPrev = document.getElementById('btn-prev-day'), btnNext = document.getElementById('btn-next-day'), btnLatest = document.getElementById('btn-latest-day');
 
     dp.min = dates[0]; dp.max = dates[dates.length - 1]; dp.value = dp.max;
     
     const renderTable = (dStr) => {
       if(!dStr) { dStr = dates[dates.length - 1]; dp.value = dStr; } 
-      
       const currIdx = dates.indexOf(dStr);
       
       btnPrev.disabled = (currIdx <= 0);
@@ -487,15 +514,27 @@
       }
       
       const mmdd = dStr.slice(5);
+      const weights = getWeights();
+
       dtb.innerHTML = byDate[dStr].map(r => {
         const meta = STATIC_METADATA[r.resort.toLowerCase()] || {base:'?', summit:'?'};
         const tb = r.base?.temperature_2m_max ?? r.temperature_2m_max, ts = r.summit?.temperature_2m_max;
         const rawSn = r.summit?.snow_depth ?? r.snow_depth;
         const fs = r.summit?.snowfall_sum ?? r.snowfall_sum ?? 0;
-        const sc = r.scores?.score_universal ?? r.score_universal ?? null;
         const fmt = (t) => t !== null && t !== undefined ? `${t.toFixed(1)}°C` : '—'; 
         const warn = (r.flags && r.flags.length) ? `<span title="Data Flag: ${r.flags.join(',')}" style="cursor:help;">⚠️</span> ` : '';
-        const autopsy = generateQualityAutopsy(r);
+        
+        // Execute Dynamic Engine
+        const dScore = computeDynamicScore(r, weights);
+        const finalSc = dScore.score;
+
+        let tooltipHTML = `<div style="margin-bottom:4px; font-weight:bold; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:4px;">Diagnostic Matrix</div>`;
+        tooltipHTML += `<div>❄️ Pow Factor: ${(dScore.metrics.fPowder*10).toFixed(1)}/10</div>`;
+        tooltipHTML += `<div>☀️ Sun Factor: ${(dScore.metrics.fSun*10).toFixed(1)}/10</div>`;
+        tooltipHTML += `<div>🛡️ Comf Factor: ${(dScore.metrics.fComfort*10).toFixed(1)}/10</div>`;
+        if (dScore.metrics.fatal.length > 0) {
+          tooltipHTML += `<div style="color:#ef4444; font-weight:bold; margin-top:4px;">🚨 ${dScore.metrics.fatal.join(' + ')}</div>`;
+        }
 
         let snHtml = '—';
         if (rawSn !== null && rawSn !== undefined) {
@@ -512,19 +551,16 @@
         }
 
         return `<tr>
-          <td>
-            <div style="font-weight:bold;text-transform:capitalize;">${warn}${r.resort}</div>
-            <div style="font-size:0.7rem; color:var(--text-muted);">${meta.base}m - ${meta.summit}m</div>
-          </td>
+          <td><div style="font-weight:bold;text-transform:capitalize;">${warn}${r.resort}</div><div style="font-size:0.7rem; color:var(--text-muted);">${meta.base}m - ${meta.summit}m</div></td>
           <td>${fmt(tb)}</td>
           <td>${fmt(ts)}</td>
           <td>${snHtml}</td>
           <td>${fs>0?`<span style="color:#3b82f6;font-weight:bold;">+${fs.toFixed(1)}cm</span>`:'0'}</td>
           <td style="position:relative; text-align:right;">
             <div class="quality-badge" style="margin-left: auto;">
-              <div style="width:12px;height:12px;border-radius:50%;background:${getColor(sc)}"></div>
-              ${sc!==null?(sc*10).toFixed(1)+'/10':'—'}
-              <div class="quality-tooltip">${autopsy}</div>
+              <div style="width:12px;height:12px;border-radius:50%;background:${getColor(finalSc)}"></div>
+              ${(finalSc*10).toFixed(1)}/10
+              <div class="quality-tooltip">${tooltipHTML}</div>
             </div>
           </td>
         </tr>`;
@@ -532,29 +568,16 @@
     };
 
     dp.addEventListener('change', e => renderTable(e.target.value)); 
-    
-    btnPrev.onclick = () => {
-      const idx = dates.indexOf(dp.value);
-      if (idx > 0) { dp.value = dates[idx - 1]; renderTable(dp.value); }
-    };
-    btnNext.onclick = () => {
-      const idx = dates.indexOf(dp.value);
-      if (idx !== -1 && idx < dates.length - 1) { dp.value = dates[idx + 1]; renderTable(dp.value); }
-    };
-    btnLatest.onclick = () => {
-      dp.value = dates[dates.length - 1]; renderTable(dp.value);
-    };
+    btnPrev.onclick = () => { const idx = dates.indexOf(dp.value); if (idx > 0) { dp.value = dates[idx - 1]; renderTable(dp.value); } };
+    btnNext.onclick = () => { const idx = dates.indexOf(dp.value); if (idx !== -1 && idx < dates.length - 1) { dp.value = dates[idx + 1]; renderTable(dp.value); } };
+    btnLatest.onclick = () => { dp.value = dates[dates.length - 1]; renderTable(dp.value); };
 
     renderTable(dp.value);
 
     // ── HEATMAPS ──
     let hmRes = 7;
     const hc = document.getElementById('heatmap-container');
-    const targetMonths = [
-      {m: 12, name: 'Dec', d: 31}, {m: 1, name: 'Jan', d: 31}, 
-      {m: 2, name: 'Feb', d: 29}, {m: 3, name: 'Mar', d: 31}, 
-      {m: 4, name: 'Apr', d: 30}
-    ];
+    const targetMonths = [ {m: 12, name: 'Dec', d: 31}, {m: 1, name: 'Jan', d: 31}, {m: 2, name: 'Feb', d: 29}, {m: 3, name: 'Mar', d: 31}, {m: 4, name: 'Apr', d: 30} ];
     
     document.querySelectorAll('#heatmap-controls .control-btn').forEach(btn => {
       btn.onclick = (e) => {
@@ -564,14 +587,13 @@
     });
 
     const getSeasonYears = (resortData) => {
-      const years = new Set(resortData.map(r => {
-        const y = parseInt(r.date.slice(0,4)), m = parseInt(r.date.slice(5,7));
-        return m >= 10 ? y : y - 1;
-      }));
+      const years = new Set(resortData.map(r => { const y = parseInt(r.date.slice(0,4)), m = parseInt(r.date.slice(5,7)); return m >= 10 ? y : y - 1; }));
       return Array.from(years).sort().reverse();
     };
 
-    const renderHeatmaps = () => {
+    // Make renderHeatmaps global so the sliders can trigger it
+    window.renderHeatmaps = () => {
+      const weights = getWeights();
       hc.innerHTML = '';
       Object.keys(byResort).forEach(resort => {
         const rData = byResort[resort];
@@ -593,14 +615,18 @@
             for(let day=1; day<=daysInMonth; day+=hmRes) {
               const chunkDays = [];
               for(let i=0; i<hmRes && (day+i)<=daysInMonth; i++) {
-                const dStr = `${y}-${String(mo.m).padStart(2,'0')}-${String(day+i).padStart(2,'0')}`;
-                chunkDays.push(dStr);
+                chunkDays.push(`${y}-${String(mo.m).padStart(2,'0')}-${String(day+i).padStart(2,'0')}`);
               }
               
               const startStr = chunkDays[0], endStr = chunkDays[chunkDays.length-1];
               let isFuture = startStr > latestDataDate;
               
-              const vs = chunkDays.map(d => dataMap[d]?.scores?.score_universal ?? dataMap[d]?.score_universal).filter(s=>s!==null&&s!==undefined);
+              // Dynamic Calculation instead of static universal_score
+              const vs = chunkDays.map(d => {
+                if(!dataMap[d]) return null;
+                return computeDynamicScore(dataMap[d], weights).score;
+              }).filter(s=>s!==null);
+
               const snowTot = chunkDays.reduce((a,d) => a+(dataMap[d]?.summit?.snowfall_sum ?? dataMap[d]?.snowfall_sum ?? 0), 0);
               const scoreAvg = vs.length > 0 ? vs.reduce((a,c)=>a+c,0)/vs.length : null;
               
@@ -610,7 +636,7 @@
             html += `<div class="hm-month-block"><div class="hm-month-label">${mo.name}</div><div class="hm-grid">
               ${blocks.map(w => {
                 if (w.isFuture) return `<div class="hm-cell hm-cell-future" title="Future (${w.d})"></div>`;
-                return `<div class="hm-cell" style="background:${getColor(w.s)}; border: 1px solid ${w.s===null?'var(--border-color)':'transparent'};" title="${w.d} | Score: ${w.s!==null?(w.s*10).toFixed(1):'—'} | Snow: ${w.f.toFixed(1)}cm"></div>`;
+                return `<div class="hm-cell" style="background:${getColor(w.s)}; border: 1px solid ${w.s===null?'var(--border-color)':'transparent'};" title="${w.d}\nScore: ${w.s!==null?(w.s*10).toFixed(1):'—'}\nSnow: ${w.f.toFixed(1)}cm"></div>`;
               }).join('')}
             </div></div>`;
           });
@@ -619,7 +645,7 @@
         hc.innerHTML += html + `</div>`;
       });
     };
-    renderHeatmaps();
+    renderHeatmaps(); // Initial render
 
     // ── SNOWPACK CANVAS ──
     const cvs = document.getElementById('snow-canvas'), ctx = cvs.getContext('2d');
@@ -627,11 +653,7 @@
     let act = Object.keys(byResort)[0], hoverDayOffset = null, maWindow = 1, showHistoricalAvg = true;
     let isTouch = false; 
     
-    const monthMarkers = [
-      { label: "Dec 1", off: 0 }, { label: "Jan 1", off: 31 },
-      { label: "Feb 1", off: 62 }, { label: "Mar 1", off: 90 },
-      { label: "Apr 1", off: 121 }, { label: "May 1", off: 151 }
-    ];
+    const monthMarkers = [ { label: "Dec 1", off: 0 }, { label: "Jan 1", off: 31 }, { label: "Feb 1", off: 62 }, { label: "Mar 1", off: 90 }, { label: "Apr 1", off: 121 }, { label: "May 1", off: 151 } ];
 
     Object.keys(byResort).forEach(r => {
       const b = document.createElement('button'); b.innerText = r.toUpperCase(); b.className = 'control-btn';
@@ -654,9 +676,7 @@
       for (let i = 0; i < data.length; i++) {
         if (data[i].y === null) { res.push({x: data[i].x, y: null}); continue; }
         let sum = 0, count = 0;
-        for (let j = Math.max(0, i - window + 1); j <= i; j++) {
-          if (data[j] && data[j].y !== null) { sum += data[j].y; count++; }
-        }
+        for (let j = Math.max(0, i - window + 1); j <= i; j++) { if (data[j] && data[j].y !== null) { sum += data[j].y; count++; } }
         res.push({x: data[i].x, y: count > 0 ? sum/count : null});
       }
       return res;
@@ -669,21 +689,14 @@
       const linesRaw = {}; let maxD = 100;
       
       rd.forEach(r => {
-        const y = parseInt(r.date.slice(0,4));
-        const m = parseInt(r.date.slice(5,7));
-        const day = parseInt(r.date.slice(8,10));
-
+        const y = parseInt(r.date.slice(0,4)), m = parseInt(r.date.slice(5,7)), day = parseInt(r.date.slice(8,10));
         if (m > 5 && m < 12) return; 
-        
         const startYear = m === 12 ? y : y - 1;
         const ss = `${startYear}/${String(startYear+1).slice(2)}`;
-        
-        const start = Date.UTC(startYear, 11, 1);
-        const current = Date.UTC(y, m-1, day);
+        const start = Date.UTC(startYear, 11, 1), current = Date.UTC(y, m-1, day);
         const off = Math.floor((current - start) / 86400000);
         
         if (off < 0 || off > 152) return; 
-        
         const rawDep = r.summit?.snow_depth ?? r.snow_depth;
         if (!linesRaw[ss]) linesRaw[ss] = []; 
         linesRaw[ss].push({x:off, y: (rawDep !== null && rawDep !== undefined) ? rawDep*100 : null});
@@ -706,12 +719,8 @@
       if (showHistoricalAvg) {
         for(let i=0; i<=152; i++) {
           let sum = 0, count = 0;
-          seasonKeys.forEach(ss => {
-            const pt = lines[ss][i];
-            if (pt !== undefined && pt.y !== null) { sum += pt.y; count++; }
-          });
-          if (count > 0) avgData.push({x: i, y: sum/count});
-          else avgData.push({x: i, y: null});
+          seasonKeys.forEach(ss => { const pt = lines[ss][i]; if (pt !== undefined && pt.y !== null) { sum += pt.y; count++; } });
+          if (count > 0) avgData.push({x: i, y: sum/count}); else avgData.push({x: i, y: null});
         }
       }
       
@@ -728,15 +737,10 @@
       ctx.strokeStyle = getStyleVar('--grid-line'); ctx.fillStyle = getStyleVar('--text-muted'); ctx.font = 'bold 24px system-ui'; ctx.textBaseline = 'middle';
       ctx.textAlign = 'right'; 
       for(let i=0; i<=maxD; i+=50) { 
-        const y = pY+h-(i/maxD)*h; 
-        ctx.beginPath(); ctx.moveTo(pX,y); ctx.lineTo(pX+w,y); ctx.lineWidth = 2; ctx.stroke(); 
-        ctx.fillText(`${i} cm`, pX-20, y); 
+        const y = pY+h-(i/maxD)*h; ctx.beginPath(); ctx.moveTo(pX,y); ctx.lineTo(pX+w,y); ctx.lineWidth = 2; ctx.stroke(); ctx.fillText(`${i} cm`, pX-20, y); 
       }
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      monthMarkers.forEach(m => {
-        const x = mapX(m.off);
-        if (x <= pX+w) { ctx.beginPath(); ctx.moveTo(x, pY); ctx.lineTo(x, pY+h); ctx.lineWidth = 2; ctx.stroke(); ctx.fillText(m.label, x, pY+h + 15); }
-      });
+      monthMarkers.forEach(m => { const x = mapX(m.off); if (x <= pX+w) { ctx.beginPath(); ctx.moveTo(x, pY); ctx.lineTo(x, pY+h); ctx.lineWidth = 2; ctx.stroke(); ctx.fillText(m.label, x, pY+h + 15); }});
       
       const drawPath = (pts, strokeColor, lineWidth, isDashed = false) => {
         ctx.beginPath(); let isDrawing = false;
@@ -749,15 +753,9 @@
         ctx.stroke();
       };
 
-      seasonKeys.forEach((ss, idx) => {
-        const c = ss === currentSeason ? getStyleVar('--snow-stroke') : seasonColors[idx % seasonColors.length];
-        const lw = ss === currentSeason ? 6 : 3;
-        drawPath(lines[ss], c, lw);
-      });
-
+      seasonKeys.forEach((ss, idx) => { const c = ss === currentSeason ? getStyleVar('--snow-stroke') : seasonColors[idx % seasonColors.length]; drawPath(lines[ss], c, ss === currentSeason ? 6 : 3); });
       if (showHistoricalAvg && avgData.length > 1) drawPath(avgData, getStyleVar('--text-main'), 5, true);
 
-      // Interactive Tooltip
       if (hoverDayOffset !== null && hoverDayOffset >= 0 && hoverDayOffset <= 152) {
         const hx = mapX(hoverDayOffset);
         ctx.beginPath(); ctx.moveTo(hx, pY); ctx.lineTo(hx, pY+h);
@@ -771,7 +769,6 @@
             ctx.beginPath(); ctx.arc(hx, mapY(pt.y), 6, 0, 2*Math.PI); ctx.fillStyle = getStyleVar('--bg-main'); ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = readouts[readouts.length-1].c; ctx.stroke();
           }
         });
-
         if (showHistoricalAvg) {
           const aPt = avgData[hoverDayOffset];
           if (aPt && aPt.y !== null) {
@@ -783,15 +780,8 @@
         if (readouts.length > 0) {
           ctx.fillStyle = getStyleVar('--bg-header');
           const boxW = 180, boxH = 20 + (readouts.length * 30);
-          
-          let boxX = hx + 15; 
-          let boxY = pY;
-
-          if (isTouch) {
-            boxY = pY - 50; 
-            if (boxY < 0) boxY = 0; 
-          }
-
+          let boxX = hx + 15, boxY = pY;
+          if (isTouch) { boxY = pY - 50; if (boxY < 0) boxY = 0; }
           if (boxX + boxW > pX + w) boxX = hx - boxW - 15;
           if (boxX < pX) boxX = pX; 
           
@@ -805,26 +795,9 @@
       }
     };
     
-    cvs.addEventListener('mousemove', (e) => {
-      isTouch = false;
-      const rect = cvs.getBoundingClientRect(), scaleX = cvs.width / rect.width;
-      const mouseX = (e.clientX - rect.left) * scaleX, pX = 120, w = cvs.width - pX * 2;
-      hoverDayOffset = Math.round(((mouseX - pX) / w) * 152);
-      window.repaintCanvas();
-    });
+    cvs.addEventListener('mousemove', (e) => { isTouch = false; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.clientX - rect.left) * (cvs.width / rect.width)) - 120) / (cvs.width - 240) * 152); window.repaintCanvas(); });
     cvs.addEventListener('mouseleave', () => { hoverDayOffset = null; window.repaintCanvas(); });
-    
-    // THE SCROLL-BLEED FIX: Prevent page scroll while graphing
-    cvs.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0) {
-        e.preventDefault(); 
-        isTouch = true;
-        const rect = cvs.getBoundingClientRect(), scaleX = cvs.width / rect.width;
-        const mouseX = (e.touches[0].clientX - rect.left) * scaleX, pX = 120, w = cvs.width - pX * 2;
-        hoverDayOffset = Math.round(((mouseX - pX) / w) * 152);
-        window.repaintCanvas();
-      }
-    }, {passive: false});
+    cvs.addEventListener('touchmove', (e) => { if (e.touches.length > 0) { e.preventDefault(); isTouch = true; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.touches[0].clientX - rect.left) * (cvs.width / rect.width)) - 120) / (cvs.width - 240) * 152); window.repaintCanvas(); } }, {passive: false});
 
     setTimeout(window.repaintCanvas, 50);
   });
