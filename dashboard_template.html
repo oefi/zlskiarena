@@ -14,6 +14,9 @@
 <meta property="og:description" content="Historical ski weather for 5 resorts across Austria & South Tyrol. Every powder day, every sunny terrace, every storm.">
 <meta property="og:image" content="https://oefi.github.io/zlskiarena/og-image.png">
 
+<!-- Silences the 404 Favicon Error with a zero-dependency SVG inline data URI -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎿</text></svg>">
+
 <style>
   /* ── DESIGN TOKENS ── */
   :root {
@@ -642,7 +645,40 @@
       const fPowder = Math.min(sSnow / 20.0, 1.0);
       const fSun = Math.min(sunHours / 8.0, 1.0);
       const fCoverage = Math.min(snDepth, 1.0);
-        <div style="margin-top:0.6rem; padding:0.4rem 0.6rem; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.5); border-radius:4px; color:#ef4444; font-weight:bold; font-size:0.75rem; display:flex; gap:0.4rem; align-items:center;">
+
+      const totalWeight = weights.pow + weights.sun + weights.cov;
+      if (totalWeight === 0) return { score: 0.5, metrics: { fPowder, fSun, fCoverage, fatal: [] } };
+
+      let rawScore = ((fPowder * weights.pow) + (fSun * weights.sun) + (fCoverage * weights.cov)) / totalWeight;
+      const fatal = [];
+
+      if (bRain > 2 && bTemp > 0 && sSnow < 2) { rawScore *= 0.2; fatal.push("Rain Penalty"); }
+      if (sGust > 75) { rawScore *= 0.3; fatal.push("Wind Hold"); }
+      if (bTemp !== null && bTemp > 5) { rawScore *= 0.8; fatal.push("Slush Risk"); }
+
+      return { score: rawScore, metrics: { fPowder, fSun, fCoverage, fatal } };
+    };
+
+    // ── ADVANCED TOOLTIP BUILDER ──
+    const generateRichTooltipHTML = (title, dScore, finalSc, extras = '') => {
+      if (finalSc === null) return `<div class="tt-data-node"><div>Data unavailable for ${title}</div></div>`;
+      
+      const pC = dScore.metrics.fPowder >= 0.8 ? 'var(--snow-yield)' : 'var(--text-main)';
+      const sC = dScore.metrics.fSun >= 0.8 ? 'var(--sun-yield)' : 'var(--text-main)';
+      const cC = dScore.metrics.fCoverage >= 0.8 ? '#22c55e' : 'var(--text-main)';
+
+      let html = `<div class="tt-data-node">
+        <div style="font-size:0.9rem; font-weight:800; color:var(--brand); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.4rem; margin-bottom:0.4rem;">${title}</div>
+        ${extras}
+        <div style="color:var(--text-muted); font-size:0.7rem; margin-top:0.4rem; text-transform:uppercase;">Algorithmic Engine</div>
+        <div class="tt-grid">
+          <span style="color:var(--text-muted)">❄️ Powder</span> <span class="tt-val" style="color:${pC}">${(dScore.metrics.fPowder*10).toFixed(1)} <span style="font-size:0.6rem; opacity:0.6;">/ 10</span></span>
+          <span style="color:var(--text-muted)">☀️ Bluebird</span> <span class="tt-val" style="color:${sC}">${(dScore.metrics.fSun*10).toFixed(1)} <span style="font-size:0.6rem; opacity:0.6;">/ 10</span></span>
+          <span style="color:var(--text-muted)">🏔️ Coverage</span> <span class="tt-val" style="color:${cC}">${(dScore.metrics.fCoverage*10).toFixed(1)} <span style="font-size:0.6rem; opacity:0.6;">/ 10</span></span>
+        </div>`;
+      
+      if (dScore.metrics.fatal.length > 0) {
+        html += `<div style="margin-top:0.6rem; padding:0.4rem 0.6rem; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.5); border-radius:4px; color:#ef4444; font-weight:bold; font-size:0.75rem; display:flex; gap:0.4rem; align-items:center;">
           <span>🚨</span> <span>Penalties Active:<br>${dScore.metrics.fatal.join(' · ')}</span>
         </div>`;
       }
