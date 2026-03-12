@@ -35,19 +35,19 @@
 
   [data-theme="light"] {
     --brand: #2563eb; 
-    --bg-main: #f8fafc; --bg-header: rgba(255, 255, 255, 0.85); --bg-card: #ffffff;
+    --bg-main: #f8fafc; --bg-header: #ffffff; --bg-card: #ffffff;
     --text-main: #0f172a; --text-muted: #475569; --border-color: #cbd5e1;
     --grid-line: rgba(0, 0, 0, 0.1); color-scheme: light;
   }
   [data-theme="grey"] {
     --brand: #3b82f6; 
-    --bg-main: #374151; --bg-header: rgba(55, 65, 81, 0.85); --bg-card: #4b5563;
+    --bg-main: #374151; --bg-header: #374151; --bg-card: #4b5563;
     --text-main: #f3f4f6; --text-muted: #d1d5db; --border-color: #6b7280;
     --grid-line: rgba(255, 255, 255, 0.15); color-scheme: dark;
   }
   [data-theme="night"] {
     --brand: #3b82f6; 
-    --bg-main: #0d1829; --bg-header: rgba(13, 24, 41, 0.85); --bg-card: #1a2d4e;
+    --bg-main: #0d1829; --bg-header: #0d1829; --bg-card: #1a2d4e;
     --text-main: #e8edf5; --text-muted: #8fa0ba; --border-color: #1e3260;
     --grid-line: rgba(255, 255, 255, 0.15); color-scheme: dark;
   }
@@ -114,6 +114,15 @@
   .archetype-btn { background: transparent; border: 1px solid var(--border-color); font-size: 0.8rem; }
   .archetype-btn.active { background: var(--text-main); color: var(--bg-main); border-color: var(--text-main); }
 
+  /* ── GLOBAL RESORT TABS ── */
+  .resort-tab-btn {
+    padding: 0.4rem 1rem; background: transparent; border: 1px solid transparent; 
+    border-radius: 4px; color: var(--text-muted); font-weight: bold; font-size: 0.85rem; 
+    cursor: pointer; white-space: nowrap; transition: all 0.2s;
+  }
+  .resort-tab-btn:hover { color: var(--text-main); background: var(--border-color); }
+  .resort-tab-btn.active { color: #fff; background: var(--brand); border-color: var(--brand); }
+
   /* Forms & Sliders */
   input[type="date"] {
     height: 36px; padding: 0 0.5rem;
@@ -133,14 +142,10 @@
   input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 
   /* ── FORECAST CARDS ── */
-  .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; }
-  .fc-header { background: var(--border-color); padding: 0.75rem 1rem; font-weight: 800; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.05em; display: flex; justify-content: space-between; align-items: center; }
-  .fc-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border-color); }
-  .fc-day { background: var(--bg-main); padding: 0.75rem; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.85rem; }
-  .fc-day-title { font-weight: bold; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; margin-bottom: 0.2rem; border-bottom: 1px dotted var(--grid-line); padding-bottom: 0.2rem; }
-  .fc-stat { display: flex; justify-content: space-between; align-items: center; font-variant-numeric: tabular-nums; }
-  .fc-val.alert { color: #ef4444; font-weight: bold; }
-  .fc-val.good { color: var(--brand); font-weight: bold; }
+  #forecast-wrapper { display: grid; grid-template-columns: 1fr; gap: 1.5rem; align-items: stretch; }
+  @media (min-width: 1024px) { #forecast-wrapper { grid-template-columns: 320px 1fr; } }
+  
+  .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; padding: 1rem; display: flex; flex-direction: column; justify-content: center; }
 
   /* ── HEATMAP ── */
   .hm-season-row { display: grid; grid-template-columns: 70px 1fr; gap: 0.5rem; align-items: center; font-size: 0.8rem; margin-bottom: 0.75rem; }
@@ -189,12 +194,11 @@
   .legend-dotted { border-bottom: 3px dotted var(--text-main); background: transparent !important; height: 0; width: 16px; }
 
   @media (max-width: 1024px) { 
-    header { display: flex !important; flex-direction: column; gap: 0.8rem; padding: 1rem !important; } 
-    header > div { width: 100%; justify-content: center !important; text-align: center; }
+    header.main-header { display: flex !important; flex-direction: column; gap: 0.8rem; padding: 1rem !important; } 
+    header.main-header > div { width: 100%; justify-content: center !important; text-align: center; }
     #toc { justify-content: center; width: 100%; flex-wrap: wrap; } 
   }
   @media (max-width: 768px) {
-    .fc-body { grid-template-columns: 1fr; }
     .hm-months-container { flex-direction: column; gap: 1rem; }
     .hm-month-label { text-align: left; border-bottom: 1px solid var(--grid-line); padding-bottom: 2px; }
     .hm-season-row { grid-template-columns: 1fr; gap: 0.2rem; align-items: start; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; }
@@ -204,7 +208,7 @@
   @media print { 
     body { background: white !important; color: black !important; } 
     section { border: 1px solid #ccc; break-inside: avoid; margin-bottom: 1rem; padding: 1rem; } 
-    header { display: none !important; } 
+    header, #global-resort-header { display: none !important; } 
     canvas { filter: grayscale(100%); border-color: #000; } 
     #algo-controls { display: none !important; }
   }
@@ -215,8 +219,8 @@
 <!-- Global Glassmorphic Tooltip Container -->
 <div id="global-tooltip"></div>
 
-<!-- ── LEAN 3-COLUMN HEADER ── -->
-<header style="position: sticky; top: 0; z-index: 999; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding: 0.6rem 1rem; background: var(--bg-header); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+<!-- ── LEAN 3-COLUMN HEADER (UNPINNED) ── -->
+<header class="main-header" style="position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding: 0.6rem 1rem; background: var(--bg-header); border-bottom: 1px solid var(--border-color);">
   
   <!-- Left: Navigation & Controls -->
   <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
@@ -252,6 +256,11 @@
   </div>
 </header>
 
+<!-- ── GLOBAL RESORT SELECTOR (PINNED) ── -->
+<div id="global-resort-header" style="position: sticky; top: 0; z-index: 998; background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.5rem 1rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: nowrap; overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+  <!-- Buttons injected via JS -->
+</div>
+
 <main class="container">
   
   <!-- ── FORECAST (TACTICAL & EXTENDED) ── -->
@@ -261,30 +270,32 @@
         <h2 style="margin:0; border:none; padding:0; border-bottom: none;">Forecast & Alpine Hazards 📡</h2>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">High-resolution aggregate models mapped to exact base and summit topography.</p>
       </div>
-      <div id="fc-canvas-controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
     </div>
 
-    <!-- The 7-Day Tactical Overview -->
-    <div id="tactical-summary-board" class="grid-layout" style="margin-bottom: 2rem;">
-      <div style="color: var(--text-muted); font-style: italic;">Awaiting payload...</div>
-    </div>
-
-    <!-- The Extended Visual Outlook (Meteogram) -->
-    <div style="border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
-      <h3 style="margin: 0 0 1rem 0; color: var(--text-main); font-size: 1.1rem;">Extended Meteogram (16-Day Horizon) 🗓️</h3>
+    <!-- The Consolidated Forecast Wrapper -->
+    <div id="forecast-wrapper">
       
-      <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; overflow: hidden;">
-        <div style="display: flex; gap: 1.5rem; margin-bottom: 1rem; font-size: 0.75rem; font-weight: bold; color: var(--text-muted); flex-wrap: wrap;">
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:linear-gradient(to bottom, #ef4444, #3b82f6); border-radius:2px;"></div> Temp Range (°C)</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--snow-yield); border-radius:2px;"></div> Snow (cm)</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--rain-yield); border-radius:2px;"></div> Rain (mm)</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--sun-yield); border-radius:2px;"></div> Sun (h)</div>
+      <!-- The 7-Day Tactical Overview (Left Panel) -->
+      <div id="tactical-summary-board" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; align-content: start;">
+        <div style="color: var(--text-muted); font-style: italic;">Awaiting payload...</div>
+      </div>
+
+      <!-- The Extended Visual Outlook (Right Panel) -->
+      <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; display: flex; flex-direction: column;">
+        
+        <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem; font-size: 0.75rem; font-weight: bold; color: var(--text-muted); flex-wrap: wrap;">
+          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:linear-gradient(to bottom, #ef4444, #3b82f6); border-radius:2px;"></div> Temp Range</div>
+          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--snow-yield); border-radius:2px;"></div> Snow</div>
+          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--rain-yield); border-radius:2px;"></div> Rain</div>
           <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--cloud-base); border-radius:2px;"></div> Clouds</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:16px; height:2px; border-bottom:2px dashed #ef4444;"></div> Wind Gusts</div>
+          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--sun-yield); border-radius:2px;"></div> Sun (h)</div>
+          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:16px; height:2px; border-bottom:2px dashed #ef4444;"></div> Gusts</div>
         </div>
-        <div style="position: relative;">
-          <canvas id="forecast-canvas" width="1200" height="600"></canvas>
+
+        <div style="position: relative; flex-grow: 1; min-height: 400px;">
+          <canvas id="forecast-canvas" width="800" height="500"></canvas>
         </div>
+
       </div>
     </div>
   </section>
@@ -294,7 +305,7 @@
     <div class="flex-between" style="margin-bottom: 1rem; align-items: flex-end;">
       <div>
         <h2 style="margin:0; border:none; padding:0; border-bottom: none;">Seasonal Quality Matrix 🔥</h2>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">Select a resort to view its historical footprint. Matrix repaints instantly on metric shift.</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">Historical footprint based on algorithm shift.</p>
       </div>
       <div id="heatmap-controls" style="display: flex; gap: 0.5rem;">
         <button class="control-btn" data-res="1">1 Day</button>
@@ -302,9 +313,6 @@
         <button class="control-btn active" data-res="7">7 Days</button>
       </div>
     </div>
-
-    <!-- Matrix Resort Tabs -->
-    <div id="hm-resort-controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);"></div>
     
     <!-- Dynamic Score UI (The Recipe Maker) -->
     <div id="algo-controls" style="display: flex; flex-direction: column; gap: 1rem; background: var(--bg-main); padding: 1.5rem; border-radius: 6px; border: 1px solid var(--border-color); margin-bottom: 1.5rem;">
@@ -387,7 +395,6 @@
     
     <div style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 1rem;">
       <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; align-items: center;">
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;" id="canvas-controls"></div>
         
         <div style="display: flex; gap: 0.5rem; align-items: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
           <span style="font-size: 0.75rem; color: var(--text-muted); padding: 0 0.5rem; font-weight: bold; text-transform: uppercase;">Filter:</span>
@@ -560,15 +567,39 @@
 
     const sb = document.getElementById('status-badge'), ts = document.getElementById('update-time');
 
+    // ── GLOBAL RESORT STATE ──
+    const globalResorts = Object.keys(STATIC_METADATA);
+    window.GLOBAL_RESORT = globalResorts.includes('schoeneben') ? 'schoeneben' : globalResorts[0];
+
+    const glbHeader = document.getElementById('global-resort-header');
+    globalResorts.forEach(r => {
+      const b = document.createElement('button');
+      b.innerText = r.toUpperCase();
+      b.className = 'resort-tab-btn' + (r === window.GLOBAL_RESORT ? ' active' : '');
+      b.onclick = () => { 
+        document.querySelectorAll('.resort-tab-btn').forEach(btn => btn.classList.remove('active'));
+        b.classList.add('active');
+        window.GLOBAL_RESORT = r;
+        
+        if(typeof renderTacticalSummary === 'function') renderTacticalSummary(window.GLOBAL_RESORT);
+        if(typeof window.repaintForecastCanvas === 'function') window.repaintForecastCanvas();
+        if(typeof window.renderHeatmaps === 'function') window.renderHeatmaps();
+        if(typeof window.repaintCanvas === 'function') window.repaintCanvas();
+        if(typeof window.repaintAtmosCanvas === 'function') window.repaintAtmosCanvas();
+      };
+      glbHeader.appendChild(b);
+    });
+
     // =========================================================
     // MODULE 1: FORECAST ENGINE (Decoupled & Null-Guarded)
     // =========================================================
     const fcBoard = document.getElementById('tactical-summary-board');
-    const fCc = document.getElementById('fc-canvas-controls');
-    let activeFcResort = FORECAST_DATA && FORECAST_DATA.resorts ? Object.keys(FORECAST_DATA.resorts)[0] : null;
 
     const renderTacticalSummary = (resort) => {
-      if (!FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[resort]) return;
+      if (!FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[resort]) {
+          fcBoard.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">No forecast payload for ${resort}</div>`;
+          return;
+      }
       const hourly = FORECAST_DATA.resorts[resort];
       const limit = Math.min(168, hourly.temperature_2m?.length || 0); // 7 days
       if (limit === 0) return;
@@ -589,41 +620,29 @@
       const meta = STATIC_METADATA[resort.toLowerCase()] || {base:'?', summit:'?'};
 
       fcBoard.innerHTML = `
-          <div class="fc-card" style="padding: 1.2rem; display:flex; flex-direction:column; justify-content:center;">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.5rem; letter-spacing:0.05em;">7-Day Snow Yield ❄️</div>
-              <div style="font-size:2.5rem; font-weight:800; color:var(--snow-yield); line-height:1;">${snow.toFixed(0)}<span style="font-size:1.2rem; color:var(--text-muted); margin-left:0.2rem;">cm</span></div>
+          <div class="fc-card">
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">7-Day Snow Yield ❄️</div>
+              <div style="font-size:2rem; font-weight:800; color:var(--snow-yield); line-height:1;">${snow.toFixed(0)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">cm</span></div>
           </div>
-          <div class="fc-card" style="padding: 1.2rem; display:flex; flex-direction:column; justify-content:center;">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.5rem; letter-spacing:0.05em;">7-Day Rain Hazard 🌧️</div>
-              <div style="font-size:2.5rem; font-weight:800; color:${rain > 5 ? '#ef4444' : 'var(--text-main)'}; line-height:1;">${rain.toFixed(1)}<span style="font-size:1.2rem; color:var(--text-muted); margin-left:0.2rem;">mm</span></div>
+          <div class="fc-card">
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">7-Day Rain Hazard 🌧️</div>
+              <div style="font-size:2rem; font-weight:800; color:${rain > 5 ? '#ef4444' : 'var(--text-main)'}; line-height:1;">${rain.toFixed(1)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">mm</span></div>
           </div>
-          <div class="fc-card" style="padding: 1.2rem; display:flex; flex-direction:column; justify-content:center;">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.5rem; letter-spacing:0.05em;">Peak Wind Hold Risk 💨</div>
-              <div style="font-size:2.5rem; font-weight:800; color:${maxGust > 65 ? '#ef4444' : 'var(--text-main)'}; line-height:1;">${maxGust.toFixed(0)}<span style="font-size:1.2rem; color:var(--text-muted); margin-left:0.2rem;">km/h</span></div>
-              <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.4rem;">Expected on ${gustDayStr}</div>
+          <div class="fc-card">
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Peak Wind Hold Risk 💨</div>
+              <div style="font-size:2rem; font-weight:800; color:${maxGust > 65 ? '#ef4444' : 'var(--text-main)'}; line-height:1;">${maxGust.toFixed(0)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">km/h</span></div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Expected on ${gustDayStr}</div>
           </div>
-          <div class="fc-card" style="padding: 1.2rem; display:flex; flex-direction:column; justify-content:center;">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.5rem; letter-spacing:0.05em;">Freezing Line (0°C) 🏔️</div>
-              <div style="font-size:1.2rem; font-weight:800; color:var(--text-main); line-height:1.4;">Max: <span style="color:${maxFz > meta.base ? '#ef4444' : 'var(--brand)'};">${maxFz}m</span><br>Min: ${minFz}m</div>
-              <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.4rem;">Base elevation is ${meta.base}m</div>
+          <div class="fc-card">
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Freezing Line (0°C) 🏔️</div>
+              <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.4;">Max: <span style="color:${maxFz > meta.base ? '#ef4444' : 'var(--brand)'};">${maxFz}m</span><br>Min: ${minFz}m</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Base elevation is ${meta.base}m</div>
           </div>
       `;
     };
 
     if (FORECAST_DATA && FORECAST_DATA.resorts && Object.keys(FORECAST_DATA.resorts).length > 0) {
-      Object.keys(FORECAST_DATA.resorts).forEach(resort => {
-        const b = document.createElement('button'); b.innerText = resort.toUpperCase(); b.className = 'control-btn';
-        if(resort === activeFcResort) b.classList.add('active');
-        b.onclick = () => { 
-          Array.from(fCc.children).forEach(c=>c.classList.remove('active')); 
-          b.classList.add('active'); 
-          activeFcResort = resort; 
-          renderTacticalSummary(activeFcResort);
-          window.repaintForecastCanvas(); 
-        };
-        fCc.appendChild(b);
-      });
-      renderTacticalSummary(activeFcResort);
+      renderTacticalSummary(window.GLOBAL_RESORT);
     } else if (FORECAST_DATA && FORECAST_DATA.error) {
       fcBoard.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">API Failure: ${FORECAST_DATA.error}</div>`;
     } else {
@@ -635,10 +654,10 @@
     let fcHoverIdx = null; let fcTouch = false;
 
     window.repaintForecastCanvas = () => {
-      if (!ctxFc || !activeFcResort || !FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[activeFcResort]) return;
+      if (!ctxFc || !window.GLOBAL_RESORT || !FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
       ctxFc.clearRect(0,0,cvsFc.width,cvsFc.height);
 
-      const hourly = FORECAST_DATA.resorts[activeFcResort];
+      const hourly = FORECAST_DATA.resorts[window.GLOBAL_RESORT];
       if (!hourly.temperature_2m) return;
       const numDays = Math.floor(hourly.temperature_2m.length / 24);
       if (numDays === 0) return;
@@ -668,8 +687,9 @@
       const w = cvsFc.width - pX - pRight;
       const h = cvsFc.height - pY - pBot; 
       
-      const hP1 = h * 0.45, hP2 = h * 0.25, hP3 = h * 0.20, gap = h * 0.05;
-      const yP1 = pY, yP2 = yP1 + hP1 + gap, yP3 = yP2 + hP2 + gap;
+      // Condensed Graph Architecture: Precip collapsed into Temp band
+      const hP1 = h * 0.65, hP2 = h * 0.25, gap = h * 0.1;
+      const yP1 = pY, yP2 = yP1 + hP1 + gap;
       
       const colW = w / numDays;
       const fonts = getResponsiveCanvasFonts(cvsFc, 12, 14);
@@ -680,20 +700,20 @@
       const mapYTemp = t => yP1 + hP1 - ((t - minT) / tRange) * hP1;
 
       const maxPrecip = Math.max(10, ...daily.map(d => d.snow + d.rain));
-      const mapYPrecip = val => yP2 + hP2 - (val / maxPrecip) * hP2;
+      // Precip consumes only the bottom 35% of the temperature band
+      const mapYPrecip = val => yP1 + hP1 - (val / maxPrecip) * (hP1 * 0.35);
       
       const maxSun = 14; 
-      const mapYSun = val => yP3 + hP3 - (val / maxSun) * hP3;
+      const mapYSun = val => yP2 + hP2 - (val / maxSun) * hP2;
 
       const maxGust = Math.max(60, ...daily.map(d=>d.gust));
-      const mapYGust = g => yP3 + hP3 - (Math.min(g, maxGust) / maxGust) * hP3;
+      const mapYGust = g => yP2 + hP2 - (Math.min(g, maxGust) / maxGust) * hP2;
 
       ctxFc.strokeStyle = getStyleVar('--grid-line'); ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.font = fonts.axis;
 
-      ctxFc.save(); ctxFc.translate(20, yP1 + hP1/2); ctxFc.rotate(-Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Temp (°C)", 0, 0); ctxFc.restore();
-      ctxFc.save(); ctxFc.translate(20, yP2 + hP2/2); ctxFc.rotate(-Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Precip (mm/cm)", 0, 0); ctxFc.restore();
-      ctxFc.save(); ctxFc.translate(20, yP3 + hP3/2); ctxFc.rotate(-Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Sun (h)", 0, 0); ctxFc.restore();
-      ctxFc.save(); ctxFc.translate(cvsFc.width - 20, yP3 + hP3/2); ctxFc.rotate(Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Gusts (km/h)", 0, 0); ctxFc.restore();
+      ctxFc.save(); ctxFc.translate(20, yP1 + hP1/2); ctxFc.rotate(-Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Temp / Precip", 0, 0); ctxFc.restore();
+      ctxFc.save(); ctxFc.translate(20, yP2 + hP2/2); ctxFc.rotate(-Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Sun (h)", 0, 0); ctxFc.restore();
+      ctxFc.save(); ctxFc.translate(cvsFc.width - 20, yP2 + hP2/2); ctxFc.rotate(Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Gusts (km/h)", 0, 0); ctxFc.restore();
 
       ctxFc.textAlign = 'right'; ctxFc.textBaseline = 'middle';
       for(let t=Math.ceil(minT/5)*5; t<=maxT; t+=5) {
@@ -703,12 +723,6 @@
       const zeroY = mapYTemp(0); ctxFc.beginPath(); ctxFc.moveTo(pX,zeroY); ctxFc.lineTo(pX+w,zeroY); ctxFc.lineWidth=2; ctxFc.strokeStyle=getStyleVar('--text-muted'); ctxFc.stroke();
       ctxFc.strokeStyle = getStyleVar('--grid-line');
       
-      for(let p=0; p<=maxPrecip; p+=Math.ceil(maxPrecip/4)) {
-        if(p===0) continue; const y = mapYPrecip(p);
-        ctxFc.beginPath(); ctxFc.moveTo(pX,y); ctxFc.lineTo(pX+w,y); ctxFc.lineWidth = 1; ctxFc.stroke(); ctxFc.fillText(`${p}`, pX-10, y);
-      }
-      ctxFc.beginPath(); ctxFc.moveTo(pX,yP2+hP2); ctxFc.lineTo(pX+w,yP2+hP2); ctxFc.lineWidth=2; ctxFc.strokeStyle=getStyleVar('--text-muted'); ctxFc.stroke(); ctxFc.strokeStyle = getStyleVar('--grid-line');
-
       for(let s=0; s<=maxSun; s+=7) {
         if(s===0) continue; const y = mapYSun(s);
         ctxFc.beginPath(); ctxFc.moveTo(pX,y); ctxFc.lineTo(pX+w,y); ctxFc.lineWidth = 1; ctxFc.stroke(); ctxFc.fillText(`${s}h`, pX-10, y);
@@ -717,22 +731,38 @@
       for(let g=20; g<=maxGust; g+=Math.ceil(maxGust/3)) {
         const y = mapYGust(g); ctxFc.fillText(`${g}`, pX+w+10, y);
       }
-      ctxFc.beginPath(); ctxFc.moveTo(pX,yP3+hP3); ctxFc.lineTo(pX+w,yP3+hP3); ctxFc.lineWidth=2; ctxFc.strokeStyle=getStyleVar('--text-muted'); ctxFc.stroke();
+      ctxFc.beginPath(); ctxFc.moveTo(pX,yP2+hP2); ctxFc.lineTo(pX+w,yP2+hP2); ctxFc.lineWidth=2; ctxFc.strokeStyle=getStyleVar('--text-muted'); ctxFc.stroke();
 
       daily.forEach((d, i) => {
         ctxFc.fillStyle = getStyleVar('--cloud-base'); ctxFc.globalAlpha = d.cloud / 100;
-        ctxFc.fillRect(pX + i*colW + 1, yP1, colW - 2, hP1 + gap + hP2); ctxFc.globalAlpha = 1.0;
+        ctxFc.fillRect(pX + i*colW + 1, yP1, colW - 2, hP1); ctxFc.globalAlpha = 1.0;
         
         ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.textAlign = 'center'; ctxFc.textBaseline = 'top';
         const cx = pX + i*colW + colW/2;
         const parts = d.label.split(', ');
         if(parts.length === 2) {
-          ctxFc.fillText(parts[0], cx, yP3 + hP3 + 10); ctxFc.fillText(parts[1], cx, yP3 + hP3 + 24);
+          ctxFc.fillText(parts[0], cx, yP2 + hP2 + 10); ctxFc.fillText(parts[1], cx, yP2 + hP2 + 24);
         } else {
-          ctxFc.fillText(d.label, cx, yP3 + hP3 + 10);
+          ctxFc.fillText(d.label, cx, yP2 + hP2 + 10);
         }
       });
 
+      // Precip embedded within Temp Chart
+      daily.forEach((d, i) => {
+        const cx = pX + i*colW + colW/2;
+        const bW = Math.max(4, Math.min(colW * 0.5, 30));
+        
+        const rH = (yP1+hP1) - mapYPrecip(d.rain);
+        const sH = (yP1+hP1) - mapYPrecip(d.snow); 
+        
+        if (rH > 0) { ctxFc.fillStyle = getStyleVar('--rain-yield'); ctxFc.fillRect(cx - bW/2, yP1+hP1 - rH, bW, rH); }
+        if (sH > 0) { ctxFc.fillStyle = getStyleVar('--snow-yield'); ctxFc.fillRect(cx - bW/2, yP1+hP1 - rH - sH, bW, sH); }
+        
+        const sunH = hP2 - (mapYSun(d.sun) - yP2);
+        if (sunH > 0) { ctxFc.fillStyle = getStyleVar('--sun-yield'); ctxFc.fillRect(cx - bW/2, yP2+hP2 - sunH, bW, sunH); }
+      });
+
+      // Temp Graph plotted over Precip
       ctxFc.beginPath();
       daily.forEach((d, i) => { const cx = pX + i*colW + colW/2; if(i===0) ctxFc.moveTo(cx, mapYTemp(d.tMax)); else ctxFc.lineTo(cx, mapYTemp(d.tMax)); });
       for(let i=numDays-1; i>=0; i--) { const cx = pX + i*colW + colW/2; ctxFc.lineTo(cx, mapYTemp(daily[i].tMin)); }
@@ -743,16 +773,7 @@
       ctxFc.beginPath(); daily.forEach((d,i) => { const cx=pX+i*colW+colW/2; if(i===0) ctxFc.moveTo(cx,mapYTemp(d.tMax)); else ctxFc.lineTo(cx,mapYTemp(d.tMax)); }); ctxFc.strokeStyle='#ef4444'; ctxFc.lineWidth=3; ctxFc.stroke();
       ctxFc.beginPath(); daily.forEach((d,i) => { const cx=pX+i*colW+colW/2; if(i===0) ctxFc.moveTo(cx,mapYTemp(d.tMin)); else ctxFc.lineTo(cx,mapYTemp(d.tMin)); }); ctxFc.strokeStyle='#3b82f6'; ctxFc.lineWidth=3; ctxFc.stroke();
 
-      daily.forEach((d, i) => {
-        const cx = pX + i*colW + colW/2;
-        const bW = Math.max(4, Math.min(colW * 0.5, 20));
-        const rH = hP2 - (mapYPrecip(d.rain) - yP2), sH = hP2 - (mapYPrecip(d.snow) - yP2); 
-        if (rH > 0) { ctxFc.fillStyle = getStyleVar('--rain-yield'); ctxFc.fillRect(cx - bW/2, yP2+hP2 - rH, bW, rH); }
-        if (sH > 0) { ctxFc.fillStyle = getStyleVar('--snow-yield'); ctxFc.fillRect(cx - bW/2, yP2+hP2 - rH - sH, bW, sH); }
-        const sunH = hP3 - (mapYSun(d.sun) - yP3);
-        if (sunH > 0) { ctxFc.fillStyle = getStyleVar('--sun-yield'); ctxFc.fillRect(cx - bW/2, yP3+hP3 - sunH, bW, sunH); }
-      });
-
+      // Gusts
       ctxFc.beginPath(); let drawingG = false;
       daily.forEach((d, i) => {
         const cx = pX + i*colW + colW/2; const y = mapYGust(d.gust);
@@ -763,7 +784,7 @@
       if (fcHoverIdx !== null && fcHoverIdx >= 0 && fcHoverIdx < numDays) {
         const d = daily[fcHoverIdx];
         const hx = pX + fcHoverIdx*colW + colW/2;
-        ctxFc.beginPath(); ctxFc.moveTo(hx, pY); ctxFc.lineTo(hx, yP3+hP3); ctxFc.strokeStyle=getStyleVar('--text-main'); ctxFc.lineWidth=2; ctxFc.setLineDash([5,5]); ctxFc.stroke(); ctxFc.setLineDash([]);
+        ctxFc.beginPath(); ctxFc.moveTo(hx, pY); ctxFc.lineTo(hx, yP2+hP2); ctxFc.strokeStyle=getStyleVar('--text-main'); ctxFc.lineWidth=2; ctxFc.setLineDash([5,5]); ctxFc.stroke(); ctxFc.setLineDash([]);
         ctxFc.fillStyle = getStyleVar('--bg-header');
         
         const scale = cvsFc.width / (cvsFc.clientWidth || 800);
@@ -788,11 +809,11 @@
 
     if (cvsFc) {
       cvsFc.addEventListener('mousemove', (e) => {
-        if (!FORECAST_DATA || !FORECAST_DATA.resorts || !activeFcResort || !FORECAST_DATA.resorts[activeFcResort]) return;
+        if (!FORECAST_DATA || !FORECAST_DATA.resorts || !window.GLOBAL_RESORT || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
         fcTouch = false; const rect = cvsFc.getBoundingClientRect(); 
         const mouseX = (e.clientX - rect.left) * (cvsFc.width / rect.width);
         const pX = 60, pRight = 60, w = cvsFc.width - pX - pRight;
-        const numDays = Math.floor(FORECAST_DATA.resorts[activeFcResort].temperature_2m.length / 24);
+        const numDays = Math.floor(FORECAST_DATA.resorts[window.GLOBAL_RESORT].temperature_2m.length / 24);
         if (numDays === 0) return;
         fcHoverIdx = Math.floor((mouseX - pX) / (w / numDays));
         if (fcHoverIdx < 0 || fcHoverIdx >= numDays) fcHoverIdx = null;
@@ -802,11 +823,11 @@
       cvsFc.addEventListener('touchmove', (e) => {
         if (e.touches.length > 0) {
           e.preventDefault(); 
-          if (!FORECAST_DATA || !FORECAST_DATA.resorts || !activeFcResort || !FORECAST_DATA.resorts[activeFcResort]) return;
+          if (!FORECAST_DATA || !FORECAST_DATA.resorts || !window.GLOBAL_RESORT || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
           fcTouch = true; const rect = cvsFc.getBoundingClientRect();
           const mouseX = (e.touches[0].clientX - rect.left) * (cvsFc.width / rect.width);
           const pX = 60, pRight = 60, w = cvsFc.width - pX - pRight;
-          const numDays = Math.floor(FORECAST_DATA.resorts[activeFcResort].temperature_2m.length / 24);
+          const numDays = Math.floor(FORECAST_DATA.resorts[window.GLOBAL_RESORT].temperature_2m.length / 24);
           if (numDays === 0) return;
           fcHoverIdx = Math.floor((mouseX - pX) / (w / numDays));
           if (fcHoverIdx < 0 || fcHoverIdx >= numDays) fcHoverIdx = null;
@@ -1025,24 +1046,9 @@
 
     let hmRes = 7;
     const hc = document.getElementById('heatmap-container');
-    const hmRc = document.getElementById('hm-resort-controls');
     
     const targetMonths = [ {m: 11, name: 'Nov', d: 30}, {m: 12, name: 'Dec', d: 31}, {m: 1, name: 'Jan', d: 31}, {m: 2, name: 'Feb', d: 29}, {m: 3, name: 'Mar', d: 31}, {m: 4, name: 'Apr', d: 30} ];
     
-    let activeHmResort = Object.keys(byResort).includes('schoeneben') ? 'schoeneben' : Object.keys(byResort)[0];
-
-    Object.keys(byResort).forEach(r => {
-      const b = document.createElement('button'); b.innerText = r.toUpperCase(); b.className = 'control-btn';
-      if(r === activeHmResort) b.classList.add('active');
-      b.onclick = () => { 
-        Array.from(hmRc.children).forEach(c=>c.classList.remove('active')); 
-        b.classList.add('active'); 
-        activeHmResort = r; 
-        renderHeatmaps(); 
-      };
-      hmRc.appendChild(b);
-    });
-
     document.querySelectorAll('#heatmap-controls .control-btn').forEach(btn => {
       btn.onclick = (e) => {
         document.querySelectorAll('#heatmap-controls .control-btn').forEach(b => b.classList.remove('active'));
@@ -1059,13 +1065,16 @@
       const weights = getWeights();
       hc.innerHTML = '';
       
-      const rData = byResort[activeHmResort];
-      if (!rData) return;
+      const rData = byResort[window.GLOBAL_RESORT];
+      if (!rData) {
+        hc.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px;">No historical telemetry found for ${window.GLOBAL_RESORT}.</div>`;
+        return;
+      }
 
       const dataMap = {};
       rData.forEach(r => dataMap[r.date] = r);
       
-      let html = `<div><h3 style="margin:0 0 0.5rem 0; font-size:1.2rem; text-transform:capitalize; color:var(--brand);">${activeHmResort}</h3>`;
+      let html = `<div><h3 style="margin:0 0 0.5rem 0; font-size:1.2rem; text-transform:capitalize; color:var(--brand);">${window.GLOBAL_RESORT}</h3>`;
       
       const seasons = getSeasonYears(rData);
       seasons.forEach(startYear => {
@@ -1129,18 +1138,6 @@
     renderHeatmaps(); 
 
     const monthMarkers = [ { label: "Nov 1", off: 0 }, { label: "Dec 1", off: 30 }, { label: "Jan 1", off: 61 }, { label: "Feb 1", off: 92 }, { label: "Mar 1", off: 120 }, { label: "Apr 1", off: 151 }, { label: "May 1", off: 181 } ];
-    const cc = document.getElementById('canvas-controls');
-    let act = Object.keys(byResort)[0];
-
-    Object.keys(byResort).forEach(r => {
-      const b = document.createElement('button'); b.innerText = r.toUpperCase(); b.className = 'control-btn';
-      if(r===act) b.classList.add('active');
-      b.onclick = () => { 
-        Array.from(cc.children).forEach(c=>c.classList.remove('active')); b.classList.add('active'); act=r; 
-        window.repaintCanvas(); window.repaintAtmosCanvas();
-      };
-      cc.appendChild(b);
-    });
 
     const cvs = document.getElementById('snow-canvas'), ctx = cvs.getContext('2d');
     const legend = document.getElementById('canvas-legend'), avgBtn = document.getElementById('toggle-avg-btn');
@@ -1165,8 +1162,9 @@
     };
 
     window.repaintCanvas = () => {
+      if(!cvs) return;
       ctx.clearRect(0,0,cvs.width,cvs.height); 
-      const rd = byResort[act]; if(!rd) return;
+      const rd = byResort[window.GLOBAL_RESORT]; if(!rd) return;
       
       const linesRaw = {}; let maxD = 100;
       
@@ -1281,8 +1279,9 @@
     let atmosHoverDay = null;
 
     window.repaintAtmosCanvas = () => {
+      if(!cvsA) return;
       ctxA.clearRect(0,0,cvsA.width,cvsA.height); 
-      const rd = byResort[act]; if(!rd) return;
+      const rd = byResort[window.GLOBAL_RESORT]; if(!rd) return;
 
       const seasons = getSeasonYears(rd);
       if (seasons.length === 0) return;
