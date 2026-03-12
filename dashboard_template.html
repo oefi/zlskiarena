@@ -257,7 +257,7 @@
     <!-- The Extended Visual Outlook (Meteogram) -->
     <div style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
       <div class="flex-between" style="margin-bottom: 1rem;">
-        <h3 style="margin: 0; color: var(--text-main); font-size: 1.1rem;">Extended Meteogram (14-Day Horizon) 🗓️</h3>
+        <h3 style="margin: 0; color: var(--text-main); font-size: 1.1rem;">Extended Meteogram (16-Day Horizon) 🗓️</h3>
         <div id="fc-canvas-controls" style="display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
       </div>
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem; margin-bottom: 1rem;">Dynamic dual-pane rendering of long-range API data. Top Pane: Temperature, Clouds & Sun. Bottom Pane: Stacked Snow/Rain & Wind Gusts.</p>
@@ -470,7 +470,6 @@
   const seasonColors = ['#64748b', '#d946ef', '#0ea5e9', '#f59e0b', '#10b981', '#f43f5e', '#8b5cf6'];
 
   // ── 15-MINUTE SYNC CHRONOMETER ──
-  // Since Actions deploy static files, this tracks the local clock against a modulo-15 interval.
   const cdTimer = document.getElementById('cd-timer');
   setInterval(() => {
     const now = new Date();
@@ -484,7 +483,6 @@
     
     if (diffMins === 0 && diffSecs === 0) {
       cdTimer.innerHTML = `<span style="color:var(--brand); animation: updatePulse 1s infinite alternate;">SYNCING...</span>`;
-      // Soft reload to fetch new HTML injected by GitHub Actions
       setTimeout(() => window.location.reload(true), 2000); 
     } else {
       cdTimer.innerText = `${String(diffMins).padStart(2,'0')}:${String(diffSecs).padStart(2,'0')}`;
@@ -665,7 +663,7 @@
     };
 
 
-    // ── FORECAST ENGINE (Tactical 3-Day & Extended 14-Day Meteogram) ──
+    // ── FORECAST ENGINE (Tactical 3-Day & Extended 16-Day Meteogram) ──
     const fc = document.getElementById('forecast-container');
     const fCc = document.getElementById('fc-canvas-controls');
     let activeFcResort = FORECAST_DATA && FORECAST_DATA.resorts ? Object.keys(FORECAST_DATA.resorts)[0] : null;
@@ -680,13 +678,14 @@
           const start = i * 24, end = start + 24;
           if (!hourly.temperature_2m || hourly.temperature_2m.length <= start) break;
           
-          const tArr = hourly.temperature_2m.slice(start, end);
-          const tMin = Math.min(...tArr), tMax = Math.max(...tArr);
-          const snow = hourly.snowfall ? hourly.snowfall.slice(start, end).reduce((a,b)=>a+b,0) : 0;
-          const rain = hourly.rain ? hourly.rain.slice(start, end).reduce((a,b)=>a+b,0) : 0;
-          const gust = hourly.windgusts_10m ? Math.max(...hourly.windgusts_10m.slice(start, end)) : 0;
-          const fzArr = hourly.freezinglevel_height ? hourly.freezinglevel_height.slice(start, end) : [0];
-          const fz = Math.round(fzArr.reduce((a,b)=>a+b,0)/fzArr.length);
+          const tArr = hourly.temperature_2m.slice(start, end).filter(v => v !== null);
+          const tMin = tArr.length ? Math.min(...tArr) : 0, tMax = tArr.length ? Math.max(...tArr) : 0;
+          const snow = hourly.snowfall ? hourly.snowfall.slice(start, end).reduce((a,b)=>a+(b||0),0) : 0;
+          const rain = hourly.rain ? hourly.rain.slice(start, end).reduce((a,b)=>a+(b||0),0) : 0;
+          const gustArr = hourly.windgusts_10m ? hourly.windgusts_10m.slice(start, end).filter(v => v !== null) : [];
+          const gust = gustArr.length ? Math.max(...gustArr) : 0;
+          const fzArr = hourly.freezinglevel_height ? hourly.freezinglevel_height.slice(start, end).filter(v => v !== null) : [];
+          const fz = fzArr.length ? Math.round(fzArr.reduce((a,b)=>a+b,0)/fzArr.length) : 0;
 
           const gustClass = gust > 60 ? 'alert' : '';
           const snowClass = snow > 5 ? 'good' : '';
@@ -730,20 +729,28 @@
       const daily = [];
       for (let i = 0; i < numDays; i++) {
         const start = i * 24, end = start + 24;
-        const t = hourly.temperature_2m.slice(start, end);
-        const sn = hourly.snowfall ? hourly.snowfall.slice(start, end).reduce((a,b)=>a+b,0) : 0;
-        const rn = hourly.rain ? hourly.rain.slice(start, end).reduce((a,b)=>a+b,0) : 0;
-        const cc = hourly.cloudcover ? hourly.cloudcover.slice(start, end).reduce((a,b)=>a+b,0)/24 : 0; 
-        const sun = hourly.sunshine_duration ? hourly.sunshine_duration.slice(start, end).reduce((a,b)=>a+b,0)/3600 : (100-cc)*0.12;
-        const gust = hourly.windgusts_10m ? Math.max(...hourly.windgusts_10m.slice(start, end)) : 0;
+        const t = hourly.temperature_2m.slice(start, end).filter(v => v !== null);
+        const sn = hourly.snowfall ? hourly.snowfall.slice(start, end).reduce((a,b)=>a+(b||0),0) : 0;
+        const rn = hourly.rain ? hourly.rain.slice(start, end).reduce((a,b)=>a+(b||0),0) : 0;
+        const ccArr = hourly.cloudcover ? hourly.cloudcover.slice(start, end).filter(v => v !== null) : [];
+        const cc = ccArr.length ? ccArr.reduce((a,b)=>a+b,0)/ccArr.length : 0; 
+        const sun = hourly.sunshine_duration ? hourly.sunshine_duration.slice(start, end).reduce((a,b)=>a+(b||0),0)/3600 : (100-cc)*0.12;
+        const gustArr = hourly.windgusts_10m ? hourly.windgusts_10m.slice(start, end).filter(v => v !== null) : [];
+        const gust = gustArr.length ? Math.max(...gustArr) : 0;
 
-        const d = new Date(localNow.getTime() + i*86400000);
-        daily.push({ tMax: Math.max(...t), tMin: Math.min(...t), snow: sn, rain: rn, gust: gust, cloud: cc, sun: sun, label: d.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'}) });
+        // Extract exact API date if available, otherwise guess via local browser clock
+        let exactDate;
+        if (hourly.time && hourly.time[start]) exactDate = new Date(hourly.time[start]);
+        else exactDate = new Date(localNow.getTime() + i*86400000);
+
+        const dateStr = exactDate.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'});
+        
+        daily.push({ tMax: t.length ? Math.max(...t) : 0, tMin: t.length ? Math.min(...t) : 0, snow: sn, rain: rn, gust: gust, cloud: cc, sun: sun, label: dateStr });
       }
 
       const pX = 60, pY = 20, pRight = 60;
       const w = cvsFc.width - pX - pRight;
-      const h = cvsFc.height - pY * 2 - 20; 
+      const h = cvsFc.height - pY * 2 - 40; // Extra room at bottom for stacked dates
       
       const hTop = h * 0.60;
       const gap = h * 0.10;
@@ -792,8 +799,15 @@
         const sW = Math.max(4, Math.min(colW * 0.3, 16));
         ctxFc.fillRect(cx - sW/2, midY - sunH, sW, sunH);
 
+        // Date Labels (Stacked vertically for 16-col dense layouts)
         ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.textAlign = 'center'; ctxFc.textBaseline = 'top';
-        ctxFc.fillText(d.label, cx, pY + h + 10);
+        const parts = d.label.split(', ');
+        if(parts.length === 2) {
+          ctxFc.fillText(parts[0], cx, pY + h + 10);
+          ctxFc.fillText(parts[1], cx, pY + h + 24);
+        } else {
+          ctxFc.fillText(d.label, cx, pY + h + 10);
+        }
       });
 
       ctxFc.beginPath();
@@ -857,7 +871,7 @@
         ctxFc.fillRect(boxX, boxY, boxW, boxH); ctxFc.strokeStyle = getStyleVar('--border-color'); ctxFc.strokeRect(boxX, boxY, boxW, boxH);
         ctxFc.textAlign = 'left'; ctxFc.textBaseline = 'top'; ctxFc.font = fonts.tooltip;
         
-        ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.fillText(d.label, boxX + padding, boxY + (10*scale));
+        ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.fillText(d.label.replace(', ', ' · '), boxX + padding, boxY + (10*scale));
         ctxFc.fillStyle = getStyleVar('--text-main'); 
         ctxFc.fillText(`Max: ${d.tMax.toFixed(1)}°C`, boxX + padding, boxY + (35*scale));
         ctxFc.fillText(`Min: ${d.tMin.toFixed(1)}°C`, boxX + padding, boxY + (55*scale));
@@ -1054,7 +1068,7 @@
                    fPowder: vs.reduce((a,c)=>a+c.metrics.fPowder,0)/count,
                    fSun: vs.reduce((a,c)=>a+c.metrics.fSun,0)/count,
                    fCoverage: vs.reduce((a,c)=>a+c.metrics.fCoverage,0)/count,
-                   fatal: [] // simplifying fatal for averages
+                   fatal: [] 
                  }
               };
             }
