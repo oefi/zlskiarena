@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Step 2 — Clean, Normalize & QC Pipeline
-Enforces the Strict Winter Mandate (Dec 1 - May 1). Drops summer slop.
+Enforces the Strict Winter Mandate (Nov 1 - May 1). Drops summer slop.
 Merges base and summit data while rigorously checking for missing API variables.
+Infers missing sunshine data via WMO weather codes.
 """
 
 import json
@@ -42,12 +43,27 @@ def extract_daily(raw_json):
         gusts  = safe_val("wind_gusts_10m_max")
         precip = safe_val("precipitation_sum")
         snow   = safe_val("snowfall_sum")
+        sun    = safe_val("sunshine_duration")
+        wc     = safe_val("weathercode")
 
         flags = []
-        # Physical Inference: 0 precip means mathematically 0 snow
+        
+        # Physical Inference 1: 0 precip means mathematically 0 snow
         if precip == 0.0 and snow is None:
             snow = 0.0
             flags.append("snow_inferred")
+
+        # Physical Inference 2: ERA5 drops sunshine duration randomly. Infer from WMO codes.
+        if sun is None and wc is not None:
+            if wc == 0:
+                sun = 36000.0  # ~10 hours pure sun
+            elif wc in [1, 2]:
+                sun = 21600.0  # ~6 hours partial sun
+            elif wc == 3:
+                sun = 7200.0   # ~2 hours peek-a-boo
+            else:
+                sun = 0.0      # Overcast / Storm
+            flags.append("sun_inferred")
 
         if t_max is None: flags.append("no_temp")
         if gusts is None: flags.append("no_wind")
@@ -61,11 +77,10 @@ def extract_daily(raw_json):
             "snow_depth": safe_val("snow_depth"),
             "precipitation_sum": precip,
             "precipitation_hours": safe_val("precipitation_hours"),
-            "sunshine_duration": safe_val("sunshine_duration"),
-            "shortwave_radiation_sum": safe_val("shortwave_radiation_sum"),
+            "sunshine_duration": sun,
             "windspeed_10m_max": safe_val("windspeed_10m_max"),
             "wind_gusts_10m_max": gusts,
-            "weathercode": safe_val("weathercode"),
+            "weathercode": wc,
             "data_flags": flags
         }
         extracted.append(record)
