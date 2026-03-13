@@ -894,9 +894,10 @@
         ctxFc.fillStyle = '#3b82f6'; ctxFc.fillText(`Rain: ${d.rain.toFixed(1)}mm`, boxX + padding, currentY); currentY += yStep;
         ctxFc.fillStyle = '#60a5fa'; ctxFc.fillText(`Snow: ${d.snow.toFixed(1)}cm`, boxX + padding, currentY); currentY += yStep;
         
-        // Inject the mathematical powder density ratio if it snowed
+        // Inject the mathematical powder density ratio (Clamped to prevent div-zero/infinity rendering blowout)
         if (d.snow > 0 && d.precip > 0) {
             let ratio = (d.snow * 10) / d.precip;
+            if (ratio > 35) ratio = 35.0; // Thermodynamic upper boundary clamp
             let flavor = ratio > 15 ? "Blower 🌬️" : ratio < 7 ? "Cement 🧱" : "Standard ❄️";
             ctxFc.fillStyle = getStyleVar('--text-main');
             ctxFc.fillText(`Density: ${ratio.toFixed(1)}:1 (${flavor})`, boxX + padding, currentY); currentY += yStep;
