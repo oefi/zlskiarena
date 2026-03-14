@@ -504,8 +504,13 @@
     if (gTooltip.style.display === 'block') {
       let x = e.pageX + 15; let y = e.pageY + 15;
       const rect = gTooltip.getBoundingClientRect();
-      if (x + rect.width > window.innerWidth) x = window.innerWidth - rect.width - 20;
+      const maxW = document.body.clientWidth;
+      
+      // Clamp X to document bounds
+      if (x + rect.width > maxW) x = maxW - rect.width - 10;
+      // Clamp Y to viewport bounds
       if (y + rect.height > window.innerHeight + window.scrollY) y = e.pageY - rect.height - 15;
+      
       gTooltip.style.left = `${x}px`; gTooltip.style.top = `${y}px`;
     }
   });
