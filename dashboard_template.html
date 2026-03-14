@@ -132,6 +132,21 @@
   @media (min-width: 1024px) { #forecast-wrapper { grid-template-columns: 320px 1fr; } }
   .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; padding: 1rem; display: flex; flex-direction: column; justify-content: center; }
 
+  /* ── BEST-DAYS STRIP ── */
+  #best-days-strip { display: flex; gap: 0.4rem; flex-wrap: nowrap; overflow-x: auto; padding: 0.75rem 0 0.5rem; scrollbar-width: thin; }
+  .fc-day-chip { flex: 0 0 auto; min-width: 72px; padding: 0.5rem 0.4rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; display: flex; flex-direction: column; gap: 0.15rem; cursor: default; transition: transform 0.1s; }
+  .fc-day-chip:hover { transform: translateY(-2px); }
+  .fc-day-chip--top { border-color: #22c55e; box-shadow: 0 0 0 1px rgba(34,197,94,0.3); }
+  .fc-day-chip--top3-1 { border-color: #fbbf24; box-shadow: 0 0 0 1px rgba(251,191,36,0.4); }
+
+  /* ── AVALANCHE WARNING ── */
+  .avl-warning { font-size: 0.75rem; font-weight: 700; color: #fbbf24; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 3px; padding: 0.2rem 0.4rem; margin-top: 0.3rem; display: inline-block; }
+
+  /* ── ATMOS SEASON NAV ── */
+  .atmos-nav-btn { background: transparent; border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-muted); cursor: pointer; padding: 0.2rem 0.5rem; font-size: 0.85rem; transition: all 0.15s; }
+  .atmos-nav-btn:hover { background: var(--border-color); color: var(--text-main); }
+  .atmos-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
   /* ── HEATMAP ── */
   .hm-season-row { display: grid; grid-template-columns: 70px 1fr; gap: 0.5rem; align-items: center; font-size: 0.8rem; margin-bottom: 0.75rem; }
   .hm-months-container { display: flex; gap: 4px; width: 100%; }
@@ -293,6 +308,14 @@
 
       </div>
     </div>
+
+    <!-- ── BEST FORECAST DAYS STRIP ── -->
+    <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+      <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
+        📅 Day-by-Day Bluebird Forecast <span style="font-weight:400; text-transform:none; letter-spacing:0; opacity:0.7;">(✓ = top 3 days to ski)</span>
+      </div>
+      <div id="best-days-strip"><div style="color:var(--text-muted); font-style:italic; font-size:0.85rem;">Awaiting forecast…</div></div>
+    </div>
   </section>
 
   <!-- ── HEATMAP (COMPOSITE SCORE ENGINE) ── -->
@@ -352,7 +375,7 @@
       <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; align-items: center;">
         
         <div style="display: flex; gap: 0.5rem; align-items: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
-          <span style="font-size: 0.75rem; color: var(--text-muted); padding: 0 0.5rem; font-weight: bold; text-transform: uppercase;">Filter:</span>
+          <span style="font-size: 0.75rem; color: var(--text-muted); padding: 0 0.5rem; font-weight: bold; text-transform: uppercase;">Smooth:</span>
           <button class="control-btn filter-btn active" data-ma="1" style="border:none; border-radius:0;">Raw</button>
           <button class="control-btn filter-btn" data-ma="3" style="border:none; border-left:1px solid var(--border-color); border-radius:0;">3d Avg</button>
           <button class="control-btn filter-btn" data-ma="7" style="border:none; border-left:1px solid var(--border-color); border-radius:0;">7d Avg</button>
@@ -373,7 +396,7 @@
   <!-- ── ATMOSPHERIC CONDITIONS CANVAS ── -->
   <section id="atmosphere">
     <h2>Atmospheric Engine (Base) 🌡️</h2>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Isolating the current active season. Rendering Thermal Bands, Solar Yield, Snow Events, and Wind Spikes.</p>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Deep-dive into any season. Thermal bands, solar yield, snow events, and wind spikes.</p>
     
     <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
       <div style="display: flex; flex-wrap: wrap; gap: 1rem; padding: 0.5rem; background: var(--bg-main); border-radius: 6px; border: 1px solid var(--border-color);">
@@ -382,7 +405,11 @@
         <div class="legend-item"><div class="legend-color" style="background:var(--snow-yield); height:12px;"></div>New Snow (cm)</div>
         <div class="legend-item"><div class="legend-color" style="background:#ef4444; height:2px;"></div>Wind Gusts</div>
       </div>
-      <div style="font-size: 0.85rem; font-weight: bold; color: var(--brand);" id="atmos-season-label">Season: Loading...</div>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <button class="atmos-nav-btn" id="atmos-prev-season" title="Previous season">◀</button>
+        <div style="font-size: 0.85rem; font-weight: bold; color: var(--brand); min-width: 100px; text-align: center;" id="atmos-season-label">Season: Loading...</div>
+        <button class="atmos-nav-btn" id="atmos-next-season" title="Next (more recent) season">▶</button>
+      </div>
     </div>
 
     <div style="position: relative;">
@@ -577,9 +604,11 @@
         window.GLOBAL_RESORT = r;
         
         if(typeof renderTacticalSummary === 'function') renderTacticalSummary(window.GLOBAL_RESORT);
+        if(typeof window.renderBestDaysStrip === 'function') window.renderBestDaysStrip();
         if(typeof window.repaintForecastCanvas === 'function') window.repaintForecastCanvas();
         if(typeof window.renderHeatmaps === 'function') window.renderHeatmaps();
         if(typeof window.repaintCanvas === 'function') window.repaintCanvas();
+        if (typeof atmosSeasonIdx !== 'undefined') atmosSeasonIdx = 0;
         if(typeof window.repaintAtmosCanvas === 'function') window.repaintAtmosCanvas();
       };
       glbHeader.appendChild(b);
@@ -628,31 +657,62 @@
         gustDayStr = gustDate.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
       }
 
-      // Freezing level — prefer daily max/min, fall back to hourly
-      let maxFz = 0, minFz = 0, fzDaysBelowBase = 0;
+      // Freezing level — from hourly (daily aggregates were removed as non-existent in API)
+      // CORRECT freeze-thaw logic: risk is when fz-line RISES ABOVE the base elevation.
+      // fz > base means it's warm enough to melt at base → daytime thaw, overnight refreeze = ICE.
+      // fz < base means it stays frozen all day = GOOD conditions.
+      let maxFz = 0, minFz = 0, fzDaysAboveBase = 0;
       const meta = STATIC_METADATA[resort.toLowerCase()] || {base: 0, summit: 0};
-      if (daily?.freezing_level_height_max) {
-        const fzMax = daily.freezing_level_height_max.slice(0, days7).filter(v=>v!==null);
-        const fzMin = daily.freezing_level_height_min ? daily.freezing_level_height_min.slice(0, days7).filter(v=>v!==null) : [];
-        maxFz = fzMax.length ? Math.max(...fzMax) : 0;
-        minFz = fzMin.length ? Math.min(...fzMin) : 0;
-        fzDaysBelowBase = fzMax.filter(v => v < meta.base).length;
-      } else {
-        const fzArr = hourly.freezing_level_height ? hourly.freezing_level_height.slice(0, limit).filter(v=>v!==null) : [];
-        maxFz = fzArr.length ? Math.max(...fzArr) : 0;
-        minFz = fzArr.length ? Math.min(...fzArr) : 0;
-        // Count days where the daily max freezing level dips below base elevation
-        for (let i = 0; i < days7; i++) {
-          const dayFz = hourly.freezing_level_height ? hourly.freezing_level_height.slice(i*24, (i+1)*24).filter(v=>v!==null) : [];
-          if (dayFz.length && Math.max(...dayFz) < meta.base) fzDaysBelowBase++;
-        }
+      const fzArr = hourly.freezing_level_height ? hourly.freezing_level_height.slice(0, limit).filter(v=>v!==null) : [];
+      maxFz = fzArr.length ? Math.max(...fzArr) : 0;
+      minFz = fzArr.length ? Math.min(...fzArr) : 0;
+      // Count days where fz line climbs ABOVE base at any point (thaw risk)
+      for (let i = 0; i < days7; i++) {
+        const dayFz = hourly.freezing_level_height ? hourly.freezing_level_height.slice(i*24, (i+1)*24).filter(v=>v!==null) : [];
+        if (dayFz.length && Math.max(...dayFz) > meta.base) fzDaysAboveBase++;
       }
 
-      // Visibility — worst-case km over the 7-day window (ski-critical for off-piste/visibility closures)
+      // Visibility — worst-case km over the 7-day window
       const visArr = hourly.visibility ? hourly.visibility.slice(0, limit).filter(v=>v!==null) : [];
       const minVis = visArr.length ? Math.min(...visArr) / 1000 : null; // m → km
       const visibilityHtml = minVis !== null
         ? `<div style="font-size:2rem; font-weight:800; color:${minVis < 0.2 ? '#ef4444' : minVis < 1 ? '#f59e0b' : 'var(--text-main)'}; line-height:1;">${minVis < 1 ? (minVis*1000).toFixed(0)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">m</span>' : minVis.toFixed(1)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">km</span>'}</div><div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Worst hourly in 7d</div>`
+        : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
+
+      // Month-aware rain threshold: Jan rain is a snowpack killer; Apr rain is normal spring
+      // Destructive thresholds per month: Nov-Feb=2mm, Mar=5mm, Apr=10mm
+      const forecastMonth = localNow.getMonth() + 1; // 1-12
+      const rainThreshold = forecastMonth <= 2 || forecastMonth >= 11 ? 2 : forecastMonth <= 3 ? 5 : 10;
+      const rainIsDangerous = rain > rainThreshold;
+      const rainNote = rainIsDangerous
+        ? `<div style="font-size:0.7rem;color:#ef4444;margin-top:0.3rem;font-weight:600;">>${rainThreshold}mm threshold for ${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][forecastMonth]}</div>`
+        : `<div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">Threshold: ${rainThreshold}mm (${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][forecastMonth]})</div>`;
+
+      // Avalanche slab signal: heavy snowfall + high wind on same day = wind slab loading
+      // Classic recipe: >15cm new snow AND gusts >40 km/h within same 24h window
+      let avlDays = 0, avlDayLabels = [];
+      for (let i = 0; i < days7; i++) {
+        const snArr = hourly.snowfall ? hourly.snowfall.slice(i*24,(i+1)*24).reduce((a,b)=>a+(b||0),0) : 0;
+        const gArr  = hourly.wind_gusts_10m ? Math.max(...hourly.wind_gusts_10m.slice(i*24,(i+1)*24).filter(v=>v!==null).concat([0])) : 0;
+        if (snArr > 15 && gArr > 40) {
+          avlDays++;
+          const d = hourly.time ? new Date(hourly.time[i*24]) : new Date(localNow.getTime()+i*86400000);
+          avlDayLabels.push(d.toLocaleDateString('en-US',{weekday:'short'}));
+        }
+      }
+      const avlHtml = avlDays > 0
+        ? `<div style="font-size:1.4rem; font-weight:800; color:#fbbf24; line-height:1;">${avlDays}d <span style="font-size:0.85rem;">risk</span></div><div class="avl-warning">⚠ Wind slab: ${avlDayLabels.join(', ')}</div>`
+        : `<div style="font-size:1.1rem; font-weight:800; color:#22c55e; line-height:1.4;">Low</div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">No wind-slab days forecast</div>`;
+
+      // UV at summit — peak daily UV index across the week
+      const uvArr = daily?.uv_index_max ? daily.uv_index_max.slice(0, days7).filter(v=>v!==null) : [];
+      const peakUV = uvArr.length ? Math.max(...uvArr) : null;
+      // At alpine altitudes UV increases ~10-12% per 1000m above sea level
+      // The forecast already has elevation factored in via the elevation param
+      const uvColor = peakUV === null ? 'var(--text-muted)' : peakUV >= 8 ? '#ef4444' : peakUV >= 6 ? '#f97316' : peakUV >= 4 ? '#f59e0b' : '#22c55e';
+      const uvLabel = peakUV === null ? '—' : peakUV >= 8 ? 'Very High' : peakUV >= 6 ? 'High' : peakUV >= 4 ? 'Moderate' : 'Low';
+      const uvHtml = peakUV !== null
+        ? `<div style="font-size:2rem; font-weight:800; color:${uvColor}; line-height:1;">${peakUV.toFixed(0)}<span style="font-size:0.85rem; color:var(--text-muted); margin-left:0.3rem;">UV</span></div><div style="font-size:0.7rem;color:${uvColor};margin-top:0.2rem;font-weight:600;">${uvLabel} — ${meta.summit}m summit</div>`
         : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
 
       fcBoard.innerHTML = `
@@ -661,18 +721,27 @@
               <div style="font-size:2rem; font-weight:800; color:var(--snow-yield); line-height:1;">${snow.toFixed(0)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">cm</span></div>
           </div>
           <div class="fc-card">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">7-Day Rain Hazard 🌧️</div>
-              <div style="font-size:2rem; font-weight:800; color:${rain > 5 ? '#ef4444' : 'var(--text-main)'}; line-height:1;">${rain.toFixed(1)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">mm</span></div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Rain Hazard 🌧️</div>
+              <div style="font-size:2rem; font-weight:800; color:${rainIsDangerous ? '#ef4444' : 'var(--text-main)'}; line-height:1;">${rain.toFixed(1)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">mm</span></div>
+              ${rainNote}
           </div>
           <div class="fc-card">
               <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Peak Wind Hold Risk 💨</div>
               <div style="font-size:2rem; font-weight:800; color:${maxGust > 65 ? '#ef4444' : 'var(--text-main)'}; line-height:1;">${maxGust.toFixed(0)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">km/h</span></div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Expected on ${gustDayStr}</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Peak on ${gustDayStr}</div>
           </div>
           <div class="fc-card">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Freezing Line (0°C) 🏔️</div>
-              <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.4;">Max: <span style="color:${maxFz > meta.base ? '#ef4444' : 'var(--brand)'};">${Math.round(maxFz)}m</span> · Min: ${Math.round(minFz)}m</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">${fzDaysBelowBase > 0 ? `<span style="color:#ef4444;font-weight:bold;">${fzDaysBelowBase}d below base (${meta.base}m) — freeze-thaw risk</span>` : `Base at ${meta.base}m — freezing line stays above`}</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Freeze-Thaw Risk 🧊</div>
+              <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.4;">Fz max: <span style="color:${maxFz > meta.base ? '#ef4444' : '#22c55e'};">${Math.round(maxFz)}m</span> · min: ${Math.round(minFz)}m</div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.4rem;">${fzDaysAboveBase > 0 ? `<span style="color:#ef4444;font-weight:bold;">${fzDaysAboveBase}d fz-line above base (${meta.base}m) — ice/crust risk</span>` : `<span style="color:#22c55e;font-weight:600;">Fz line stays below base — snowpack solid ✓</span>`}</div>
+          </div>
+          <div class="fc-card">
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Wind Slab Risk 🏔️</div>
+              ${avlHtml}
+          </div>
+          <div class="fc-card">
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Summit UV Index ☀️</div>
+              ${uvHtml}
           </div>
           <div class="fc-card">
               <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Worst Visibility 👁️</div>
@@ -687,6 +756,120 @@
       fcBoard.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">API Failure: ${FORECAST_DATA.error}</div>`;
     } else {
       fcBoard.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">Forecast Payload Missing</div>`;
+    }
+
+    // ── BEST DAYS STRIP ──────────────────────────────────────────────────
+    // Scores each forecast day using the same Bluebird formula (sun/depth/temp/wind/powder).
+    // snow_depth and precipitation_probability are now fetched in the payload.
+    // Highlights the top 3 days so a tourist can plan instantly.
+    const computeForecastDayScore = (tMax, tMin, sunH, depthM, gustKmh, freshCm, maxDepth, probPct) => {
+      // Normalise against resort's historical max depth; fallback if unavailable
+      const fSun  = Math.min(1, sunH / 10); // 10h = perfect alpine day
+      const fDepth= maxDepth > 0 ? Math.min(1, (depthM || 0) / maxDepth) : 0.5;
+      let fTemp = 0.5;
+      if (tMax !== null) {
+        if      (tMax <= -20) fTemp = 0.3;
+        else if (tMax <= -12) fTemp = 0.7 + 0.3*(tMax+20)/8;
+        else if (tMax <=  -2) fTemp = 1.0;
+        else if (tMax <=   5) fTemp = 1.0 - 0.5*(tMax+2)/7;
+        else if (tMax <=  15) fTemp = 0.5 - 0.4*(tMax-5)/10;
+        else                  fTemp = 0.05;
+        fTemp = Math.max(0, Math.min(1, fTemp));
+      }
+      let wMult = 1.0;
+      if (gustKmh !== null) {
+        if      (gustKmh <= 30) wMult = 1.0;
+        else if (gustKmh <= 50) wMult = 1.0 - 0.1*(gustKmh-30)/20;
+        else if (gustKmh <= 80) wMult = 0.9 - 0.4*(gustKmh-50)/30;
+        else                    wMult = 0.3;
+      }
+      let pBonus = 0;
+      if (freshCm > 10) {
+        const sf = Math.min(1,(freshCm-10)/20);
+        const wf = (gustKmh === null || gustKmh <= 30) ? 1 : gustKmh <= 50 ? 1-(gustKmh-30)/20 : 0;
+        pBonus = 0.15 * sf * wf;
+      }
+      // Confidence scaling: low precip probability on snow days = uncertain score
+      // When probability < 30% treat it as 30% likely (don't fully dismiss low-prob snow)
+      const probFactor = probPct !== null ? Math.min(1, 0.3 + (probPct / 100) * 0.7) : 1.0;
+      const raw = 0.40*fSun + 0.25*fDepth + 0.20*fTemp + 0.15*wMult;
+      const score = Math.max(0, Math.min(1, (raw + pBonus) * wMult));
+      return { score: Math.round(score * 1000) / 1000, fSun, fDepth, fTemp, wMult, pBonus, probFactor };
+    };
+
+    window.renderBestDaysStrip = () => {
+      const strip = document.getElementById('best-days-strip');
+      if (!strip) return;
+      if (!FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) {
+        strip.innerHTML = `<div style="color:var(--text-muted);font-style:italic;font-size:0.85rem;">No forecast data.</div>`;
+        return;
+      }
+      const resortData = FORECAST_DATA.resorts[window.GLOBAL_RESORT];
+      const hourly = resortData.hourly || resortData;
+      if (!hourly.temperature_2m) { strip.innerHTML = ''; return; }
+      const numDays = Math.min(16, Math.floor(hourly.temperature_2m.length / 24));
+      if (numDays === 0) { strip.innerHTML = ''; return; }
+
+      // Historical max depth for normalisation
+      const histBounds = typeof getResortBounds === 'function' ? getResortBounds(window.GLOBAL_RESORT) : { maxDepth: 2 };
+      const maxDepth = histBounds.maxDepth || 2;
+
+      const days = [];
+      for (let i = 0; i < numDays; i++) {
+        const s = i * 24, e = s + 24;
+        const slice = k => hourly[k] ? hourly[k].slice(s, e).filter(v => v !== null) : [];
+        const temps  = slice('temperature_2m');
+        const tMax   = temps.length ? Math.max(...temps) : null;
+        const tMin   = temps.length ? Math.min(...temps) : null;
+        const sunSec = hourly.sunshine_duration ? hourly.sunshine_duration.slice(s,e).reduce((a,b)=>a+(b||0),0) : 0;
+        const sunH   = Math.min(sunSec / 3600, 16);
+        const depthArr = slice('snow_depth');
+        const depthM = depthArr.length ? depthArr.reduce((a,b)=>a+b,0)/depthArr.length : null;
+        const gusts  = slice('wind_gusts_10m');
+        const gustMax= gusts.length ? Math.max(...gusts) : null;
+        const freshCm= hourly.snowfall ? hourly.snowfall.slice(s,e).reduce((a,b)=>a+(b||0),0) : 0;
+        const probArr= slice('precipitation_probability');
+        const probMax= probArr.length ? Math.max(...probArr) : null;
+        const dt     = hourly.time ? new Date(hourly.time[s]) : new Date(localNow.getTime()+i*86400000);
+        const scored = computeForecastDayScore(tMax, tMin, sunH, depthM, gustMax, freshCm, maxDepth, probMax);
+        const dayWmo = hourly.weather_code ? (hourly.weather_code.slice(s,e).filter(v=>v!==null)[12] || null) : null;
+        const wmoEmoji = dayWmo === null ? '🌤️' : dayWmo === 0 ? '☀️' : dayWmo <= 2 ? '🌤️' : dayWmo === 3 ? '☁️' :
+                         dayWmo <= 48 ? '🌫️' : dayWmo <= 57 ? '🌧️' : dayWmo <= 67 ? '🌨️' :
+                         dayWmo <= 77 ? '❄️' : dayWmo <= 82 ? '🌦️' : dayWmo <= 86 ? '🌨️' : '⛈️';
+        days.push({ dt, tMax, freshCm, sunH, depthM, gustMax, probMax, score: scored.score, fSun: scored.fSun, wmoEmoji });
+      }
+
+      // Rank by score to find top 3
+      const ranked = [...days].map((d,i)=>({i, score:d.score})).sort((a,b)=>b.score-a.score);
+      const topIdx = new Set(ranked.slice(0,3).map(r=>r.i));
+      const bestIdx = ranked[0].i;
+
+      strip.innerHTML = days.map((d, i) => {
+        const isTop = topIdx.has(i);
+        const isBest = i === bestIdx;
+        const chipClass = isBest ? 'fc-day-chip fc-day-chip--top' : isTop ? 'fc-day-chip fc-day-chip--top3-1' : 'fc-day-chip';
+        const scoreColor = d.score >= 0.75 ? '#22c55e' : d.score >= 0.55 ? '#84cc16' : d.score >= 0.40 ? '#f59e0b' : '#ef4444';
+        const dayLabel  = d.dt.toLocaleDateString('en-US', {weekday:'short'});
+        const dateLabel = d.dt.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+        const snowStr   = d.freshCm > 0.5 ? `❄️${d.freshCm.toFixed(0)}cm` : '';
+        const probStr   = d.probMax !== null && d.probMax > 20 ? `${Math.round(d.probMax)}%☔` : '';
+        const bestMark  = isBest ? '⭐' : isTop ? '✓' : '';
+        return `<div class="${chipClass}" title="Score ${(d.score*100).toFixed(0)}% — ${dayLabel} ${dateLabel}">
+          <div style="font-size:0.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;display:flex;justify-content:space-between;">
+            <span>${dayLabel}</span><span style="color:${isTop?'#fbbf24':'var(--text-muted)'};">${bestMark}</span>
+          </div>
+          <div style="font-size:0.65rem;color:var(--text-muted);">${dateLabel}</div>
+          <div style="font-size:1.3rem;line-height:1.1;text-align:center;">${d.wmoEmoji}</div>
+          <div style="font-size:0.85rem;font-weight:800;color:${scoreColor};text-align:center;">${(d.score*100).toFixed(0)}%</div>
+          ${d.tMax !== null ? `<div style="font-size:0.6rem;color:var(--text-muted);text-align:center;">${d.tMax.toFixed(0)}°C</div>` : ''}
+          ${snowStr ? `<div style="font-size:0.6rem;color:#93c5fd;">${snowStr}</div>` : ''}
+          ${probStr ? `<div style="font-size:0.6rem;color:#60a5fa;">${probStr}</div>` : ''}
+        </div>`;
+      }).join('');
+    };
+
+    if (FORECAST_DATA && FORECAST_DATA.resorts && Object.keys(FORECAST_DATA.resorts).length > 0) {
+      window.renderBestDaysStrip();
     }
 
     const cvsFc = document.getElementById('forecast-canvas');
@@ -1297,7 +1480,22 @@
       const seasons = getSeasonYears(rData);
       seasons.forEach(startYear => {
         const ss = `${startYear}/${String(startYear+1).slice(2)}`;
-        html += `<div class="hm-season-row"><div style="text-align:right; font-weight:bold; color:var(--text-muted);">${ss}</div><div class="hm-months-container">`;
+
+        // Powder day count for this season: summit snowfall > 10cm AND gusts < 50 km/h
+        let powderDays = 0;
+        rData.forEach(r => {
+          const y = parseInt(r.date.slice(0,4)), m = parseInt(r.date.slice(5,7));
+          const rSeason = m >= 11 ? y : y - 1;
+          if (rSeason !== startYear) return;
+          const fresh = r.summit?.snowfall_sum ?? r.snowfall_sum ?? 0;
+          const gust  = r.base?.wind_gusts_10m_max ?? r.wind_gusts_10m_max ?? 999;
+          if (fresh > 10 && gust < 50) powderDays++;
+        });
+        const powderBadge = powderDays > 0
+          ? `<span title="${powderDays} days with >10cm fresh snow & manageable wind" style="font-size:0.6rem;background:rgba(96,165,250,0.15);border:1px solid rgba(96,165,250,0.3);color:#60a5fa;border-radius:3px;padding:0.1rem 0.3rem;margin-left:0.4rem;font-weight:700;cursor:help;">❄️${powderDays}d</span>`
+          : '';
+
+        html += `<div class="hm-season-row"><div style="text-align:right; font-weight:bold; color:var(--text-muted);">${ss}${powderBadge}</div><div class="hm-months-container">`;
         
         targetMonths.forEach(mo => {
           const y = mo.m >= 11 ? startYear : startYear + 1;
@@ -1519,6 +1717,23 @@
 
     const cvsA = document.getElementById('atmos-canvas'), ctxA = cvsA.getContext('2d'), lblSeason = document.getElementById('atmos-season-label');
     let atmosHoverDay = null;
+    let atmosSeasonIdx = 0; // 0 = most recent, increases toward older seasons
+
+    const updateAtmosNavBtns = (seasons) => {
+      const prevBtn = document.getElementById('atmos-prev-season');
+      const nextBtn = document.getElementById('atmos-next-season');
+      if (prevBtn) prevBtn.disabled = atmosSeasonIdx >= seasons.length - 1;
+      if (nextBtn) nextBtn.disabled = atmosSeasonIdx <= 0;
+    };
+
+    document.getElementById('atmos-prev-season')?.addEventListener('click', () => {
+      const rd = byResort[window.GLOBAL_RESORT]; if (!rd) return;
+      const seasons = getSeasonYears(rd);
+      if (atmosSeasonIdx < seasons.length - 1) { atmosSeasonIdx++; window.repaintAtmosCanvas(); }
+    });
+    document.getElementById('atmos-next-season')?.addEventListener('click', () => {
+      if (atmosSeasonIdx > 0) { atmosSeasonIdx--; window.repaintAtmosCanvas(); }
+    });
 
     window.repaintAtmosCanvas = () => {
       if(!cvsA) return;
@@ -1527,8 +1742,11 @@
 
       const seasons = getSeasonYears(rd);
       if (seasons.length === 0) return;
-      const curYear = seasons[0]; 
+      // Clamp idx in case resort switch has fewer seasons
+      atmosSeasonIdx = Math.min(atmosSeasonIdx, seasons.length - 1);
+      const curYear = seasons[atmosSeasonIdx];
       lblSeason.innerText = `Season: ${curYear}/${String(curYear+1).slice(2)}`;
+      updateAtmosNavBtns(seasons);
 
       const atmosData = new Array(183).fill(null);
       rd.forEach(r => {
