@@ -12,7 +12,7 @@ from pathlib import Path
 
 BASE    = Path(__file__).parent.parent
 SCRIPTS = BASE / "scripts"
-# Rerouted from enriched_data.json
+# Rerouted from dead enriched_data.json -> master_data.json
 DATA    = BASE / "data" / "processed" / "master_data.json"
 OUT     = BASE / "nauders_dashboard.html"
 
@@ -55,10 +55,10 @@ def main():
     fetch_cmd = [sys.executable, str(SCRIPTS / "fetch_openmeteo.py")]
     if args.end_date:
         fetch_cmd.extend(["--end-date", args.end_date])
-        
+
     has_cache = DATA.exists()
     fetch_success = run(fetch_cmd, "Fetch Open-Meteo", allow_fail=has_cache)
-    
+
     if not fetch_success and has_cache:
         print("\n[!] WARNING: Fetch failed, but cached data exists. Proceeding with stale data.")
     else:
