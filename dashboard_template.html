@@ -288,7 +288,7 @@
         </div>
 
         <div style="position: relative; flex-grow: 1; min-height: 300px;">
-          <canvas id="forecast-canvas" width="800" height="380"></canvas>
+          <canvas id="forecast-canvas" width="2000" height="760"></canvas>
         </div>
 
       </div>
@@ -757,10 +757,6 @@
         
         const gustArr = hourly.wind_gusts_10m ? hourly.wind_gusts_10m.slice(start, end).filter(v => v !== null) : [];
         const gust = gustArr.length ? Math.max(...gustArr) : 0;
-
-        let exactDate;
-        if (hourly.time && hourly.time[start]) exactDate = new Date(hourly.time[start]);
-        else exactDate = new Date(localNow.getTime() + i*86400000);
 
         const dateStr = exactDate.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'});
         
