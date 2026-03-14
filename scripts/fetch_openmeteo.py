@@ -15,6 +15,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 BASE_URL   = "https://archive-api.open-meteo.com/v1/archive"
 START_DATE = "2019-11-01"
 
+# FIX: Changed 'weathercode' to the correct ERA5 API parameter 'weather_code'
 DAILY_VARS = [
     "temperature_2m_max", 
     "temperature_2m_min", 
@@ -27,7 +28,7 @@ DAILY_VARS = [
     "shortwave_radiation_sum", 
     "windspeed_10m_max", 
     "wind_gusts_10m_max",       
-    "weathercode"
+    "weather_code" 
 ]
 
 RESORTS = [
@@ -40,19 +41,22 @@ RESORTS = [
 
 def get_session():
     session = requests.Session()
-    retry = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+    # FIX: Added connect=5 and read=5 so the retry block handles timeout exceptions gracefully
+    retry = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504], connect=5, read=5)
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     return session
-def fetch_one(session, name, lat, lon, label, elevation_m, vars_to_use, start_date, end_date):
+
+# FIX: Added `elevation` to the parameter signature
+def fetch_one(session, name, lat, lon, elevation, elevation_label, vars_to_use, start_d, end_d):
     params = {
         "latitude": lat,
         "longitude": lon,
-        "elevation": elevation_m,
-        "start_date": start_date,
-        "end_date": end_date,
-        "daily": ",".join(vars_to_use),
+        "elevation": elevation, # FIX: Open-Meteo will now accurately downscale temperatures/snow
+        "start_date": start_d,
+        "end_date": end_d,
+        "daily": ",".join(vars_to_use), 
         "timezone": "Europe/Berlin"
     }
     
@@ -76,7 +80,8 @@ def default_end_date():
 
 def probe_variables(session, lat, lon, base_m):
     try:
-        fetch_one(session, "probe", lat, lon, "test", DAILY_VARS, "2024-01-01", "2024-01-02")
+        # FIX: Pushed base_m into the updated fetch_one signature
+        fetch_one(session, "probe", lat, lon, base_m, "test", DAILY_VARS, "2024-01-01", "2024-01-02")
         return DAILY_VARS
     except Exception as e:
         print(f"Probe failed: {e}")
@@ -107,15 +112,15 @@ def main():
         vars_to_use = probe_variables(session, lat, lon, base_m)
         if not vars_to_use: sys.exit("No variables worked.")
 
-try:
+    try:
         for name, lat, lon, base_m, summit_m in RESORTS:
             print(f"\n[{name.upper()}]")
-            
-            n_base = fetch_one(session, name, lat, lon, "base", base_m, vars_to_use, START_DATE, end_date)
+            # FIX: Properly pass base_m and summit_m as the elevation argument
+            n_base = fetch_one(session, name, lat, lon, base_m, "base", vars_to_use, START_DATE, end_date)
             print(f"  ✓ Base   ({base_m}m): {n_base} days")
             time.sleep(0.6)
             
-            n_summit = fetch_one(session, name, lat, lon, "summit", summit_m, vars_to_use, START_DATE, end_date)
+            n_summit = fetch_one(session, name, lat, lon, summit_m, "summit", vars_to_use, START_DATE, end_date)
             print(f"  ✓ Summit ({summit_m}m): {n_summit} days")
             time.sleep(0.6)
             
