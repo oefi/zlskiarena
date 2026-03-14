@@ -565,7 +565,7 @@
     });
 
     // =========================================================
-    // MODULE 1: FORECAST ENGINE (Soil Temp & Density Math Injected)
+    // MODULE 1: FORECAST ENGINE
     // =========================================================
     const fcBoard = document.getElementById('tactical-summary-board');
 
@@ -609,7 +609,7 @@
           </div>
           <div class="fc-card">
               <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Freezing Line (0°C) 🏔️</div>
-              <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.4;">Max: <span style="color:${maxFz > meta.base ? '#ef4444' : 'var(--brand)'};">${maxFz}m</span><br>Min: ${minFz}m</div>
+              <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.4;">Max: <span style="color:${maxFz > meta.base ? '#ef4444' : 'var(--brand)'};">${Math.round(maxFz)}m</span><br>Min: ${Math.round(minFz)}m</div>
               <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Base elevation is ${meta.base}m</div>
           </div>
       `;
@@ -665,12 +665,12 @@
             }, 0) / wcArr.length;
         }
 
-        // Astronomical max daylight for 47°N (Alps) on this forecast day.
-        // Used both to cap real values (API anomalies) and to scale the fallback realistically.
-        let exactDateForSun;
-        if (hourly.time && hourly.time[start]) exactDateForSun = new Date(hourly.time[start]);
-        else exactDateForSun = new Date(localNow.getTime() + i*86400000);
-        const doy = Math.floor((exactDateForSun - new Date(exactDateForSun.getFullYear(), 0, 0)) / 86400000);
+        // Single date object used for both sun calculation and label
+        let exactDate;
+        if (hourly.time && hourly.time[start]) exactDate = new Date(hourly.time[start]);
+        else exactDate = new Date(localNow.getTime() + i*86400000);
+
+        const doy = Math.floor((exactDate - new Date(exactDate.getFullYear(), 0, 0)) / 86400000);
         const decl = -23.45 * Math.cos((360/365 * (doy + 10)) * Math.PI/180) * Math.PI/180;
         const lat = 47 * Math.PI/180;
         const cosHA = -Math.tan(lat) * Math.tan(decl);
