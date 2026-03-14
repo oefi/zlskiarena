@@ -107,14 +107,15 @@ def main():
         vars_to_use = probe_variables(session, lat, lon, base_m)
         if not vars_to_use: sys.exit("No variables worked.")
 
-    try:
+try:
         for name, lat, lon, base_m, summit_m in RESORTS:
             print(f"\n[{name.upper()}]")
-            n_base = fetch_one(session, name, lat, lon, "base", vars_to_use, START_DATE, end_date)
+            
+            n_base = fetch_one(session, name, lat, lon, "base", base_m, vars_to_use, START_DATE, end_date)
             print(f"  ✓ Base   ({base_m}m): {n_base} days")
             time.sleep(0.6)
             
-            n_summit = fetch_one(session, name, lat, lon, "summit", vars_to_use, START_DATE, end_date)
+            n_summit = fetch_one(session, name, lat, lon, "summit", summit_m, vars_to_use, START_DATE, end_date)
             print(f"  ✓ Summit ({summit_m}m): {n_summit} days")
             time.sleep(0.6)
             
