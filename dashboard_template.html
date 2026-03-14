@@ -299,8 +299,8 @@
           <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:16px; height:2px; border-bottom:2px dashed #a16207;"></div> Soil (0cm)</div>
           <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--snow-yield); border-radius:2px;"></div> Snow</div>
           <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--rain-yield); border-radius:2px;"></div> Rain</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--cloud-base); border-radius:2px;"></div> Clouds</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--sun-yield); border-radius:2px;"></div> Sun (h)</div>
+          <div style="display:flex; align-items:center; gap:0.3rem;"><div style="width:10px; height:5px; background:rgba(190,210,240,0.9); border-radius:1px;"></div><div style="width:10px; height:5px; background:rgba(110,135,165,0.9); border-radius:1px;"></div><div style="width:10px; height:5px; background:rgba(55,75,100,0.9); border-radius:1px;"></div> Cloud H/M/L</div>
+          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:rgba(255,145,10,0.8); border-radius:2px;"></div> Direct Solar</div>
           <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:16px; height:2px; border-bottom:2px dashed #ef4444;"></div> Gusts</div>
         </div>
 
@@ -975,6 +975,21 @@
 
         const dateStr = exactDate.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'});
         
+        // Cloud layers — daily mean per altitude band (graceful zero if not fetched)
+        const ccLowArr  = hourly.cloud_cover_low  ? hourly.cloud_cover_low.slice(start, end).filter(v=>v!==null)  : [];
+        const ccMidArr  = hourly.cloud_cover_mid  ? hourly.cloud_cover_mid.slice(start, end).filter(v=>v!==null)  : [];
+        const ccHighArr = hourly.cloud_cover_high ? hourly.cloud_cover_high.slice(start, end).filter(v=>v!==null) : [];
+        const ccLow  = ccLowArr.length  ? ccLowArr.reduce((a,b)=>a+b,0)/ccLowArr.length   : 0;
+        const ccMid  = ccMidArr.length  ? ccMidArr.reduce((a,b)=>a+b,0)/ccMidArr.length   : 0;
+        const ccHigh = ccHighArr.length ? ccHighArr.reduce((a,b)=>a+b,0)/ccHighArr.length  : 0;
+
+        // Direct radiation — sum hourly W/m², then mean over lit hours (>0 W/m²).
+        // This is the unscattered solar beam: zero under any cloud, high on bluebird.
+        // Graceful fallback to sun-hours bars if not in payload (old cached data).
+        const drArr      = hourly.direct_radiation ? hourly.direct_radiation.slice(start, end).filter(v=>v!==null) : [];
+        const drLitCount = drArr.filter(v=>v>0).length || 1;
+        const directMean = drArr.length ? drArr.reduce((a,b)=>a+b,0) / drLitCount : 0; // mean W/m² over lit hours
+
         daily.push({ 
             tMax: t.length ? Math.max(...t) : 0, 
             tMin: t.length ? Math.min(...t) : 0, 
@@ -984,7 +999,9 @@
             soil: soilTemp,
             gust: gust, 
             cloud: cc, 
+            ccLow, ccMid, ccHigh,
             sun: sun,
+            directMean,
             astroMax: astroMaxSun,
             label: dateStr 
         });
@@ -1023,8 +1040,15 @@
       const maxPrecip = Math.max(5, ...daily.map(d => d.precip));
       const mapYPrecip = val => zeroY - (val / maxPrecip) * (zeroY - yP1) * 0.85;
 
-      const maxSun = Math.ceil(Math.max(12, ...daily.map(d => d.astroMax || 12)));
-      const mapYSun = val => yP2 + hP2 - (Math.min(val, maxSun) / maxSun) * hP2;
+      // Direct radiation axis — mean W/m² over lit hours.
+      // Fallback to sun-hours axis if direct_radiation not in payload.
+      const hasDirectRad = daily.some(d => d.directMean > 0);
+      const maxDirect = hasDirectRad
+        ? Math.max(300, ...daily.map(d => d.directMean || 0))
+        : Math.ceil(Math.max(12, ...daily.map(d => d.astroMax || 12)));
+      const mapYDirect = val => yP2 + hP2 - (Math.min(val, maxDirect) / maxDirect) * hP2;
+      // Keep mapYSun alias for any other consumers that may use it
+      const mapYSun = mapYDirect;
 
       const maxGust = Math.max(60, ...daily.map(d=>d.gust));
       const mapYGust = g => yP2 + hP2 - (Math.min(g, maxGust) / maxGust) * hP2;
@@ -1037,7 +1061,7 @@
 
       ctxFc.save(); ctxFc.translate(leftTitleOff, yP1 + hP1/2); ctxFc.rotate(-Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Temp (°C)", 0, 0); ctxFc.restore();
       ctxFc.save(); ctxFc.translate(rightTitleOff, yP1 + (zeroY - yP1)/2); ctxFc.rotate(Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillStyle = '#3b82f6'; ctxFc.fillText("Precip (mm)", 0, 0); ctxFc.restore();
-      ctxFc.save(); ctxFc.translate(leftTitleOff, yP2 + hP2/2); ctxFc.rotate(-Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.fillText("Sun (h)", 0, 0); ctxFc.restore();
+      ctxFc.save(); ctxFc.translate(leftTitleOff, yP2 + hP2/2); ctxFc.rotate(-Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.fillText(hasDirectRad ? "Direct Solar" : "Sun (h)", 0, 0); ctxFc.restore();
       ctxFc.save(); ctxFc.translate(rightTitleOff, yP2 + hP2/2); ctxFc.rotate(Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Gusts", 0, 0); ctxFc.restore();
 
       ctxFc.textAlign = 'right'; ctxFc.textBaseline = 'middle';
@@ -1067,10 +1091,20 @@
 
       ctxFc.textAlign = 'right';
       ctxFc.fillStyle = getStyleVar('--text-muted');
-      const sunStep = maxSun <= 12 ? 6 : maxSun <= 16 ? 4 : 6;
-      for(let s=sunStep; s<=maxSun; s+=sunStep) {
-        const y = mapYSun(s);
-        ctxFc.beginPath(); ctxFc.moveTo(pX,y); ctxFc.lineTo(pX+w,y); ctxFc.lineWidth = 1; ctxFc.stroke(); ctxFc.fillText(`${s}h`, pX - labelOffset, y);
+      if (hasDirectRad) {
+        // W/m² ticks at 25%, 50%, 75%, 100% of maxDirect
+        [0.25, 0.5, 0.75, 1.0].forEach(frac => {
+          const val = Math.round(maxDirect * frac);
+          const y = mapYDirect(val);
+          ctxFc.beginPath(); ctxFc.moveTo(pX,y); ctxFc.lineTo(pX+w,y); ctxFc.lineWidth = 1; ctxFc.stroke();
+          ctxFc.fillText(`${val}`, pX - labelOffset, y);
+        });
+      } else {
+        const sunStep = maxDirect <= 12 ? 6 : maxDirect <= 16 ? 4 : 6;
+        for(let s=sunStep; s<=maxDirect; s+=sunStep) {
+          const y = mapYDirect(s);
+          ctxFc.beginPath(); ctxFc.moveTo(pX,y); ctxFc.lineTo(pX+w,y); ctxFc.lineWidth = 1; ctxFc.stroke(); ctxFc.fillText(`${s}h`, pX - labelOffset, y);
+        }
       }
       ctxFc.textAlign = 'left';
       for(let g=20; g<=maxGust; g+=Math.ceil(maxGust/3)) {
@@ -1078,10 +1112,35 @@
       }
       ctxFc.beginPath(); ctxFc.moveTo(pX,yP2+hP2); ctxFc.lineTo(pX+w,yP2+hP2); ctxFc.lineWidth=2; ctxFc.strokeStyle=getStyleVar('--text-muted'); ctxFc.stroke();
 
+      // Cloud layer bands — drawn at top of temp panel before labels.
+      // Each band is cloudBandH canvas units tall. Order top→bottom: high, mid, low
+      // matching the physical sky (high cirrus is harmless; low stratus = fog/lift-close risk).
+      const cloudBandH = 7; // canvas units per layer
       daily.forEach((d, i) => {
-        ctxFc.fillStyle = getStyleVar('--cloud-base'); ctxFc.globalAlpha = d.cloud / 100;
-        ctxFc.fillRect(pX + i*colW + 1, yP1, colW - 2, hP1); ctxFc.globalAlpha = 1.0;
-        
+        const colX = pX + i*colW + 1;
+        const colBW = colW - 2;
+        // High cloud (cirrus): pale silver-blue — fine to ski under
+        if (d.ccHigh > 0) {
+          ctxFc.fillStyle = 'rgba(190,210,240,1)'; ctxFc.globalAlpha = d.ccHigh / 100;
+          ctxFc.fillRect(colX, yP1, colBW, cloudBandH);
+        }
+        // Mid cloud (altostratus): grey-blue — flat light, visibility ok
+        if (d.ccMid > 0) {
+          ctxFc.fillStyle = 'rgba(110,135,165,1)'; ctxFc.globalAlpha = d.ccMid / 100;
+          ctxFc.fillRect(colX, yP1 + cloudBandH, colBW, cloudBandH);
+        }
+        // Low cloud (stratus/fog): dark slate — whiteout / lift closure risk
+        if (d.ccLow > 0) {
+          ctxFc.fillStyle = 'rgba(55,75,100,1)'; ctxFc.globalAlpha = d.ccLow / 100;
+          ctxFc.fillRect(colX, yP1 + cloudBandH*2, colBW, cloudBandH);
+        }
+        // Legacy fallback: if no layer data, draw single tint as before
+        if (d.ccHigh === 0 && d.ccMid === 0 && d.ccLow === 0 && d.cloud > 0) {
+          ctxFc.fillStyle = getStyleVar('--cloud-base'); ctxFc.globalAlpha = d.cloud / 100;
+          ctxFc.fillRect(colX, yP1, colBW, hP1);
+        }
+        ctxFc.globalAlpha = 1.0;
+
         ctxFc.fillStyle = getStyleVar('--text-muted'); 
         const cx = pX + i*colW + colW/2;
         
@@ -1152,8 +1211,24 @@
             ctxFc.fillRect(cx - bW/2, sY, bW, rY - sY); 
         }
         
-        const sunH = hP2 - (mapYSun(d.sun) - yP2);
-        if (sunH > 0) { ctxFc.fillStyle = getStyleVar('--sun-yield'); ctxFc.fillRect(cx - bW/2, yP2+hP2 - sunH, bW, sunH); }
+        if (hasDirectRad) {
+          // Direct radiation bar — amber intensity gradient by fraction of 16-day max.
+          // Deep amber = bluebird beam, grey = overcast diffuse only.
+          const dFrac = maxDirect > 0 ? Math.min(1, d.directMean / maxDirect) : 0;
+          const barH = hP2 - (mapYDirect(d.directMean) - yP2);
+          if (barH > 0) {
+            const rC = Math.round(120 + 135 * dFrac);     // 120→255
+            const gC = Math.round(120 + 30  * dFrac);     // 120→150 (keeps it amber not yellow)
+            const bC = Math.round(120 - 120 * dFrac);     // 120→0
+            const aC = (0.20 + 0.75 * dFrac).toFixed(2);
+            ctxFc.fillStyle = `rgba(${rC},${gC},${bC},${aC})`;
+            ctxFc.fillRect(cx - bW/2, yP2+hP2 - barH, bW, barH);
+          }
+        } else {
+          // Fallback: sunshine-hours bars (old behaviour, old payload)
+          const sunH = hP2 - (mapYDirect(d.sun) - yP2);
+          if (sunH > 0) { ctxFc.fillStyle = getStyleVar('--sun-yield'); ctxFc.fillRect(cx - bW/2, yP2+hP2 - sunH, bW, sunH); }
+        }
       });
 
       ctxFc.beginPath(); let drawingG = false;
@@ -1175,6 +1250,8 @@
         let rows = 6;
         if (d.soil !== null) rows++;
         if (d.snow > 0 && d.precip > 0) rows++;
+        if (hasDirectRad) rows++;          // direct solar row
+        if (d.ccLow > 5 || d.ccMid > 5 || d.ccHigh > 5) rows++; // cloud layers row
         const boxW = 190 * scale, boxH = (30 + (rows * 20)) * scale, padding = 15 * scale;
         
         let boxX = hx + padding, boxY = pY;
@@ -1199,7 +1276,17 @@
         }
         
         ctxFc.fillStyle = getStyleVar('--text-main');
-        ctxFc.fillText(`Sun: ${d.sun.toFixed(1)}h`, boxX + padding, currentY); currentY += yStep;
+        if (hasDirectRad && d.directMean > 0) {
+          const dFrac = maxDirect > 0 ? Math.min(1, d.directMean / maxDirect) : 0;
+          const quality = dFrac >= 0.8 ? '☀ Bluebird' : dFrac >= 0.5 ? '🌤 Bright' : dFrac >= 0.25 ? '⛅ Diffuse' : '☁ Overcast';
+          ctxFc.fillText(`Direct solar: ${Math.round(d.directMean)} W/m² (${quality})`, boxX + padding, currentY); currentY += yStep;
+        } else {
+          ctxFc.fillText(`Sun: ${d.sun.toFixed(1)}h`, boxX + padding, currentY); currentY += yStep;
+        }
+        if (d.ccLow > 5 || d.ccMid > 5 || d.ccHigh > 5) {
+          ctxFc.fillStyle = getStyleVar('--text-muted');
+          ctxFc.fillText(`Cloud: ↑${Math.round(d.ccHigh)}% ↔${Math.round(d.ccMid)}% ↓${Math.round(d.ccLow)}%`, boxX + padding, currentY); currentY += yStep;
+        }
         ctxFc.fillStyle = '#3b82f6'; ctxFc.fillText(`Rain: ${d.rain.toFixed(1)}mm`, boxX + padding, currentY); currentY += yStep;
         ctxFc.fillStyle = '#60a5fa'; ctxFc.fillText(`Snow: ${d.snow.toFixed(1)}cm`, boxX + padding, currentY); currentY += yStep;
         
