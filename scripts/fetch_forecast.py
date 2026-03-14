@@ -17,7 +17,7 @@ HOURLY_VARS = [
     "temperature_2m", "apparent_temperature", "precipitation", "rain", 
     "snowfall", "weathercode", "windspeed_10m", "windgusts_10m", 
     "visibility", "freezinglevel_height", "soil_temperature_0cm",
-    "sunshine_duration"
+    "sunshine_duration", "cloudcover"
 ]
 FORECAST_DAYS = 16
 
@@ -59,14 +59,14 @@ def main():
             resp.raise_for_status()
             forecast_payload["resorts"][name] = resp.json().get("hourly", {})
             time.sleep(0.5)
-            
+
         with open(OUT_FILE, "w") as f:
             json.dump(forecast_payload, f, separators=(",", ":"))
-            
+        print(f"✓ Forecast payload baked successfully ({len(RESORTS)} resorts).")
+
     except Exception as e:
-        print(f"\n[!] WARNING: High-res forecast fetch failed: {e}")
-        with open(OUT_FILE, "w") as f:
-            json.dump({"error": str(e), "resorts": {}}, f)
+        print(f"[!] Critical API Failure: {e}")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
