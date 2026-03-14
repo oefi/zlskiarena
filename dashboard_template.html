@@ -713,7 +713,7 @@
         
         // Pluck the raw precip mm and soil temp (if the backend was updated to fetch them)
         const precipArr = hourly.precipitation ? hourly.precipitation.slice(start, end).filter(v => v !== null) : [];
-        const totalPrecip = precipArr.length ? precipArr.reduce((a,b)=>a+b, 0) : rn + (sn * 0.1); 
+        const totalPrecip = precipArr.length ? precipArr.reduce((a,b)=>a+b, 0) : rn + (sn / 7); // sn cm → mm SWE at 7:1 (API standard)
         
         const soilArr = hourly.soil_temperature_0cm ? hourly.soil_temperature_0cm.slice(start, end).filter(v => v !== null) : [];
         const soilTemp = soilArr.length ? soilArr.reduce((a,b)=>a+b, 0)/soilArr.length : null;
