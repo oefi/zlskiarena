@@ -44,6 +44,7 @@ def extract_daily(raw_json):
         precip = safe_val("precipitation_sum")
         snow   = safe_val("snowfall_sum")
         sun    = safe_val("sunshine_duration")
+        sw     = safe_val("shortwave_radiation_sum")
         wc     = safe_val("weathercode")
 
         flags = []
@@ -53,17 +54,23 @@ def extract_daily(raw_json):
             snow = 0.0
             flags.append("snow_inferred")
 
-        # Physical Inference 2: ERA5 drops sunshine duration randomly. Infer from WMO codes.
-        if sun is None and wc is not None:
-            if wc == 0:
-                sun = 36000.0  # ~10 hours pure sun
-            elif wc in [1, 2]:
-                sun = 21600.0  # ~6 hours partial sun
-            elif wc == 3:
-                sun = 7200.0   # ~2 hours peek-a-boo
+        # Physical Inference 2: Cure the "All Red Matrix"
+        # If sun is missing OR exactly 0.0, we infer it from raw solar radiation.
+        if not sun:
+            if sw and sw > 2.0:
+                # 1 MJ/m2 is roughly proportional to solar intensity.
+                # Winter clear day = ~12-15 MJ/m2. Overcast = ~2-4 MJ/m2.
+                est_hours = (sw - 2.5) * 0.8
+                sun = max(0.0, min(est_hours, 12.0)) * 3600.0
+                flags.append("sun_inferred_from_radiation")
+            elif wc is not None:
+                if wc <= 1: sun = 36000.0
+                elif wc == 2: sun = 21600.0
+                elif wc == 3: sun = 7200.0
+                else: sun = 0.0
+                flags.append("sun_inferred_from_wmo")
             else:
-                sun = 0.0      # Overcast / Storm
-            flags.append("sun_inferred")
+                sun = 0.0
 
         if t_max is None: flags.append("no_temp")
         if gusts is None: flags.append("no_wind")
