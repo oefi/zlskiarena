@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Zwei Länder Skiarena — Open-Meteo Historical Weather Fetcher
-Hardened with exponential backoff and correct daily=var1&daily=var2 URI formatting.
+Hardened with exponential backoff and correct URI formatting.
 """
 
 import requests, json, time, sys, argparse
@@ -15,20 +15,19 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 BASE_URL   = "https://archive-api.open-meteo.com/v1/archive"
 START_DATE = "2019-11-01"
 
-# FIX: Changed 'weathercode' to the correct ERA5 API parameter 'weather_code'
+# FIX: Reverted to 'weathercode', corrected 'windgusts', removed invalid 'snow_depth'
 DAILY_VARS = [
     "temperature_2m_max", 
     "temperature_2m_min", 
     "apparent_temperature_min", 
     "snowfall_sum", 
-    "snow_depth", 
     "precipitation_sum", 
     "precipitation_hours",      
     "sunshine_duration",        
     "shortwave_radiation_sum", 
     "windspeed_10m_max", 
-    "wind_gusts_10m_max",       
-    "weather_code" 
+    "windgusts_10m_max",       
+    "weathercode" 
 ]
 
 RESORTS = [
@@ -41,19 +40,17 @@ RESORTS = [
 
 def get_session():
     session = requests.Session()
-    # FIX: Added connect=5 and read=5 so the retry block handles timeout exceptions gracefully
     retry = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504], connect=5, read=5)
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     return session
 
-# FIX: Added `elevation` to the parameter signature
 def fetch_one(session, name, lat, lon, elevation, elevation_label, vars_to_use, start_d, end_d):
     params = {
         "latitude": lat,
         "longitude": lon,
-        "elevation": elevation, # FIX: Open-Meteo will now accurately downscale temperatures/snow
+        "elevation": elevation,
         "start_date": start_d,
         "end_date": end_d,
         "daily": ",".join(vars_to_use), 
@@ -80,7 +77,6 @@ def default_end_date():
 
 def probe_variables(session, lat, lon, base_m):
     try:
-        # FIX: Pushed base_m into the updated fetch_one signature
         fetch_one(session, "probe", lat, lon, base_m, "test", DAILY_VARS, "2024-01-01", "2024-01-02")
         return DAILY_VARS
     except Exception as e:
@@ -115,7 +111,6 @@ def main():
     try:
         for name, lat, lon, base_m, summit_m in RESORTS:
             print(f"\n[{name.upper()}]")
-            # FIX: Properly pass base_m and summit_m as the elevation argument
             n_base = fetch_one(session, name, lat, lon, base_m, "base", vars_to_use, START_DATE, end_date)
             print(f"  ✓ Base   ({base_m}m): {n_base} days")
             time.sleep(0.6)
