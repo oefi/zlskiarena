@@ -51,9 +51,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: data/
-          key: ski-data-${{ hashFiles('scripts/clean_normalize.py') }}-${{ github.run_id }}
+          key: ski-data-${{ hashFiles('scripts/clean_normalize.py', 'scripts/fetch_openmeteo.py', 'scripts/fetch_forecast.py', 'scripts/compute_metrics.py') }}-${{ github.run_id }}
           restore-keys: |
-            ski-data-${{ hashFiles('scripts/clean_normalize.py') }}-
+            ski-data-${{ hashFiles('scripts/clean_normalize.py', 'scripts/fetch_openmeteo.py', 'scripts/fetch_forecast.py', 'scripts/compute_metrics.py') }}-
             ski-data-
 
       - name: Refresh data and rebuild
