@@ -58,18 +58,16 @@ def main():
         e.append(t(start_x - 15, start_y + (row * (cell_size + gap)) + 15, f"20{20+row}/{21+row}", 14, MUTED, weight="bold", align="end"))
         
         for col in range(cols):
-            # Generate a realistic sine-wave pattern for winter weather + noise
             base_score = 0.5 + (math.sin(col / 3.0) * 0.3)
             noise = random.uniform(-0.2, 0.2)
             score = max(0.0, min(1.0, base_score + noise))
-            
-            x = start_x + col * (cell_size + gap)
-            y = start_y + row * (cell_size + gap)
             
             # 5% chance of absolute zero (Storm day)
             if random.random() < 0.05:
                 score = 0.0
             
+            x = start_x + col * (cell_size + gap)
+            y = start_y + row * (cell_size + gap)
             e.append(r(x, y, cell_size, cell_size, get_color(score), rx=4))
 
     # Bottom Branding
