@@ -13,11 +13,19 @@ OUT_FILE = Path(__file__).parent.parent / "data" / "processed" / "forecast_data.
 OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
+# Sunshine duration injected into the explicit request payload
 HOURLY_VARS = [
-    "temperature_2m", "apparent_temperature", "precipitation", "rain", 
-    "snowfall", "weathercode", "windspeed_10m", "windgusts_10m", 
-    "visibility", "freezinglevel_height", "soil_temperature_0cm",
-    "sunshine_duration", "cloudcover"
+    "temperature_2m", 
+    "apparent_temperature", 
+    "precipitation", 
+    "rain", 
+    "snowfall", 
+    "weathercode", 
+    "windspeed_10m", 
+    "windgusts_10m", 
+    "visibility", 
+    "freezinglevel_height",
+    "sunshine_duration"
 ]
 FORECAST_DAYS = 16
 
@@ -62,10 +70,10 @@ def main():
 
         with open(OUT_FILE, "w") as f:
             json.dump(forecast_payload, f, separators=(",", ":"))
-        print(f"✓ Forecast payload baked successfully ({len(RESORTS)} resorts).")
+        print(f"Forecast fetched successfully for {len(RESORTS)} resorts.")
 
     except Exception as e:
-        print(f"[!] Critical API Failure: {e}")
+        print(f"Forecast fetch failed: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
