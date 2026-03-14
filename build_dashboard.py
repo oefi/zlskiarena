@@ -16,14 +16,14 @@ OUT      = BASE / "nauders_dashboard.html"
 def main():
     print("Building dashboard…")
     template = TMPL.read_text(encoding="utf-8")
-    
+
     if "__SKI_DATA_PLACEHOLDER__" not in template:
         sys.exit("ERROR: __SKI_DATA_PLACEHOLDER__ not found in template")
 
     # Inject History
     if not DATA.exists():
         sys.exit(f"ERROR: {DATA.name} missing. Run clean_normalize.py first.")
-        
+
     data_str = DATA.read_text(encoding="utf-8")
     html = template.replace("__SKI_DATA_PLACEHOLDER__", data_str)
 
