@@ -2,7 +2,9 @@ name: Refresh Ski Dashboard
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    # Forecast data: every 6 hours (model updates 4×/day)
+    # Historical ERA5-Land has a 5-7 day lag — daily rebuild is plenty
+    - cron: "0 */6 * * *"
   workflow_dispatch:
     inputs:
       end_date:
@@ -42,12 +44,7 @@ jobs:
           python-version: "3.11"
           cache: "pip"
 
-      - name: Install Cairo OS Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
-
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
       - name: Cache Processed Data
