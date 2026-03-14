@@ -57,24 +57,29 @@ def extract_daily(raw_json):
         if raw_sun_seconds is not None:
             sun_hours = round(raw_sun_seconds / 3600.0, 1)
         else:
-            sun_hours = 0.0
-            flags.append("MISSING_SUN_SENSOR_DATA")
+raw_snow = safe_val("snow_depth")
+        snow_cm = round(raw_snow * 100, 1) if raw_snow is not None else 0.0
+        
+        raw_sun = safe_val("sunshine_duration")
+        sun_hrs = round(raw_sun / 3600, 1) if raw_sun is not None else 0.0
 
         record = {
             "date": d,
-            "tMax": t_max,
-            "tMin": t_min,
-            "snowfall_sum": snow_sum,
-            "snow_depth": safe_val("snow_depth"),
+            "temperature_2m_max": safe_val("temperature_2m_max"),
+            "temperature_2m_min": safe_val("temperature_2m_min"),
+            "apparent_temperature_min": safe_val("apparent_temperature_min"),
+            "snowfall_sum": safe_val("snowfall_sum"),
+            "snow_depth": snow_cm,
             "precipitation_sum": precip,
             "precipitation_hours": safe_val("precipitation_hours"),
-            "sunshine_duration": sun_hours, # Pure API reflection
+            "sunshine_duration": sun_hrs,
             "windspeed_10m_max": safe_val("windspeed_10m_max"),
             "wind_gusts_10m_max": gusts,
             "weathercode": wc,
             "data_flags": flags
         }
         extracted.append(record)
+        
     return extracted
 
 def main():
