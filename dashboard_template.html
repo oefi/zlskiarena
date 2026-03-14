@@ -811,7 +811,11 @@
       if (numDays === 0) { strip.innerHTML = ''; return; }
 
       // Historical max depth for normalisation
-      const histBounds = typeof getResortBounds === 'function' ? getResortBounds(window.GLOBAL_RESORT) : { maxDepth: 2 };
+      // NOTE: uses window.getResortBounds (not the const) — this function is called during Module 1
+      // setup (line ~872) before the const declaration in Module 2 is reached, which would cause a
+      // TDZ ReferenceError and kill the entire DOMContentLoaded handler. Accessing a window property
+      // is always safe: returns undefined before assignment, no TDZ.
+      const histBounds = typeof window.getResortBounds === 'function' ? window.getResortBounds(window.GLOBAL_RESORT) : { maxDepth: 2 };
       const maxDepth = histBounds.maxDepth || 2;
 
       const days = [];
@@ -1246,7 +1250,7 @@
     dates.sort();
 
     const boundsCache = {};
-    const getResortBounds = (res) => {
+    window.getResortBounds = (res) => {
        if(boundsCache[res]) return boundsCache[res];
        const rd = byResort[res] || [];
        let minSun = 999, maxSun = 0, maxDepth = 0, maxGust = 0;
@@ -1395,7 +1399,7 @@
         const fmt = (t) => t !== null && t !== undefined ? `${t.toFixed(1)}°C` : '—'; 
         const warn = (r.flags && r.flags.length) ? `<span title="Data Flag: ${r.flags.join(',')}" style="cursor:help;">⚠️</span> ` : '';
         
-        const bounds = getResortBounds(r.resort);
+        const bounds = window.getResortBounds(r.resort);
         const dScore = computeDynamicScore(r, bounds);
         const finalSc = dScore.score;
 
@@ -1463,7 +1467,7 @@
     };
 
     window.renderHeatmaps = () => {
-      const bounds = getResortBounds(window.GLOBAL_RESORT);
+      const bounds = window.getResortBounds(window.GLOBAL_RESORT);
       hc.innerHTML = '';
       
       const rData = byResort[window.GLOBAL_RESORT];
