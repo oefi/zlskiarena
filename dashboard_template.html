@@ -294,14 +294,14 @@
       <!-- The Extended Visual Outlook (Right Panel) -->
       <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; display: flex; flex-direction: column;">
         
-        <div style="display: flex; gap: 1rem; margin-bottom: 0.5rem; font-size: 0.75rem; font-weight: bold; color: var(--text-muted); flex-wrap: wrap;">
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:linear-gradient(to bottom, #ef4444, #3b82f6); border-radius:2px;"></div> Temp Range</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:16px; height:2px; border-bottom:2px dashed #a16207;"></div> Soil (0cm)</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--snow-yield); border-radius:2px;"></div> Snow</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:var(--rain-yield); border-radius:2px;"></div> Rain</div>
-          <div style="display:flex; align-items:center; gap:0.3rem;"><div style="width:10px; height:5px; background:rgba(190,210,240,0.9); border-radius:1px;"></div><div style="width:10px; height:5px; background:rgba(110,135,165,0.9); border-radius:1px;"></div><div style="width:10px; height:5px; background:rgba(55,75,100,0.9); border-radius:1px;"></div> Cloud H/M/L</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:12px; height:12px; background:rgba(255,145,10,0.8); border-radius:2px;"></div> Direct Solar</div>
-          <div style="display:flex; align-items:center; gap:0.4rem;"><div style="width:16px; height:2px; border-bottom:2px dashed #ef4444;"></div> Gusts</div>
+        <div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); flex-wrap: wrap; align-items: center;">
+          <span title="Daily air temperature range at base elevation. Red line = daily max, blue line = daily min." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:12px;height:10px;background:linear-gradient(to bottom,rgba(239,68,68,0.5),rgba(59,130,246,0.5));border-radius:2px;"></span>T max/min</span>
+          <span title="Soil surface temperature (0 cm depth). Stays negative = snowpack stable. Above 0°C = melt from below." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #a16207;"></span>Soil 0 cm</span>
+          <span title="24h snowfall accumulation (cm). Plotted as water-equivalent mm on precip axis." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:var(--snow-yield);border-radius:2px;"></span>Snowfall</span>
+          <span title="24h liquid rainfall (mm)." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:var(--rain-yield);border-radius:2px;"></span>Rainfall</span>
+          <span title="Cloud cover by altitude layer, shown at bottom of temp chart. High (Ci): pale blue — no impact. Mid (As): grey — flat light. Low (St/Fog): dark — whiteout, lift closure risk." style="display:flex;align-items:center;gap:0.2rem;cursor:help;"><span style="display:inline-block;width:8px;height:5px;background:rgba(185,210,240,0.9);border-radius:1px;"></span><span style="display:inline-block;width:8px;height:5px;background:rgba(105,130,160,0.9);border-radius:1px;"></span><span style="display:inline-block;width:8px;height:5px;background:rgba(50,70,95,0.9);border-radius:1px;"></span> Cloud Hi/Mid/Low</span>
+          <span title="Mean direct solar beam (W/m²) over daylight hours. Intensity = amber depth. Zero under full cloud. High = bluebird, UV exposure, snow softening." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:rgba(255,145,10,0.85);border-radius:2px;"></span>Direct beam W/m²</span>
+          <span title="Peak wind gust speed (km/h) at 10 m. Dashed red line. Above ~65 km/h = lift holds likely." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #ef4444;"></span>Peak gust</span>
         </div>
 
         <div style="position: relative; flex-grow: 1; min-height: 300px;">
@@ -314,7 +314,7 @@
     <!-- ── BEST FORECAST DAYS STRIP ── -->
     <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
       <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-        📅 16-Day Forecast — Day by Day <span style="font-weight:400; text-transform:none; letter-spacing:0; opacity:0.7;">(⭐ best day · ✓ top 3 to ski)</span>
+        16-Day Ski Score <span style="font-weight:400; text-transform:none; letter-spacing:0; opacity:0.7;" title="Bluebird Score: composite of sun intensity (40%), snow depth (25%), temperature (20%), wind (15%) + powder bonus. Higher = better ski conditions.">⭐ best · ✓ top 3 · score = sun/depth/temp/wind</span>
       </div>
       <div id="best-days-strip"><div style="color:var(--text-muted); font-style:italic; font-size:0.85rem;">Awaiting forecast…</div></div>
     </div>
@@ -628,7 +628,7 @@
       if (fcSubtitle) {
         const meta = STATIC_METADATA[resort.toLowerCase()] || {};
         const resortLabel = resort.charAt(0).toUpperCase() + resort.slice(1);
-        fcSubtitle.textContent = `${resortLabel} · ${meta.base ?? '?'}m base · ${meta.summit ?? '?'}m summit · best-match model blend`;
+        fcSubtitle.textContent = `${resortLabel} · base ${meta.base ?? '?'} m · summit ${meta.summit ?? '?'} m · 16-day ECMWF/ICON/GFS blend`;
       }
       if (!FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[resort]) {
           fcBoard.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">No forecast payload for ${resort}</div>`;
@@ -686,7 +686,7 @@
       const visArr = hourly.visibility ? hourly.visibility.slice(0, limit).filter(v=>v!==null) : [];
       const minVis = visArr.length ? Math.min(...visArr) / 1000 : null; // m → km
       const visibilityHtml = minVis !== null
-        ? `<div style="font-size:2rem; font-weight:800; color:${minVis < 0.2 ? '#ef4444' : minVis < 1 ? '#f59e0b' : 'var(--text-main)'}; line-height:1;">${minVis < 1 ? (minVis*1000).toFixed(0)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">m</span>' : minVis.toFixed(1)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">km</span>'}</div><div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Worst hourly in 7d</div>`
+        ? `<div style="font-size:2rem; font-weight:800; color:${minVis < 0.2 ? '#ef4444' : minVis < 1 ? '#f59e0b' : 'var(--text-main)'}; line-height:1;">${minVis < 1 ? (minVis*1000).toFixed(0)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">m</span>' : minVis.toFixed(1)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">km</span>'}</div><div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">7d minimum (hourly)</div>`
         : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
 
       // Month-aware rain threshold — use first forecast timestamp, not wall-clock.
@@ -705,7 +705,7 @@
       const minApparent = apArr.length ? Math.min(...apArr) : null;
       const maxApparent = apArr.length ? Math.max(...apArr) : null;
       const apparentHtml = minApparent !== null
-        ? `<div style="font-size:1.7rem; font-weight:800; color:${minApparent < -15 ? '#ef4444' : minApparent < -8 ? '#f59e0b' : 'var(--text-main)'}; line-height:1;">${minApparent.toFixed(0)}<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">°C</span></div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.25rem;">Worst wind-chill in 7d</div><div style="font-size:0.7rem;color:var(--text-muted);">Best: <b style="color:var(--text-main);">${maxApparent.toFixed(0)}°C</b></div>`
+        ? `<div style="font-size:1.7rem; font-weight:800; color:${minApparent < -15 ? '#ef4444' : minApparent < -8 ? '#f59e0b' : 'var(--text-main)'}; line-height:1;">${minApparent.toFixed(0)}<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">°C</span></div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.25rem;">7d min. — wind chill + humidity</div><div style="font-size:0.7rem;color:var(--text-muted);">Peak: <b style="color:var(--text-main);">${maxApparent.toFixed(0)}°C</b></div>`
         : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
       // Avalanche slab signal: heavy snowfall + high wind on same day = wind slab loading
       // Classic recipe: >15cm new snow AND gusts >40 km/h within same 24h window
@@ -720,8 +720,8 @@
         }
       }
       const avlHtml = avlDays > 0
-        ? `<div style="font-size:1.4rem; font-weight:800; color:#fbbf24; line-height:1;">${avlDays}d <span style="font-size:0.85rem;">risk</span></div><div class="avl-warning">⚠ Wind slab: ${avlDayLabels.join(', ')}</div>`
-        : `<div style="font-size:1.1rem; font-weight:800; color:#22c55e; line-height:1.4;">Low</div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">No wind-slab days forecast</div>`;
+        ? `<div style="font-size:1.4rem; font-weight:800; color:#fbbf24; line-height:1;">${avlDays}d</div><div class="avl-warning" title="Wind slab forms when fresh snow (&gt;15 cm/24h) is transported by gusts &gt;40 km/h, creating dense unstable layers on leeward slopes.">⚠ Slab load: ${avlDayLabels.join(', ')}</div>`
+        : `<div style="font-size:1.1rem; font-weight:800; color:#22c55e; line-height:1.4;">None</div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">No slab load days (&gt;15 cm + &gt;40 km/h)</div>`;
 
       // UV at summit — peak daily UV index across the week
       const uvArr = daily?.uv_index_max ? daily.uv_index_max.slice(0, days7).filter(v=>v!==null) : [];
@@ -731,43 +731,43 @@
       const uvColor = peakUV === null ? 'var(--text-muted)' : peakUV >= 8 ? '#ef4444' : peakUV >= 6 ? '#f97316' : peakUV >= 4 ? '#f59e0b' : '#22c55e';
       const uvLabel = peakUV === null ? '—' : peakUV >= 8 ? 'Very High' : peakUV >= 6 ? 'High' : peakUV >= 4 ? 'Moderate' : 'Low';
       const uvHtml = peakUV !== null
-        ? `<div style="font-size:2rem; font-weight:800; color:${uvColor}; line-height:1;">${peakUV.toFixed(0)}<span style="font-size:0.85rem; color:var(--text-muted); margin-left:0.3rem;">UV</span></div><div style="font-size:0.7rem;color:${uvColor};margin-top:0.2rem;font-weight:600;">${uvLabel} — ${meta.summit}m summit</div>`
+        ? `<div style="font-size:2rem; font-weight:800; color:${uvColor}; line-height:1;">${peakUV.toFixed(0)}<span style="font-size:0.85rem; color:var(--text-muted); margin-left:0.3rem;">UV</span></div><div style="font-size:0.7rem;color:${uvColor};margin-top:0.2rem;font-weight:600;" title="UV rises ~10% per 1000 m. At summit, sunscreen mandatory.">${uvLabel} · ${meta.summit} m</div>`
         : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
 
       fcBoard.innerHTML = `
           <div class="fc-card">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">7-Day Snow Yield ❄️</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Snowfall 7d ❄️</div>
               <div style="font-size:2rem; font-weight:800; color:var(--snow-yield); line-height:1;">${snow.toFixed(0)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">cm</span></div>
           </div>
           <div class="fc-card">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Rain Hazard 🌧️</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Rainfall 7d 🌧️</div>
               <div style="font-size:2rem; font-weight:800; color:${rainIsDangerous ? '#ef4444' : 'var(--text-main)'}; line-height:1;">${rain.toFixed(1)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">mm</span></div>
               ${rainNote}
           </div>
           <div class="fc-card">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Peak Wind Hold Risk 💨</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Peak Gust 7d 💨</div>
               <div style="font-size:2rem; font-weight:800; color:${maxGust > 65 ? '#ef4444' : 'var(--text-main)'}; line-height:1;">${maxGust.toFixed(0)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">km/h</span></div>
               <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Peak on ${gustDayStr}</div>
           </div>
           <div class="fc-card">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Freeze-Thaw Risk 🧊</div>
-              <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.4;">Fz max: <span style="color:${maxFz > meta.base ? '#ef4444' : '#22c55e'};">${Math.round(maxFz)}m</span> · min: ${Math.round(minFz)}m</div>
-              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.4rem;">${fzDaysAboveBase > 0 ? `<span style="color:#ef4444;font-weight:bold;">${fzDaysAboveBase}d fz-line above base (${meta.base}m) — ice/crust risk</span>` : `<span style="color:#22c55e;font-weight:600;">Fz line stays below base — snowpack solid ✓</span>`}</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Freezing Level 🧊</div>
+              <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.4;">Max: <span style="color:${maxFz > meta.base ? '#ef4444' : '#22c55e'};" title="0°C isotherm peak altitude">${Math.round(maxFz)} m</span> · Min: ${Math.round(minFz)} m</div>
+              <div style="font-size:0.72rem; color:var(--text-muted); margin-top:0.4rem;" title="When the 0°C altitude rises above the base, daytime melt and overnight refreeze creates ice crust.">${fzDaysAboveBase > 0 ? `<span style="color:#ef4444;font-weight:bold;">${fzDaysAboveBase}d: 0°C level above base (${meta.base} m) — melt/refreeze</span>` : `<span style="color:#22c55e;font-weight:600;">0°C level below base — no melt cycle</span>`}</div>
           </div>
           <div class="fc-card">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Wind Slab Risk 🏔️</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Wind Slab Load 🏔️</div>
               ${avlHtml}
           </div>
           <div class="fc-card">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Summit UV Index ☀️</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">UV Index (summit) ☀️</div>
               ${uvHtml}
           </div>
           <div class="fc-card">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Worst Visibility 👁️</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Min. Visibility 👁️</div>
               ${visibilityHtml}
           </div>
           <div class="fc-card">
-              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Feels Like 🧤</div>
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Apparent Temp. 🧤</div>
               ${apparentHtml}
           </div>
       `;
@@ -884,9 +884,9 @@
         const dayLabel  = d.dt.toLocaleDateString('en-US', {weekday:'short'});
         const dateLabel = d.dt.toLocaleDateString('en-US', {month:'short', day:'numeric'});
         const snowStr   = d.freshCm > 0.5 ? `❄️${d.freshCm.toFixed(0)}cm` : '';
-        const probStr   = d.probMax !== null && d.probMax > 20 ? `${Math.round(d.probMax)}%☔` : '';
+        const probStr   = d.probMax !== null && d.probMax > 20 ? `P(precip) ${Math.round(d.probMax)}%` : '';
         const bestMark  = isBest ? '⭐' : isTop ? '✓' : '';
-        return `<div class="${chipClass}" title="Score ${(d.score*100).toFixed(0)}% — ${dayLabel} ${dateLabel}">
+        return `<div class="${chipClass}" title="${dayLabel} ${dateLabel} · Bluebird ${(d.score*100).toFixed(0)}% · ${d.tMax !== null ? 'T max '+d.tMax.toFixed(0)+'°C' : ''} · ${d.freshCm > 0 ? d.freshCm.toFixed(0)+' cm snow' : 'no new snow'} · gust ${d.gustMax !== null ? d.gustMax.toFixed(0)+' km/h' : '—'}">'
           <div style="font-size:0.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;display:flex;justify-content:space-between;">
             <span>${dayLabel}</span><span style="color:${isTop?'#fbbf24':'var(--text-muted)'};">${bestMark}</span>
           </div>
@@ -1012,10 +1012,10 @@
       const isNarrow = actualWidth < 700;
       const isMobile = actualWidth < 500;
 
-      const pX = isMobile ? 40 : 60;
-      const pY = 20;
-      const pRight = isMobile ? 40 : 60;
-      const pBot = isNarrow ? 85 : 40;
+      const pX = isMobile ? 48 : 72;
+      const pY = 24;
+      const pRight = isMobile ? 48 : 72;
+      const pBot = isNarrow ? 92 : 58;  // extra room for date labels + axis titles
 
       const w = cvsFc.width - pX - pRight;
       const h = cvsFc.height - pY - pBot; 
@@ -1055,17 +1055,22 @@
 
       ctxFc.strokeStyle = getStyleVar('--grid-line'); ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.font = fonts.axis;
 
-      // Pivot Axes Layout
-      const leftTitleOff = pX * 0.35;
-      const rightTitleOff = cvsFc.width - (pRight * 0.35);
-
-      ctxFc.save(); ctxFc.translate(leftTitleOff, yP1 + hP1/2); ctxFc.rotate(-Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Temp (°C)", 0, 0); ctxFc.restore();
-      ctxFc.save(); ctxFc.translate(rightTitleOff, yP1 + (zeroY - yP1)/2); ctxFc.rotate(Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillStyle = '#3b82f6'; ctxFc.fillText("Precip (mm)", 0, 0); ctxFc.restore();
-      ctxFc.save(); ctxFc.translate(leftTitleOff, yP2 + hP2/2); ctxFc.rotate(-Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.fillText(hasDirectRad ? "Direct Solar" : "Sun (h)", 0, 0); ctxFc.restore();
-      ctxFc.save(); ctxFc.translate(rightTitleOff, yP2 + hP2/2); ctxFc.rotate(Math.PI/2); ctxFc.textAlign = "center"; ctxFc.fillText("Gusts", 0, 0); ctxFc.restore();
+      // Axis unit labels — small, non-rotated, at panel corners. No clipping risk.
+      const smallFont = `bold ${Math.max(10, Math.floor(11 * (cvsFc.width / (cvsFc.clientWidth || 1000))))}px system-ui`;
+      ctxFc.font = smallFont; ctxFc.textBaseline = 'top';
+      // Left panel corners
+      ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.textAlign = 'left';
+      ctxFc.fillText('°C', pX + 4, yP1 + 2);
+      ctxFc.fillStyle = '#3b82f6';
+      ctxFc.fillText('mm', pX + 4, zeroY - 22);
+      ctxFc.fillStyle = getStyleVar('--text-muted');
+      ctxFc.fillText(hasDirectRad ? 'W/m²' : 'h', pX + 4, yP2 + 2);
+      ctxFc.fillStyle = '#ef4444';
+      ctxFc.fillText('km/h', pX + w - 32, yP2 + 2);
+      ctxFc.font = fonts.axis;
 
       ctxFc.textAlign = 'right'; ctxFc.textBaseline = 'middle';
-      const labelOffset = isMobile ? 4 : 10;
+      const labelOffset = isMobile ? 5 : 12;
       for(let t=Math.ceil(minT/5)*5; t<=maxT; t+=5) {
         const y = mapYTemp(t);
         ctxFc.beginPath(); ctxFc.moveTo(pX,y); ctxFc.lineTo(pX+w,y);
@@ -1079,26 +1084,24 @@
       
       ctxFc.textAlign = 'left';
       ctxFc.fillStyle = '#3b82f6';
-      const pTicks = [0, maxPrecip/2, maxPrecip];
-      pTicks.forEach(pt => {
+      // Skip 0 tick — coincides with 0°C temperature label at zeroY
+      [maxPrecip/2, maxPrecip].forEach(pt => {
         const y = mapYPrecip(pt);
-        if (pt > 0) {
-            ctxFc.beginPath(); ctxFc.moveTo(pX+w-5, y); ctxFc.lineTo(pX+w, y);
-            ctxFc.strokeStyle = '#3b82f6'; ctxFc.lineWidth = 1; ctxFc.stroke();
-        }
-        ctxFc.fillText(`${pt.toFixed(0)}`, pX+w + (isMobile ? 2 : 6), y);
+        ctxFc.beginPath(); ctxFc.moveTo(pX+w-5, y); ctxFc.lineTo(pX+w, y);
+        ctxFc.strokeStyle = '#3b82f6'; ctxFc.lineWidth = 1; ctxFc.stroke();
+        ctxFc.fillText(`${pt.toFixed(0)}`, pX+w + (isMobile ? 3 : 7), y);
       });
 
       ctxFc.textAlign = 'right';
       ctxFc.fillStyle = getStyleVar('--text-muted');
       if (hasDirectRad) {
-        // W/m² ticks at 25%, 50%, 75%, 100% of maxDirect
-        [0.25, 0.5, 0.75, 1.0].forEach(frac => {
-          const val = Math.round(maxDirect * frac);
-          const y = mapYDirect(val);
+        // W/m² ticks at clean round intervals
+        const drStep = maxDirect <= 400 ? 100 : maxDirect <= 800 ? 200 : 250;
+        for (let v = drStep; v <= maxDirect; v += drStep) {
+          const y = mapYDirect(v);
           ctxFc.beginPath(); ctxFc.moveTo(pX,y); ctxFc.lineTo(pX+w,y); ctxFc.lineWidth = 1; ctxFc.stroke();
-          ctxFc.fillText(`${val}`, pX - labelOffset, y);
-        });
+          ctxFc.fillText(`${v}`, pX - labelOffset, y);
+        }
       } else {
         const sunStep = maxDirect <= 12 ? 6 : maxDirect <= 16 ? 4 : 6;
         for(let s=sunStep; s<=maxDirect; s+=sunStep) {
@@ -1106,35 +1109,38 @@
           ctxFc.beginPath(); ctxFc.moveTo(pX,y); ctxFc.lineTo(pX+w,y); ctxFc.lineWidth = 1; ctxFc.stroke(); ctxFc.fillText(`${s}h`, pX - labelOffset, y);
         }
       }
-      ctxFc.textAlign = 'left';
-      for(let g=20; g<=maxGust; g+=Math.ceil(maxGust/3)) {
-        const y = mapYGust(g); ctxFc.fillText(`${g}`, pX+w + (isMobile ? 2 : 6), y);
+      ctxFc.textAlign = 'left'; ctxFc.fillStyle = '#ef4444';
+      const gustStep = Math.ceil(maxGust / 3 / 10) * 10;
+      for(let g=gustStep; g<=maxGust; g+=gustStep) {
+        const y = mapYGust(g);
+        ctxFc.fillText(`${g}`, pX+w + (isMobile ? 3 : 7), y);
       }
       ctxFc.beginPath(); ctxFc.moveTo(pX,yP2+hP2); ctxFc.lineTo(pX+w,yP2+hP2); ctxFc.lineWidth=2; ctxFc.strokeStyle=getStyleVar('--text-muted'); ctxFc.stroke();
 
-      // Cloud layer bands — drawn at top of temp panel before labels.
-      // Each band is cloudBandH canvas units tall. Order top→bottom: high, mid, low
-      // matching the physical sky (high cirrus is harmless; low stratus = fog/lift-close risk).
-      const cloudBandH = 7; // canvas units per layer
+      // Cloud layer bands — at BOTTOM of temp panel, stacked upward: low (bottom) → high (top).
+      // Low cloud = stratus/fog at base altitude; shown lowest. High cloud = cirrus; shown highest.
+      // Opacity = cloud cover %. Colour saturation encodes impact severity.
+      const cloudBandH = 8; // canvas units per layer
+      const cloudBase = yP1 + hP1 - cloudBandH * 3; // start 3 bands above bottom of temp panel
       daily.forEach((d, i) => {
         const colX = pX + i*colW + 1;
         const colBW = colW - 2;
-        // High cloud (cirrus): pale silver-blue — fine to ski under
+        // High cloud (cirrus/Ci) — pale steel blue — minimal impact, lifts open
         if (d.ccHigh > 0) {
-          ctxFc.fillStyle = 'rgba(190,210,240,1)'; ctxFc.globalAlpha = d.ccHigh / 100;
-          ctxFc.fillRect(colX, yP1, colBW, cloudBandH);
+          ctxFc.fillStyle = 'rgba(185,210,240,1)'; ctxFc.globalAlpha = Math.min(0.9, d.ccHigh / 100 * 1.1);
+          ctxFc.fillRect(colX, cloudBase, colBW, cloudBandH);
         }
-        // Mid cloud (altostratus): grey-blue — flat light, visibility ok
+        // Mid cloud (As/Ac) — grey-blue — reduced contrast, flat light
         if (d.ccMid > 0) {
-          ctxFc.fillStyle = 'rgba(110,135,165,1)'; ctxFc.globalAlpha = d.ccMid / 100;
-          ctxFc.fillRect(colX, yP1 + cloudBandH, colBW, cloudBandH);
+          ctxFc.fillStyle = 'rgba(105,130,160,1)'; ctxFc.globalAlpha = Math.min(0.9, d.ccMid / 100 * 1.1);
+          ctxFc.fillRect(colX, cloudBase + cloudBandH, colBW, cloudBandH);
         }
-        // Low cloud (stratus/fog): dark slate — whiteout / lift closure risk
+        // Low cloud (St/Fog) — dark slate — whiteout & lift closure risk
         if (d.ccLow > 0) {
-          ctxFc.fillStyle = 'rgba(55,75,100,1)'; ctxFc.globalAlpha = d.ccLow / 100;
-          ctxFc.fillRect(colX, yP1 + cloudBandH*2, colBW, cloudBandH);
+          ctxFc.fillStyle = 'rgba(50,70,95,1)'; ctxFc.globalAlpha = Math.min(0.95, d.ccLow / 100 * 1.2);
+          ctxFc.fillRect(colX, cloudBase + cloudBandH*2, colBW, cloudBandH);
         }
-        // Legacy fallback: if no layer data, draw single tint as before
+        // Fallback: no layer data → single tint across full panel
         if (d.ccHigh === 0 && d.ccMid === 0 && d.ccLow === 0 && d.cloud > 0) {
           ctxFc.fillStyle = getStyleVar('--cloud-base'); ctxFc.globalAlpha = d.cloud / 100;
           ctxFc.fillRect(colX, yP1, colBW, hP1);
@@ -1249,7 +1255,7 @@
         // Expand the glass tooltip bounding box if we have extra density or soil data
         let rows = 6;
         if (d.soil !== null) rows++;
-        if (d.snow > 0 && d.precip > 0) rows++;
+        // density row removed — circular calculation
         if (hasDirectRad) rows++;          // direct solar row
         if (d.ccLow > 5 || d.ccMid > 5 || d.ccHigh > 5) rows++; // cloud layers row
         const boxW = 190 * scale, boxH = (30 + (rows * 20)) * scale, padding = 15 * scale;
@@ -1267,38 +1273,30 @@
         ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.fillText(d.label.replace(', ', ' · '), boxX + padding, currentY); currentY += yStep + (5*scale);
         
         ctxFc.fillStyle = getStyleVar('--text-main'); 
-        ctxFc.fillText(`Air Max: ${d.tMax.toFixed(1)}°C`, boxX + padding, currentY); currentY += yStep;
-        ctxFc.fillText(`Air Min: ${d.tMin.toFixed(1)}°C`, boxX + padding, currentY); currentY += yStep;
+        ctxFc.fillText(`T max: ${d.tMax.toFixed(1)} °C`, boxX + padding, currentY); currentY += yStep;
+        ctxFc.fillText(`T min: ${d.tMin.toFixed(1)} °C`, boxX + padding, currentY); currentY += yStep;
         
         if (d.soil !== null) {
             ctxFc.fillStyle = '#a16207'; 
-            ctxFc.fillText(`Soil (0cm): ${d.soil.toFixed(1)}°C`, boxX + padding, currentY); currentY += yStep;
+            ctxFc.fillText(`Soil 0 cm: ${d.soil.toFixed(1)} °C  (freeze risk to roots/pipes)`, boxX + padding, currentY); currentY += yStep;
         }
         
         ctxFc.fillStyle = getStyleVar('--text-main');
         if (hasDirectRad && d.directMean > 0) {
           const dFrac = maxDirect > 0 ? Math.min(1, d.directMean / maxDirect) : 0;
           const quality = dFrac >= 0.8 ? '☀ Bluebird' : dFrac >= 0.5 ? '🌤 Bright' : dFrac >= 0.25 ? '⛅ Diffuse' : '☁ Overcast';
-          ctxFc.fillText(`Direct solar: ${Math.round(d.directMean)} W/m² (${quality})`, boxX + padding, currentY); currentY += yStep;
+          ctxFc.fillText(`Direct beam: ${Math.round(d.directMean)} W/m²  ${quality}`, boxX + padding, currentY); currentY += yStep;
         } else {
           ctxFc.fillText(`Sun: ${d.sun.toFixed(1)}h`, boxX + padding, currentY); currentY += yStep;
         }
         if (d.ccLow > 5 || d.ccMid > 5 || d.ccHigh > 5) {
           ctxFc.fillStyle = getStyleVar('--text-muted');
-          ctxFc.fillText(`Cloud: ↑${Math.round(d.ccHigh)}% ↔${Math.round(d.ccMid)}% ↓${Math.round(d.ccLow)}%`, boxX + padding, currentY); currentY += yStep;
+          ctxFc.fillText(`Cloud  Hi: ${Math.round(d.ccHigh)}%  Mid: ${Math.round(d.ccMid)}%  Low: ${Math.round(d.ccLow)}%`, boxX + padding, currentY); currentY += yStep;
         }
         ctxFc.fillStyle = '#3b82f6'; ctxFc.fillText(`Rain: ${d.rain.toFixed(1)}mm`, boxX + padding, currentY); currentY += yStep;
         ctxFc.fillStyle = '#60a5fa'; ctxFc.fillText(`Snow: ${d.snow.toFixed(1)}cm`, boxX + padding, currentY); currentY += yStep;
         
-        // Inject the mathematical powder density ratio if it snowed
-        if (d.snow > 0 && d.precip > 0) {
-            let ratio = (d.snow * 10) / d.precip;
-            let flavor = ratio > 15 ? "Blower 🌬️" : ratio < 7 ? "Cement 🧱" : "Standard ❄️";
-            ctxFc.fillStyle = getStyleVar('--text-main');
-            ctxFc.fillText(`Density: ${ratio.toFixed(1)}:1 (${flavor})`, boxX + padding, currentY); currentY += yStep;
-        }
-
-        ctxFc.fillStyle = '#ef4444'; ctxFc.fillText(`Gust: ${d.gust.toFixed(0)}km/h`, boxX + padding, currentY);
+        ctxFc.fillStyle = '#ef4444'; ctxFc.fillText(`Peak gust: ${d.gust.toFixed(0)} km/h`, boxX + padding, currentY);
       }
     };
 
