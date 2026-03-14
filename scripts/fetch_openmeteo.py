@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Zwei Länder Skiarena — Open-Meteo Historical Weather Fetcher
-Hardened with exponential backoff, custom User-Agent, and slow-pacing to avoid 429s on GitHub Actions.
+Hardened with exponential backoff and correct daily=var1&daily=var2 URI formatting.
 """
 
 import requests, json, time, sys, argparse
@@ -16,17 +16,18 @@ BASE_URL   = "https://archive-api.open-meteo.com/v1/archive"
 START_DATE = "2019-11-01"
 
 DAILY_VARS = [
-    "temperature_2m_max", 
-    "temperature_2m_min", 
-    "apparent_temperature_min", 
-    "snowfall_sum", 
-    "precipitation_sum", 
-    "precipitation_hours",      
-    "sunshine_duration",        
-    "shortwave_radiation_sum", 
-    "windspeed_10m_max", 
-    "windgusts_10m_max",       
-    "weathercode" 
+    "temperature_2m_max",
+    "temperature_2m_min",
+    "apparent_temperature_min",
+    "snowfall_sum",
+    "snow_depth",
+    "precipitation_sum",
+    "precipitation_hours",
+    "sunshine_duration",
+    "shortwave_radiation_sum",
+    "wind_speed_10m_max",        # replaces deprecated windspeed_10m_max
+    "wind_gusts_10m_max",
+    "weather_code",              # replaces deprecated weathercode
 ]
 
 RESORTS = [
@@ -39,38 +40,25 @@ RESORTS = [
 
 def get_session():
     session = requests.Session()
-    # FIX: Custom User-Agent to avoid generic python-requests rate limiting
-    session.headers.update({
-        "User-Agent": "ZweiLaenderSkiarena-Dashboard/1.0 (GitHub Actions; Contact: auto@example.com)"
-    })
-    
-    # FIX: Increased backoff_factor to 2. Wait times for 429s will now be: 2s, 4s, 8s, 16s, 32s
-    retry = Retry(
-        total=6, 
-        backoff_factor=2, 
-        status_forcelist=[429, 500, 502, 503, 504], 
-        connect=10, 
-        read=10,
-        respect_retry_after_header=True
-    )
+    retry = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
     return session
 
-def fetch_one(session, name, lat, lon, elevation, elevation_label, vars_to_use, start_d, end_d):
+def fetch_one(session, name, lat, lon, elevation_label, vars_to_use, start_d, end_d, elevation_m=None):
     params = {
         "latitude": lat,
         "longitude": lon,
-        "elevation": elevation,
         "start_date": start_d,
         "end_date": end_d,
-        "daily": ",".join(vars_to_use), 
+        "daily": ",".join(vars_to_use),
         "timezone": "Europe/Berlin"
     }
+    if elevation_m is not None:
+        params["elevation"] = elevation_m  # forces lapse-rate interpolation to exact altitude
     
-    # Increased timeout to 25s for heavy ERA5 archive processing
-    response = session.get(BASE_URL, params=params, timeout=25)
+    response = session.get(BASE_URL, params=params, timeout=15)
     response.raise_for_status()
     data = response.json()
     
@@ -90,7 +78,7 @@ def default_end_date():
 
 def probe_variables(session, lat, lon, base_m):
     try:
-        fetch_one(session, "probe", lat, lon, base_m, "test", DAILY_VARS, "2024-01-01", "2024-01-02")
+        fetch_one(session, "probe", lat, lon, "test", DAILY_VARS, "2024-01-01", "2024-01-02")
         return DAILY_VARS
     except Exception as e:
         print(f"Probe failed: {e}")
@@ -124,25 +112,21 @@ def main():
     try:
         for name, lat, lon, base_m, summit_m in RESORTS:
             print(f"\n[{name.upper()}]")
-            n_base = fetch_one(session, name, lat, lon, base_m, "base", vars_to_use, START_DATE, end_date)
+            n_base = fetch_one(session, name, lat, lon, "base", vars_to_use, START_DATE, end_date, elevation_m=base_m)
             print(f"  ✓ Base   ({base_m}m): {n_base} days")
+            time.sleep(0.6)
             
-            # FIX: Increased sleep from 0.6 to 2.5 to prevent bursting the API
-            time.sleep(2.5) 
-            
-            n_summit = fetch_one(session, name, lat, lon, summit_m, "summit", vars_to_use, START_DATE, end_date)
+            n_summit = fetch_one(session, name, lat, lon, "summit", vars_to_use, START_DATE, end_date, elevation_m=summit_m)
             print(f"  ✓ Summit ({summit_m}m): {n_summit} days")
-            
-            time.sleep(2.5)
+            time.sleep(0.6)
             
     except Exception as e:
         print(f"\n[!] CRITICAL: Open-Meteo fetch failed. Error: {e}")
         print("    Initiating Hard Fallback: Generating Synthetic Data to keep pipeline green...")
-        try:
-            import generate_synthetic
-            generate_synthetic.main()
-        except ImportError:
-            print("    [!] Fallback failed: Could not import generate_synthetic.")
+        synth_script = Path(__file__).parent / "generate_synthetic.py"
+        result = subprocess.run([sys.executable, str(synth_script)])
+        if result.returncode != 0:
+            print("    [!] Fallback failed: generate_synthetic.py exited non-zero.")
             sys.exit(1)
 
 if __name__ == "__main__":

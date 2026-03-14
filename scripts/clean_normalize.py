@@ -1,4 +1,3 @@
-scripts/clean_normalize.py
 #!/usr/bin/env python3
 """
 Step 2 — Clean, Normalize & QC Pipeline
@@ -45,7 +44,8 @@ def extract_daily(raw_json):
         precip = safe_val("precipitation_sum")
         snow   = safe_val("snowfall_sum")
         sun    = safe_val("sunshine_duration")
-        wc     = safe_val("weathercode")
+        wc     = safe_val("weather_code")       # replaces deprecated weathercode
+        srad   = safe_val("shortwave_radiation_sum")
 
         flags = []
         
@@ -61,19 +61,14 @@ def extract_daily(raw_json):
             elif wc in [1, 2]:
                 sun = 21600.0  # ~6 hours partial sun
             elif wc == 3:
-                sun = 7200.0   # ~2 hours peek-a-boo
+                sun = 7200.0   # ~2 hours overcast peek-a-boo
             else:
-                sun = 0.0      # Overcast / Storm
+                # WMO 45-99: fog, drizzle, rain, snow, thunderstorm — zero direct sun
+                sun = 0.0
             flags.append("sun_inferred")
 
         if t_max is None: flags.append("no_temp")
         if gusts is None: flags.append("no_wind")
-
-        # -- UNITS NORMALIZATION --
-        sun_hrs = round(sun / 3600.0, 1) if sun is not None else 0.0
-        
-        raw_snow = safe_val("snow_depth")
-        snow_cm = round(raw_snow * 100.0, 1) if raw_snow is not None else 0.0
 
         record = {
             "date": d,
@@ -81,13 +76,14 @@ def extract_daily(raw_json):
             "temperature_2m_min": t_min,
             "apparent_temperature_min": safe_val("apparent_temperature_min"),
             "snowfall_sum": snow,
-            "snow_depth": snow_cm,
+            "snow_depth": safe_val("snow_depth"),
             "precipitation_sum": precip,
             "precipitation_hours": safe_val("precipitation_hours"),
-            "sunshine_duration": sun_hrs,
-            "windspeed_10m_max": safe_val("windspeed_10m_max"),
+            "sunshine_duration": sun,
+            "shortwave_radiation_sum": srad,
+            "wind_speed_10m_max": safe_val("wind_speed_10m_max"),  # replaces deprecated windspeed_10m_max
             "wind_gusts_10m_max": gusts,
-            "weathercode": wc,
+            "weather_code": wc,                                      # replaces deprecated weathercode
             "data_flags": flags
         }
         extracted.append(record)

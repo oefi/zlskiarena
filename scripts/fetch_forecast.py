@@ -14,10 +14,14 @@ OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
 BASE_URL = "https://api.open-meteo.com/v1/forecast"
 
 HOURLY_VARS = [
-    "temperature_2m", "apparent_temperature", "precipitation", "rain", 
-    "snowfall", "weathercode", "windspeed_10m", "windgusts_10m", 
-    "visibility", "freezinglevel_height", "soil_temperature_0cm",
-    "soil_temperature_6cm"
+    "temperature_2m", "apparent_temperature", "precipitation", "rain",
+    "snowfall", "weather_code",          # replaces deprecated weathercode
+    "wind_speed_10m",                    # replaces deprecated windspeed_10m
+    "wind_gusts_10m",                    # replaces deprecated windgusts_10m
+    "visibility", "freezing_level_height",# replaces deprecated freezinglevel_height
+    "cloud_cover",                       # was missing — needed for forecast canvas cloud bar
+    "sunshine_duration",                 # was missing — needed for forecast sun hours
+    "soil_temperature_0cm",              # was missing — needed for soil temp line
 ]
 FORECAST_DAYS = 16
 
@@ -59,14 +63,15 @@ def main():
             resp.raise_for_status()
             forecast_payload["resorts"][name] = resp.json().get("hourly", {})
             time.sleep(0.5)
-
+            
         with open(OUT_FILE, "w") as f:
             json.dump(forecast_payload, f, separators=(",", ":"))
-        print(f"Forecast fetched successfully for {len(RESORTS)} resorts.")
-
+            
     except Exception as e:
-        print(f"Forecast fetch failed: {e}")
-        sys.exit(1)
+        print(f"\n[!] WARNING: High-res forecast fetch failed: {e}")
+        with open(OUT_FILE, "w") as f:
+            json.dump({"error": str(e), "resorts": {}}, f)
 
 if __name__ == "__main__":
+
     main()

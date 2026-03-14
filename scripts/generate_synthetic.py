@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Synthetic data generator — produces realistic ERA5-style daily weather data
-for the Zwei Länder Skiarena, Nov–May 2019/20–2025/26.
+for the Zwei Länder Skiarena, Jan–Apr 2020–2026.
 
 Grounded in published climatological norms for each resort.
 Replace with real Open-Meteo output once you run fetch_openmeteo.py.
@@ -23,11 +23,11 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 # ── Date range ────────────────────────────────────────────────────────────────
 
 def ski_dates():
-    """All Nov 1–May 1 dates for seasons ending 2020 to 2026 inclusive."""
+    """All Jan–Apr dates from 2020 to 2026 inclusive."""
     dates = []
     for year in range(2020, 2027):
-        d = date(year - 1, 11, 1)
-        end = date(year, 5, 1)
+        d = date(year, 1, 1)
+        end = date(year, 4, 30)
         while d <= end:
             dates.append(d)
             d += timedelta(days=1)
@@ -39,7 +39,7 @@ ALL_DATES = ski_dates()
 # Values grounded in published data: Bergfex, Skiresort.info, snow-forecast.com,
 # ZAMG climate normals for Tyrol / South Tyrol.
 #
-# Format per month (Jan=1..May=5, Nov=11, Dec=12):
+# Format per month (Jan=1..Apr=4):
 #   base_temp_mean_c, base_temp_range_c,
 #   summit_temp_mean_c, summit_temp_range_c,
 #   base_snow_depth_mean_cm, summit_snow_depth_mean_cm,
@@ -50,49 +50,44 @@ ALL_DATES = ski_dates()
 
 PROFILES = {
     "nauders": {
-        11: (-2.5, 9,  -8.0, 7, 30,  80, 5.0, 26, 0.20, 10, 0.08),
-        12: (-4.5, 8, -12.0, 7, 50, 120, 4.0, 28, 0.25, 12, 0.04),
-        1:  (-5.5, 8, -14.0, 7, 80, 160, 4.5, 28, 0.28, 14, 0.02),
-        2:  (-4.5, 9, -13.0, 7, 100,185, 5.5, 25, 0.24, 12, 0.03),
-        3:  (-1.5, 10,-10.0, 8, 90, 170, 6.5, 27, 0.22, 10, 0.06),
-        4:  ( 3.5, 11, -5.0, 9, 45, 110, 7.0, 24, 0.18,  8, 0.14),
-        5:  ( 5.5, 11, -3.0, 9, 30,  90, 7.5, 22, 0.15,  6, 0.18),
+        # North-facing, high altitude, cold & powder-preserving
+        # Base: 1400m  Summit: 2750m
+        1: (-5.5, 8, -14.0, 7, 80,  160, 4.5, 28, 0.28, 14, 0.02),
+        2: (-4.5, 9, -13.0, 7, 100, 185, 5.5, 25, 0.24, 12, 0.03),
+        3: (-1.5, 10, -10.0, 8, 90,  170, 6.5, 27, 0.22, 10, 0.06),
+        4: ( 3.5, 11,  -5.0, 9, 45,  110, 7.0, 24, 0.18,  8, 0.14),
     },
     "schoeneben": {
-        11: (-1.0, 10, -5.5, 8, 20,  60, 6.0, 20, 0.18,  8, 0.10),
-        12: (-3.0, 9,  -9.5, 7, 40,  90, 5.0, 22, 0.22, 10, 0.06),
-        1:  (-4.0, 9, -11.5, 7, 70, 130, 5.5, 22, 0.24, 12, 0.04),
-        2:  (-2.5, 10,-10.0, 7, 85, 155, 6.5, 20, 0.20, 10, 0.06),
-        3:  ( 1.0, 11, -6.5, 8, 70, 135, 7.5, 22, 0.18,  9, 0.10),
-        4:  ( 5.5, 12, -1.5, 9, 30,  80, 8.0, 20, 0.14,  7, 0.20),
-        5:  ( 8.5, 12,  1.5, 9, 10,  40, 8.5, 18, 0.10,  5, 0.25),
+        # South-West facing, sun-drenched, warmer base, Lake Resia views
+        # Base: 1460m  Summit: 2390m
+        1: (-4.0, 9,  -11.5, 7, 70,  130, 5.5, 22, 0.24, 12, 0.04),
+        2: (-2.5, 10, -10.0, 7, 85,  155, 6.5, 20, 0.20, 10, 0.06),
+        3: ( 1.0, 11,  -6.5, 8, 70,  135, 7.5, 22, 0.18,  9, 0.10),
+        4: ( 5.5, 12,  -1.5, 9, 30,   80, 8.0, 20, 0.14,  7, 0.20),
     },
     "watles": {
-        11: (-0.5, 10, -5.0, 8, 15,  50, 6.5, 18, 0.16,  7, 0.12),
-        12: (-2.5, 9,  -9.0, 7, 35,  85, 5.5, 20, 0.20,  9, 0.06),
-        1:  (-3.5, 9, -11.0, 7, 65, 120, 6.0, 20, 0.22, 11, 0.04),
-        2:  (-1.5, 10, -9.0, 7, 75, 140, 7.0, 18, 0.18,  9, 0.07),
-        3:  ( 2.0, 11, -5.5, 8, 60, 115, 8.0, 19, 0.16,  8, 0.12),
-        4:  ( 6.5, 12, -0.5, 9, 22,  65, 8.5, 17, 0.12,  6, 0.24),
-        5:  ( 9.5, 12,  2.5, 9,  5,  30, 9.0, 15, 0.08,  4, 0.30),
+        # South-facing, consistently sunniest resort in South Tyrol
+        # Base: 1500m  Summit: 2550m
+        1: (-3.5, 9,  -11.0, 7, 65,  120, 6.0, 20, 0.22, 11, 0.04),
+        2: (-1.5, 10,  -9.0, 7, 75,  140, 7.0, 18, 0.18,  9, 0.07),
+        3: ( 2.0, 11,  -5.5, 8, 60,  115, 8.0, 19, 0.16,  8, 0.12),
+        4: ( 6.5, 12,  -0.5, 9, 22,   65, 8.5, 17, 0.12,  6, 0.24),
     },
     "sulden": {
-        11: (-4.5, 9, -11.0, 9, 50, 120, 4.5, 28, 0.22, 12, 0.05),
-        12: (-6.5, 8, -15.0, 8, 80, 180, 3.5, 30, 0.28, 15, 0.02),
-        1:  (-7.5, 8, -17.0, 8, 110,220, 4.0, 32, 0.30, 18, 0.01),
-        2:  (-6.5, 9, -16.0, 8, 130,255, 5.0, 29, 0.26, 15, 0.02),
-        3:  (-3.5, 10,-13.0, 9, 120,235, 6.0, 31, 0.24, 13, 0.04),
-        4:  ( 1.0, 11, -7.5, 9, 75, 165, 6.5, 28, 0.20, 10, 0.10),
-        5:  ( 4.0, 11, -4.5, 9, 45, 120, 7.0, 25, 0.15,  8, 0.15),
+        # North-facing, Ortler glacier shadow, highest resort, coldest & deepest snow
+        # Base: 1900m  Summit: 3250m
+        1: (-7.5, 8,  -17.0, 8, 110, 220, 4.0, 32, 0.30, 18, 0.01),
+        2: (-6.5, 9,  -16.0, 8, 130, 255, 5.0, 29, 0.26, 15, 0.02),
+        3: (-3.5, 10, -13.0, 9, 120, 235, 6.0, 31, 0.24, 13, 0.04),
+        4: ( 1.0, 11,  -7.5, 9,  75, 165, 6.5, 28, 0.20, 10, 0.10),
     },
     "trafoi": {
-        11: (-2.5, 9,  -8.5, 8, 35,  90, 4.5, 35, 0.20, 10, 0.08),
-        12: (-4.5, 8, -12.5, 8, 60, 130, 3.5, 40, 0.25, 13, 0.04),
-        1:  (-5.5, 9, -14.5, 8, 85, 165, 4.0, 42, 0.28, 15, 0.02),
-        2:  (-4.5, 9, -13.5, 8, 100,188, 4.8, 39, 0.24, 13, 0.03),
-        3:  (-1.5, 10,-10.5, 9, 90, 170, 5.5, 44, 0.22, 11, 0.06),
-        4:  ( 3.0, 11, -5.5, 9, 48, 115, 6.0, 40, 0.18,  8, 0.14),
-        5:  ( 5.5, 11, -3.5, 9, 25,  85, 6.5, 35, 0.15,  6, 0.20),
+        # NE facing, Stelvio Pass shadow zone, windiest of the five
+        # Base: 1540m  Summit: 2800m
+        1: (-5.5, 9,  -14.5, 8, 85,  165, 4.0, 42, 0.28, 15, 0.02),
+        2: (-4.5, 9,  -13.5, 8, 100, 188, 4.8, 39, 0.24, 13, 0.03),
+        3: (-1.5, 10, -10.5, 9, 90,  170, 5.5, 44, 0.22, 11, 0.06),
+        4: ( 3.0, 11,  -5.5, 9, 48,  115, 6.0, 40, 0.18,  8, 0.14),
     },
 }
 
@@ -105,7 +100,7 @@ YEAR_FACTORS = {
     2023: (-0.5,  1.10, 1.05),   # good season
     2024: (+0.8,  0.85, 1.10),   # warm-ish, decent
     2025: (-0.5,  1.15, 0.95),   # good season, average sun
-    2026: (-0.2,  1.05, 1.00),   # tracking slightly above avg
+    2026: (-0.2,  1.05, 1.00),   # tracking slightly above avg (partial)
 }
 
 # ── WMO weathercode mapping (simplified) ─────────────────────────────────────
@@ -132,12 +127,11 @@ def weathercode(snow_cm, rain_mm, sunshine_h, wind_kmh):
 def snow_depth_seasonal(day_of_year, base_cm):
     """
     Snow depth peaks mid-Feb (day ~46) and declines through April.
-    Handles Nov/Dec (DOY > 300) by wrapping them negatively to sync the curve.
     Returns a multiplier on the monthly mean.
     """
     peak_day = 46  # mid Feb
-    adjusted_doy = day_of_year - 365 if day_of_year > 200 else day_of_year
-    phase = (adjusted_doy - peak_day) / 90 * math.pi
+    # Simple cosine curve: max at peak, 0.4× at day 1, 0.2× at day 120
+    phase = (day_of_year - peak_day) / 90 * math.pi
     return max(0.15, 1.0 - 0.6 * (1 - math.cos(phase)) / 2)
 
 # ── Core generator ─────────────────────────────────────────────────────────────
@@ -150,13 +144,17 @@ def generate_resort_elevation(resort_name, elevation_label):
         "time": [],
         "temperature_2m_max": [],
         "temperature_2m_min": [],
+        "apparent_temperature_min": [],  # was missing
         "snowfall_sum": [],
-        "snow_depth": [],          # stored in metres (API convention)
+        "snow_depth": [],                # stored in metres (API convention)
         "precipitation_sum": [],
+        "precipitation_hours": [],       # was missing
         "rain_sum": [],
-        "sunshine_duration": [],   # stored in seconds (API convention)
-        "windspeed_10m_max": [],
-        "weathercode": [],
+        "sunshine_duration": [],         # stored in seconds (API convention)
+        "shortwave_radiation_sum": [],   # was missing (MJ/m²)
+        "wind_speed_10m_max": [],        # replaces deprecated windspeed_10m_max
+        "wind_gusts_10m_max": [],        # was missing
+        "weather_code": [],              # replaces deprecated weathercode
         "uv_index_max": [],
     }
 
@@ -166,16 +164,13 @@ def generate_resort_elevation(resort_name, elevation_label):
         m = d.month
         doy = d.timetuple().tm_yday
         y = d.year
-        
-        # We bracket the season year so dates in late 2019 pull from the 2020 factor block
-        season_y = y if m < 8 else y + 1
 
         (bt_mean, bt_range, st_mean, st_range,
          b_depth, s_depth,
          sun_mean, wind_mean,
          snow_prob, snow_amount, rain_prob) = profile[m]
 
-        t_off, snow_f, sun_f = YEAR_FACTORS.get(season_y, (0.0, 1.0, 1.0))
+        t_off, snow_f, sun_f = YEAR_FACTORS[y]
 
         # Choose base or summit parameters
         if is_summit:
@@ -239,6 +234,19 @@ def generate_resort_elevation(resort_name, elevation_label):
             uv_base *= 1.25
         uv = round(max(0.5, uv_base + random.gauss(0, 0.3)), 1)
 
+        # Apparent minimum temperature (feels-colder from wind chill)
+        apparent_t_min = round(t_min - wind_kmh * 0.05, 1)  # simplified wind chill offset
+
+        # Precipitation hours — proportional to event intensity
+        precip_h = 0.0
+        if snow_today_cm > 0 or rain_today_mm > 0:
+            intensity = snow_today_cm + rain_today_mm
+            precip_h = round(min(18.0, 1.0 + intensity * 0.4 + random.gauss(0, 0.5)), 1)
+            precip_h = max(0.0, precip_h)
+
+        # Shortwave radiation — proxy from sunshine hours (MJ/m²/day; ~0.75 MJ per sun-hour at alpine elev)
+        srad = round(max(0, sun_hours * 0.75 + random.gauss(0, 0.5)), 2)
+
         # WMO code
         wcode = weathercode(snow_today_cm, rain_today_mm, sun_hours, wind_kmh)
 
@@ -246,30 +254,38 @@ def generate_resort_elevation(resort_name, elevation_label):
         daily["time"].append(d.isoformat())
         daily["temperature_2m_max"].append(round(t_max, 1))
         daily["temperature_2m_min"].append(round(t_min, 1))
+        daily["apparent_temperature_min"].append(apparent_t_min)
         daily["snowfall_sum"].append(round(snow_today_cm, 1))
         daily["snow_depth"].append(round(max(0, cur_depth_cm) / 100, 3))  # metres
         daily["precipitation_sum"].append(round(precip_mm, 1))
+        daily["precipitation_hours"].append(precip_h)
         daily["rain_sum"].append(round(rain_today_mm, 1))
         daily["sunshine_duration"].append(round(sun_seconds, 0))
-        daily["windspeed_10m_max"].append(round(wind_kmh, 1))
-        daily["weathercode"].append(wcode)
+        daily["shortwave_radiation_sum"].append(srad)
+        daily["wind_speed_10m_max"].append(round(wind_kmh * 0.75, 1))  # mean ≈ 75% of gust
+        daily["wind_gusts_10m_max"].append(round(wind_kmh, 1))
+        daily["weather_code"].append(wcode)
         daily["uv_index_max"].append(uv)
 
     return {
-        "latitude":   PROFILES[resort_name][1][0] if False else 0,   # placeholder
+        "latitude":   0,
         "longitude":  0,
         "elevation":  0,
         "daily_units": {
             "time": "iso8601",
             "temperature_2m_max": "°C",
             "temperature_2m_min": "°C",
+            "apparent_temperature_min": "°C",
             "snowfall_sum": "cm",
             "snow_depth": "m",
             "precipitation_sum": "mm",
+            "precipitation_hours": "h",
             "rain_sum": "mm",
             "sunshine_duration": "s",
-            "windspeed_10m_max": "km/h",
-            "weathercode": "wmo code",
+            "shortwave_radiation_sum": "MJ/m²",
+            "wind_speed_10m_max": "km/h",
+            "wind_gusts_10m_max": "km/h",
+            "weather_code": "wmo code",
             "uv_index_max": "",
         },
         "daily": daily,
@@ -285,7 +301,7 @@ def generate_resort_elevation(resort_name, elevation_label):
 
 def main():
     print("=" * 60)
-    print("Generating synthetic weather data (182-Day Mandate Active)")
+    print("Generating synthetic weather data")
     print(f"Resorts: {list(PROFILES.keys())}")
     print(f"Dates: {ALL_DATES[0]} → {ALL_DATES[-1]}  ({len(ALL_DATES)} days)")
     print("=" * 60)
