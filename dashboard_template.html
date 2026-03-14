@@ -88,8 +88,10 @@
   .font-resizers span, #theme-cycle-btn { cursor: pointer; transition: transform 0.1s; display: inline-block; user-select: none; padding: 0.3rem; border-radius: 4px; }
   .font-resizers span:hover, #theme-cycle-btn:hover { transform: scale(1.2); background: var(--border-color); }
 
-  #toc a { padding: 0.2rem 0.4rem; border-radius: 4px; transition: background 0.2s, color 0.2s; text-decoration: none; color: inherit; opacity: 0.7; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  #toc a { padding: 0.2rem 0.4rem; border-radius: 4px; transition: background 0.2s, color 0.2s; text-decoration: none; color: inherit; opacity: 0.7; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 0.2rem; }
   #toc a:hover { background: var(--border-color); opacity: 1; }
+  .toc-label { font-size: 0.7rem; }
+  @media (max-width: 640px) { .toc-label { display: none; } }
 
   .control-btn { 
     padding: 0.4rem 0.8rem; height: 36px;
@@ -234,11 +236,11 @@
   <!-- Left: Controls & TOC (Architectural Requirement) -->
   <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
     <nav id="toc" style="display: flex; gap: 0.25rem;">
-      <a href="#powder-alarm" title="Forecast">📡</a>
-      <a href="#heatmap" title="Matrix">🔥</a>
-      <a href="#drilldown" title="Telemetry">📅</a>
-      <a href="#snowpack" title="Snowpack">🏔️</a>
-      <a href="#atmosphere" title="Atmos">🌡️</a>
+      <a href="#powder-alarm" title="Forecast">📡 <span class="toc-label">Forecast</span></a>
+      <a href="#heatmap" title="Heatmap">🔥 <span class="toc-label">Heatmap</span></a>
+      <a href="#drilldown" title="Daily Conditions">📅 <span class="toc-label">Daily</span></a>
+      <a href="#snowpack" title="Snowpack">🏔️ <span class="toc-label">Snowpack</span></a>
+      <a href="#atmosphere" title="Season Overview">🌡️ <span class="toc-label">Season</span></a>
     </nav>
     <div style="display: flex; gap: 0.25rem; align-items: center; border-left: 1px solid var(--border-color); padding-left: 0.5rem;">
       <span class="font-resizers" style="display: flex; gap: 0.1rem;">
@@ -277,7 +279,7 @@
     <div class="flex-between" style="margin-bottom: 1.5rem;">
       <div>
         <h2 style="margin:0; border:none; padding:0; border-bottom: none;">Forecast & Alpine Hazards 📡</h2>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">High-resolution aggregate models mapped to exact base and summit topography.</p>
+        <p id="forecast-subtitle" style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">High-resolution aggregate models mapped to exact base and summit topography.</p>
       </div>
     </div>
 
@@ -312,7 +314,7 @@
     <!-- ── BEST FORECAST DAYS STRIP ── -->
     <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
       <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-        📅 Day-by-Day Bluebird Forecast <span style="font-weight:400; text-transform:none; letter-spacing:0; opacity:0.7;">(✓ = top 3 days to ski)</span>
+        📅 16-Day Forecast — Day by Day <span style="font-weight:400; text-transform:none; letter-spacing:0; opacity:0.7;">(⭐ best day · ✓ top 3 to ski)</span>
       </div>
       <div id="best-days-strip"><div style="color:var(--text-muted); font-style:italic; font-size:0.85rem;">Awaiting forecast…</div></div>
     </div>
@@ -323,7 +325,7 @@
     <div class="flex-between" style="margin-bottom: 1rem; align-items: flex-end;">
       <div>
         <h2 style="margin:0; border:none; padding:0; border-bottom: none;">Bluebird Matrix 🔥</h2>
-        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">Normalized directly against the resort's 6-year peak sunlight thresholds.</p>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">Composite Bluebird Score per day-bucket — normalised against each resort's historical peak.</p>
       </div>
       <div id="heatmap-controls" style="display: flex; gap: 0.5rem;">
         <button class="control-btn" data-res="1">1 Day</button>
@@ -338,7 +340,7 @@
   <!-- ── DAILY TELEMETRY (CONTEXT AWARE) ── -->
   <section id="drilldown">
     <div class="flex-between" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
-      <h2 style="margin:0; border:none; padding:0;">Daily Telemetry & Diagnostics 📅</h2>
+      <h2 style="margin:0; border:none; padding:0;">Daily Conditions 📅</h2>
       <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
         <button id="btn-prev-day" class="control-btn" title="Previous Day">◀ Prev</button>
         <input type="date" id="date-picker">
@@ -350,11 +352,13 @@
       <table id="daily-table">
         <thead>
           <tr>
-            <th>Resort <span style="opacity:0.6; font-size:0.65rem; font-weight:normal;">(Base - Summit)</span></th>
+            <th>Resort <span style="opacity:0.6; font-size:0.65rem; font-weight:normal;">(Base · Summit)</span></th>
             <th>Base Temp</th>
             <th>Summit Temp</th>
             <th>Snow Depth <span style="text-transform:none; font-weight:normal; opacity:0.7;">(vs Hist. Avg)</span></th>
             <th>New Snow (24h)</th>
+            <th>Gusts</th>
+            <th>Sun</th>
             <th style="text-align: right;">Bluebird Score <span style="opacity:0.6; font-size:0.65rem; font-weight:normal;">(Hover)</span></th>
           </tr>
         </thead>
@@ -362,7 +366,7 @@
       </table>
     </div>
     <div style="margin-top: 1rem; padding: 0.75rem; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.8rem; color: var(--text-muted);">
-      ⚠️ <strong>Data Integrity Protocol:</strong> Missing API data is rendered as <code>—</code>. Historical Context dynamically averages this calendar day across all <em>previous</em> seasons (excluding the current one).
+      ⚠️ <strong>Data note:</strong> Missing API fields render as <code>—</code>. Historical Average is computed from all prior seasons for the same calendar day, current season excluded.
     </div>
   </section>
 
@@ -395,8 +399,8 @@
 
   <!-- ── ATMOSPHERIC CONDITIONS CANVAS ── -->
   <section id="atmosphere">
-    <h2>Atmospheric Engine (Base) 🌡️</h2>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Deep-dive into any season. Thermal bands, solar yield, snow events, and wind spikes.</p>
+    <h2>Season Overview — Base Station 🌡️</h2>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Temperature band, solar yield, snowfall events and wind spikes at base elevation — one season at a time.</p>
     
     <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
       <div style="display: flex; flex-wrap: wrap; gap: 1rem; padding: 0.5rem; background: var(--bg-main); border-radius: 6px; border: 1px solid var(--border-color);">
@@ -420,7 +424,7 @@
 </main>
 
 <footer style="text-align: center; padding: 2rem; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border-color); margin-top: 2rem;">
-  Zwei Länder Skiarena Dashboard &middot; DPI-Aware Engine &middot; Temporal Guillotine Active
+  Zwei Länder Skiarena · Open-Meteo ERA5 + ERA5-Land · Refreshed every 6 hours
 </footer>
 
 <script>
@@ -618,8 +622,14 @@
     // MODULE 1: FORECAST ENGINE
     // =========================================================
     const fcBoard = document.getElementById('tactical-summary-board');
+    const fcSubtitle = document.getElementById('forecast-subtitle');
 
     const renderTacticalSummary = (resort) => {
+      if (fcSubtitle) {
+        const meta = STATIC_METADATA[resort.toLowerCase()] || {};
+        const resortLabel = resort.charAt(0).toUpperCase() + resort.slice(1);
+        fcSubtitle.textContent = `${resortLabel} · ${meta.base ?? '?'}m base · ${meta.summit ?? '?'}m summit · best-match model blend`;
+      }
       if (!FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[resort]) {
           fcBoard.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">No forecast payload for ${resort}</div>`;
           return;
@@ -679,15 +689,24 @@
         ? `<div style="font-size:2rem; font-weight:800; color:${minVis < 0.2 ? '#ef4444' : minVis < 1 ? '#f59e0b' : 'var(--text-main)'}; line-height:1;">${minVis < 1 ? (minVis*1000).toFixed(0)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">m</span>' : minVis.toFixed(1)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">km</span>'}</div><div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Worst hourly in 7d</div>`
         : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
 
-      // Month-aware rain threshold: Jan rain is a snowpack killer; Apr rain is normal spring
-      // Destructive thresholds per month: Nov-Feb=2mm, Mar=5mm, Apr=10mm
-      const forecastMonth = localNow.getMonth() + 1; // 1-12
+      // Month-aware rain threshold — use first forecast timestamp, not wall-clock.
+      // Wall-clock breaks for off-season visitors (e.g. Oct pre-season planning).
+      const fcStartDate = hourly.time && hourly.time[0] ? new Date(hourly.time[0]) : localNow;
+      const forecastMonth = fcStartDate.getMonth() + 1; // 1-12
       const rainThreshold = forecastMonth <= 2 || forecastMonth >= 11 ? 2 : forecastMonth <= 3 ? 5 : 10;
       const rainIsDangerous = rain > rainThreshold;
       const rainNote = rainIsDangerous
-        ? `<div style="font-size:0.7rem;color:#ef4444;margin-top:0.3rem;font-weight:600;">>${rainThreshold}mm threshold for ${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][forecastMonth]}</div>`
+        ? `<div style="font-size:0.7rem;color:#ef4444;margin-top:0.3rem;font-weight:600;">&gt;${rainThreshold}mm threshold for ${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][forecastMonth]}</div>`
         : `<div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">Threshold: ${rainThreshold}mm (${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][forecastMonth]})</div>`;
 
+      // Feels-like (apparent temperature) — integrates wind chill + humidity.
+      // Open-Meteo apparent_temperature is in HOURLY_VARS; worst wind-chill matters most on a ski hill.
+      const apArr = hourly.apparent_temperature ? hourly.apparent_temperature.slice(0, limit).filter(v=>v!==null) : [];
+      const minApparent = apArr.length ? Math.min(...apArr) : null;
+      const maxApparent = apArr.length ? Math.max(...apArr) : null;
+      const apparentHtml = minApparent !== null
+        ? `<div style="font-size:1.7rem; font-weight:800; color:${minApparent < -15 ? '#ef4444' : minApparent < -8 ? '#f59e0b' : 'var(--text-main)'}; line-height:1;">${minApparent.toFixed(0)}<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">°C</span></div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.25rem;">Worst wind-chill in 7d</div><div style="font-size:0.7rem;color:var(--text-muted);">Best: <b style="color:var(--text-main);">${maxApparent.toFixed(0)}°C</b></div>`
+        : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
       // Avalanche slab signal: heavy snowfall + high wind on same day = wind slab loading
       // Classic recipe: >15cm new snow AND gusts >40 km/h within same 24h window
       let avlDays = 0, avlDayLabels = [];
@@ -747,6 +766,10 @@
               <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Worst Visibility 👁️</div>
               ${visibilityHtml}
           </div>
+          <div class="fc-card">
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Feels Like 🧤</div>
+              ${apparentHtml}
+          </div>
       `;
     };
 
@@ -762,9 +785,12 @@
     // Scores each forecast day using the same Bluebird formula (sun/depth/temp/wind/powder).
     // snow_depth and precipitation_probability are now fetched in the payload.
     // Highlights the top 3 days so a tourist can plan instantly.
-    const computeForecastDayScore = (tMax, tMin, sunH, depthM, gustKmh, freshCm, maxDepth, probPct) => {
-      // Normalise against resort's historical max depth; fallback if unavailable
-      const fSun  = Math.min(1, sunH / 10); // 10h = perfect alpine day
+    // maxSun: resort's historical peak sunshine hours (from getResortBounds), used to normalise
+    //         forecast sun hours on the same scale as historical scores. Falls back to 10h.
+    // probPct: precipitation probability 0–100. Acts as a confidence weight on snow-day scores.
+    const computeForecastDayScore = (tMax, tMin, sunH, depthM, gustKmh, freshCm, maxDepth, probPct, maxSun) => {
+      const sunPeak = (maxSun && maxSun > 0) ? maxSun : 10;
+      const fSun  = Math.min(1, sunH / sunPeak);
       const fDepth= maxDepth > 0 ? Math.min(1, (depthM || 0) / maxDepth) : 0.5;
       let fTemp = 0.5;
       if (tMax !== null) {
@@ -789,11 +815,12 @@
         const wf = (gustKmh === null || gustKmh <= 30) ? 1 : gustKmh <= 50 ? 1-(gustKmh-30)/20 : 0;
         pBonus = 0.15 * sf * wf;
       }
-      // Confidence scaling: low precip probability on snow days = uncertain score
-      // When probability < 30% treat it as 30% likely (don't fully dismiss low-prob snow)
+      // Confidence factor: low precip probability on a forecast snow day = lower confidence.
+      // Clamped at 0.3 minimum so a low-prob day still gets partial credit.
+      // Applied to the entire score (not just pBonus) to reflect forecast uncertainty.
       const probFactor = probPct !== null ? Math.min(1, 0.3 + (probPct / 100) * 0.7) : 1.0;
       const raw = 0.40*fSun + 0.25*fDepth + 0.20*fTemp + 0.15*wMult;
-      const score = Math.max(0, Math.min(1, (raw + pBonus) * wMult));
+      const score = Math.max(0, Math.min(1, (raw + pBonus) * wMult * probFactor));
       return { score: Math.round(score * 1000) / 1000, fSun, fDepth, fTemp, wMult, pBonus, probFactor };
     };
 
@@ -815,8 +842,9 @@
       // setup (line ~872) before the const declaration in Module 2 is reached, which would cause a
       // TDZ ReferenceError and kill the entire DOMContentLoaded handler. Accessing a window property
       // is always safe: returns undefined before assignment, no TDZ.
-      const histBounds = typeof window.getResortBounds === 'function' ? window.getResortBounds(window.GLOBAL_RESORT) : { maxDepth: 2 };
+      const histBounds = typeof window.getResortBounds === 'function' ? window.getResortBounds(window.GLOBAL_RESORT) : { maxDepth: 2, maxSun: 10 };
       const maxDepth = histBounds.maxDepth || 2;
+      const maxSun   = histBounds.maxSun   || 10;
 
       const days = [];
       for (let i = 0; i < numDays; i++) {
@@ -835,7 +863,7 @@
         const probArr= slice('precipitation_probability');
         const probMax= probArr.length ? Math.max(...probArr) : null;
         const dt     = hourly.time ? new Date(hourly.time[s]) : new Date(localNow.getTime()+i*86400000);
-        const scored = computeForecastDayScore(tMax, tMin, sunH, depthM, gustMax, freshCm, maxDepth, probMax);
+        const scored = computeForecastDayScore(tMax, tMin, sunH, depthM, gustMax, freshCm, maxDepth, probMax, maxSun);
         const dayWmo = hourly.weather_code ? (hourly.weather_code.slice(s,e).filter(v=>v!==null)[12] || null) : null;
         const wmoEmoji = dayWmo === null ? '🌤️' : dayWmo === 0 ? '☀️' : dayWmo <= 2 ? '🌤️' : dayWmo === 3 ? '☁️' :
                          dayWmo <= 48 ? '🌫️' : dayWmo <= 57 ? '🌧️' : dayWmo <= 67 ? '🌨️' :
@@ -900,7 +928,7 @@
         
         // Pluck the raw precip mm and soil temp (if the backend was updated to fetch them)
         const precipArr = hourly.precipitation ? hourly.precipitation.slice(start, end).filter(v => v !== null) : [];
-        const totalPrecip = precipArr.length ? precipArr.reduce((a,b)=>a+b, 0) : rn + (sn / 7); // sn cm → mm SWE at 7:1 (API standard)
+        const totalPrecip = precipArr.length ? precipArr.reduce((a,b)=>a+b, 0) : rn + (sn * 10 / 7); // sn cm snow-height → mm SWE: ÷7 (density) ×10 (cm→mm)
         
         const soilArr = hourly.soil_temperature_0cm ? hourly.soil_temperature_0cm.slice(start, end).filter(v => v !== null) : [];
         const soilTemp = soilArr.length ? soilArr.reduce((a,b)=>a+b, 0)/soilArr.length : null;
@@ -1117,7 +1145,7 @@
         }
         if (d.snow > 0) { 
             // snowfall is in cm (snow height); convert to SWE mm (÷7) to plot on the mm precip axis
-            const snowSWE = d.snow / 7;
+            const snowSWE = d.snow * 10 / 7; // cm snow-height → mm SWE (÷7 density, ×10 cm→mm)
             const sY = mapYPrecip(d.rain + snowSWE);
             const rY = mapYPrecip(d.rain);
             ctxFc.fillStyle = getStyleVar('--snow-yield'); 
@@ -1396,6 +1424,9 @@
         const tb = r.base?.temperature_2m_max ?? r.temperature_2m_max, ts = r.summit?.temperature_2m_max;
         const rawSn = r.summit?.snow_depth ?? r.snow_depth;
         const fs = r.summit?.snowfall_sum ?? r.snowfall_sum ?? 0;
+        const rawGust = r.base?.wind_gusts_10m_max ?? r.wind_gusts_10m_max ?? null;
+        const rawSunSec = r.base?.sunshine_duration ?? r.sunshine_duration ?? null;
+        const rawSunH = rawSunSec !== null ? rawSunSec / 3600 : null;
         const fmt = (t) => t !== null && t !== undefined ? `${t.toFixed(1)}°C` : '—'; 
         const warn = (r.flags && r.flags.length) ? `<span title="Data Flag: ${r.flags.join(',')}" style="cursor:help;">⚠️</span> ` : '';
         
@@ -1424,13 +1455,18 @@
             snHtml += `<span class="diff-badge ${dClass}" title="vs ${histAvg.toFixed(0)}cm Hist Avg">${dSign}${diff.toFixed(0)}cm</span>`;
           }
         }
+        const gustColor = rawGust === null ? 'var(--text-muted)' : rawGust > 65 ? '#ef4444' : rawGust > 40 ? '#f59e0b' : 'var(--text-main)';
+        const gustHtml = rawGust !== null ? `<span style="font-weight:700;color:${gustColor};">${rawGust.toFixed(0)}</span><span style="font-size:0.7rem;color:var(--text-muted);"> km/h</span>` : '—';
+        const sunHtml  = rawSunH  !== null ? `<span style="font-weight:700;">${rawSunH.toFixed(1)}</span><span style="font-size:0.7rem;color:var(--text-muted);"> h</span>` : '—';
 
         return `<tr>
-          <td><div style="font-weight:bold;text-transform:capitalize;">${warn}${r.resort}</div><div style="font-size:0.7rem; color:var(--text-muted);">${meta.base}m - ${meta.summit}m</div></td>
+          <td><div style="font-weight:bold;text-transform:capitalize;">${warn}${r.resort}</div><div style="font-size:0.7rem; color:var(--text-muted);">${meta.base}m · ${meta.summit}m</div></td>
           <td>${fmt(tb)}</td>
           <td>${fmt(ts)}</td>
           <td>${snHtml}</td>
           <td>${fs>0?`<span style="color:#3b82f6;font-weight:bold;">+${fs.toFixed(1)}cm</span>`:'0'}</td>
+          <td>${gustHtml}</td>
+          <td>${sunHtml}</td>
           <td style="position:relative; text-align:right;">
             <div class="quality-badge has-tooltip" style="margin-left: auto;">
               <div style="width:12px;height:12px;border-radius:50%;background:${getColor(finalSc)}"></div>
@@ -1586,7 +1622,7 @@
     const cvs = document.getElementById('snow-canvas'), ctx = cvs.getContext('2d');
     const legend = document.getElementById('canvas-legend'), avgBtn = document.getElementById('toggle-avg-btn');
     let hoverDayOffset = null, maWindow = 1, showHistoricalAvg = true;
-    let isTouch = false; 
+    let isSnowTouch = false; // separate from atmos canvas touch state
     
     document.querySelectorAll('.filter-btn').forEach(btn => {
       btn.onclick = (e) => { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active')); e.target.classList.add('active'); maWindow = parseInt(e.target.dataset.ma); window.repaintCanvas(); };
@@ -1699,7 +1735,7 @@
           const scale = cvs.width / (cvs.clientWidth || 1000);
           const boxW = 180 * scale, boxH = 20*scale + (readouts.length * 30 * scale), padding = 15*scale;
           let boxX = hx + padding, boxY = pY;
-          if (isTouch) { boxY = pY - (50*scale); if (boxY < 0) boxY = 0; }
+          if (isSnowTouch) { boxY = pY - (50*scale); if (boxY < 0) boxY = 0; }
           if (boxX + boxW > pX + w) boxX = hx - boxW - padding;
           if (boxX < pX) boxX = pX; 
           
@@ -1713,14 +1749,15 @@
       }
     };
     
-    cvs.addEventListener('mousemove', (e) => { isTouch = false; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.clientX - rect.left) * (cvs.width / rect.width)) - 120) / (cvs.width - 240) * 182); window.repaintCanvas(); });
+    cvs.addEventListener('mousemove', (e) => { isSnowTouch = false; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.clientX - rect.left) * (cvs.width / rect.width)) - 120) / (cvs.width - 240) * 182); window.repaintCanvas(); });
     cvs.addEventListener('mouseleave', () => { hoverDayOffset = null; window.repaintCanvas(); });
-    cvs.addEventListener('touchmove', (e) => { if (e.touches.length > 0) { e.preventDefault(); isTouch = true; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.touches[0].clientX - rect.left) * (cvs.width / rect.width)) - 120) / (cvs.width - 240) * 182); window.repaintCanvas(); } }, {passive: false});
+    cvs.addEventListener('touchmove', (e) => { if (e.touches.length > 0) { e.preventDefault(); isSnowTouch = true; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.touches[0].clientX - rect.left) * (cvs.width / rect.width)) - 120) / (cvs.width - 240) * 182); window.repaintCanvas(); } }, {passive: false});
     window.addEventListener('resize', () => { window.repaintCanvas(); });
     setTimeout(window.repaintCanvas, 50);
 
     const cvsA = document.getElementById('atmos-canvas'), ctxA = cvsA.getContext('2d'), lblSeason = document.getElementById('atmos-season-label');
     let atmosHoverDay = null;
+    let isAtmosTouch = false; // separate from snowpack canvas touch state
     let atmosSeasonIdx = 0; // 0 = most recent, increases toward older seasons
 
     const updateAtmosNavBtns = (seasons) => {
@@ -1843,7 +1880,7 @@
         const scale = cvsA.width / (cvsA.clientWidth || 1000);
         const boxW = 200 * scale, boxH = 140 * scale, padding = 15 * scale; 
         let boxX = hx + padding, boxY = pY;
-        if (isTouch) { boxY = pY - (50*scale); if (boxY < 0) boxY = 0; }
+        if (isAtmosTouch) { boxY = pY - (50*scale); if (boxY < 0) boxY = 0; }
         if (boxX + boxW > pX + w) boxX = hx - boxW - padding;
         
         ctxA.fillRect(boxX, boxY, boxW, boxH); ctxA.strokeStyle = getStyleVar('--border-color'); ctxA.strokeRect(boxX, boxY, boxW, boxH);
@@ -1861,9 +1898,9 @@
       }
     };
 
-    cvsA.addEventListener('mousemove', (e) => { isTouch = false; const rect = cvsA.getBoundingClientRect(); atmosHoverDay = Math.round((((e.clientX - rect.left) * (cvsA.width / rect.width)) - 120) / (cvsA.width - 240) * 182); window.repaintAtmosCanvas(); });
+    cvsA.addEventListener('mousemove', (e) => { isAtmosTouch = false; const rect = cvsA.getBoundingClientRect(); atmosHoverDay = Math.round((((e.clientX - rect.left) * (cvsA.width / rect.width)) - 120) / (cvsA.width - 240) * 182); window.repaintAtmosCanvas(); });
     cvsA.addEventListener('mouseleave', () => { atmosHoverDay = null; window.repaintAtmosCanvas(); });
-    cvsA.addEventListener('touchmove', (e) => { if (e.touches.length > 0) { e.preventDefault(); isTouch = true; const rect = cvsA.getBoundingClientRect(); atmosHoverDay = Math.round((((e.touches[0].clientX - rect.left) * (cvsA.width / rect.width)) - 120) / (cvsA.width - 240) * 182); window.repaintAtmosCanvas(); } }, {passive: false});
+    cvsA.addEventListener('touchmove', (e) => { if (e.touches.length > 0) { e.preventDefault(); isAtmosTouch = true; const rect = cvsA.getBoundingClientRect(); atmosHoverDay = Math.round((((e.touches[0].clientX - rect.left) * (cvsA.width / rect.width)) - 120) / (cvsA.width - 240) * 182); window.repaintAtmosCanvas(); } }, {passive: false});
     window.addEventListener('resize', () => { window.repaintAtmosCanvas(); });
     setTimeout(window.repaintAtmosCanvas, 100);
   });
