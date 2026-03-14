@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Zwei Länder Skiarena — Open-Meteo Historical Weather Fetcher
-Hardened with exponential backoff and correct URI formatting.
+Hardened with exponential backoff, custom User-Agent, and slow-pacing to avoid 429s on GitHub Actions.
 """
 
 import requests, json, time, sys, argparse
@@ -15,7 +15,6 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 BASE_URL   = "https://archive-api.open-meteo.com/v1/archive"
 START_DATE = "2019-11-01"
 
-# FIX: Reverted to 'weathercode', corrected 'windgusts', removed invalid 'snow_depth'
 DAILY_VARS = [
     "temperature_2m_max", 
     "temperature_2m_min", 
@@ -40,7 +39,20 @@ RESORTS = [
 
 def get_session():
     session = requests.Session()
-    retry = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504], connect=5, read=5)
+    # FIX: Custom User-Agent to avoid generic python-requests rate limiting
+    session.headers.update({
+        "User-Agent": "ZweiLaenderSkiarena-Dashboard/1.0 (GitHub Actions; Contact: auto@example.com)"
+    })
+    
+    # FIX: Increased backoff_factor to 2. Wait times for 429s will now be: 2s, 4s, 8s, 16s, 32s
+    retry = Retry(
+        total=6, 
+        backoff_factor=2, 
+        status_forcelist=[429, 500, 502, 503, 504], 
+        connect=10, 
+        read=10,
+        respect_retry_after_header=True
+    )
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
@@ -57,7 +69,8 @@ def fetch_one(session, name, lat, lon, elevation, elevation_label, vars_to_use, 
         "timezone": "Europe/Berlin"
     }
     
-    response = session.get(BASE_URL, params=params, timeout=15)
+    # Increased timeout to 25s for heavy ERA5 archive processing
+    response = session.get(BASE_URL, params=params, timeout=25)
     response.raise_for_status()
     data = response.json()
     
@@ -113,11 +126,14 @@ def main():
             print(f"\n[{name.upper()}]")
             n_base = fetch_one(session, name, lat, lon, base_m, "base", vars_to_use, START_DATE, end_date)
             print(f"  ✓ Base   ({base_m}m): {n_base} days")
-            time.sleep(0.6)
+            
+            # FIX: Increased sleep from 0.6 to 2.5 to prevent bursting the API
+            time.sleep(2.5) 
             
             n_summit = fetch_one(session, name, lat, lon, summit_m, "summit", vars_to_use, START_DATE, end_date)
             print(f"  ✓ Summit ({summit_m}m): {n_summit} days")
-            time.sleep(0.6)
+            
+            time.sleep(2.5)
             
     except Exception as e:
         print(f"\n[!] CRITICAL: Open-Meteo fetch failed. Error: {e}")
