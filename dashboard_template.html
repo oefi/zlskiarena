@@ -450,6 +450,27 @@
   try { SKI_DATA = __SKI_DATA_PLACEHOLDER__; } catch(e) {}
   try { FORECAST_DATA = __FORECAST_DATA_PLACEHOLDER__; } catch(e) {}
 
+  // ── SYNTHETIC DATA DETECTION ──
+  // Reads the _meta.source field written by generate_synthetic.py.
+  // If any resort's raw file is synthetic, the pipeline propagates the source tag.
+  (() => {
+    const isSynthetic = SKI_DATA && SKI_DATA._meta &&
+      typeof SKI_DATA._meta.source === 'string' &&
+      SKI_DATA._meta.source.includes('SYNTHETIC');
+    if (!isSynthetic) return;
+    const banner = document.createElement('div');
+    banner.id = 'synthetic-banner';
+    banner.style.cssText = [
+      'position:sticky','top:0','z-index:9999',
+      'background:#92400e','color:#fef3c7',
+      'padding:0.5rem 1rem','text-align:center',
+      'font-size:0.8rem','font-weight:700','letter-spacing:0.05em',
+      'border-bottom:2px solid #d97706',
+    ].join(';');
+    banner.textContent = '⚠ SYNTHETIC DATA — Real Open-Meteo fetch failed. Charts show generated placeholder data, not actual conditions.';
+    document.body.insertBefore(banner, document.body.firstChild);
+  })();
+
   // ── TEMPORAL GUILLOTINE ──
   const localNow = new Date();
   const yyyy = localNow.getFullYear(), mm = String(localNow.getMonth() + 1).padStart(2, '0'), dd = String(localNow.getDate()).padStart(2, '0');
@@ -574,24 +595,65 @@
           fcBoard.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">No forecast payload for ${resort}</div>`;
           return;
       }
-      const hourly = FORECAST_DATA.resorts[resort];
-      const limit = Math.min(168, hourly.temperature_2m?.length || 0); // 7 days
-      if (limit === 0) return;
+      const resortData = FORECAST_DATA.resorts[resort];
+      // Prefer daily aggregates if the updated fetch_forecast.py ran; fall back to hourly
+      const daily  = resortData.daily  || null;
+      const hourly = resortData.hourly || resortData;  // backwards compat with old payload shape
+      const limit  = Math.min(168, (hourly.temperature_2m?.length || 0));
+      if (limit === 0 && !daily) return;
+      const days7 = 7;
 
-      const snow = hourly.snowfall ? hourly.snowfall.slice(0, limit).reduce((a,b)=>a+(b||0),0) : 0;
-      const rain = hourly.rain ? hourly.rain.slice(0, limit).reduce((a,b)=>a+(b||0),0) : 0;
-      
-      const gusts = hourly.wind_gusts_10m ? hourly.wind_gusts_10m.slice(0, limit).filter(v=>v!==null) : [];
-      const maxGust = gusts.length ? Math.max(...gusts) : 0;
-      const gustDayIdx = hourly.wind_gusts_10m ? hourly.wind_gusts_10m.slice(0, limit).indexOf(maxGust) : 0;
-      const gustDate = hourly.time ? new Date(hourly.time[gustDayIdx]) : new Date(localNow.getTime() + (gustDayIdx * 3600 * 1000));
-      const gustDayStr = gustDate.toLocaleDateString('en-US', {weekday: 'short', month: 'short', day: 'numeric'});
+      // Snow: prefer daily sum, fall back to hourly accumulation
+      const snow = daily?.snowfall_sum
+        ? daily.snowfall_sum.slice(0, days7).reduce((a,b)=>a+(b||0),0)
+        : (hourly.snowfall ? hourly.snowfall.slice(0, days7*24).reduce((a,b)=>a+(b||0),0) : 0);
 
-      const fz = hourly.freezing_level_height ? hourly.freezing_level_height.slice(0, limit).filter(v => v !== null) : [];
-      const maxFz = fz.length ? Math.max(...fz) : 0;
-      const minFz = fz.length ? Math.min(...fz) : 0;
+      // Rain
+      const rain = daily?.rain_sum
+        ? daily.rain_sum.slice(0, days7).reduce((a,b)=>a+(b||0),0)
+        : (hourly.rain ? hourly.rain.slice(0, days7*24).reduce((a,b)=>a+(b||0),0) : 0);
 
-      const meta = STATIC_METADATA[resort.toLowerCase()] || {base:'?', summit:'?'};
+      // Peak gust — prefer daily max, fall back to hourly
+      let maxGust = 0, gustDayStr = '—';
+      if (daily?.wind_gusts_10m_max) {
+        const gustArr = daily.wind_gusts_10m_max.slice(0, days7).filter(v=>v!==null);
+        maxGust = gustArr.length ? Math.max(...gustArr) : 0;
+        const gustIdx = daily.wind_gusts_10m_max.slice(0, days7).indexOf(maxGust);
+        if (daily.time?.[gustIdx]) gustDayStr = new Date(daily.time[gustIdx]).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+      } else {
+        const gusts = hourly.wind_gusts_10m ? hourly.wind_gusts_10m.slice(0, limit).filter(v=>v!==null) : [];
+        maxGust = gusts.length ? Math.max(...gusts) : 0;
+        const gustIdx = hourly.wind_gusts_10m ? hourly.wind_gusts_10m.slice(0, limit).indexOf(maxGust) : 0;
+        const gustDate = hourly.time ? new Date(hourly.time[gustIdx]) : new Date(localNow.getTime() + gustIdx*3600000);
+        gustDayStr = gustDate.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+      }
+
+      // Freezing level — prefer daily max/min, fall back to hourly
+      let maxFz = 0, minFz = 0, fzDaysBelowBase = 0;
+      const meta = STATIC_METADATA[resort.toLowerCase()] || {base: 0, summit: 0};
+      if (daily?.freezing_level_height_max) {
+        const fzMax = daily.freezing_level_height_max.slice(0, days7).filter(v=>v!==null);
+        const fzMin = daily.freezing_level_height_min ? daily.freezing_level_height_min.slice(0, days7).filter(v=>v!==null) : [];
+        maxFz = fzMax.length ? Math.max(...fzMax) : 0;
+        minFz = fzMin.length ? Math.min(...fzMin) : 0;
+        fzDaysBelowBase = fzMax.filter(v => v < meta.base).length;
+      } else {
+        const fzArr = hourly.freezing_level_height ? hourly.freezing_level_height.slice(0, limit).filter(v=>v!==null) : [];
+        maxFz = fzArr.length ? Math.max(...fzArr) : 0;
+        minFz = fzArr.length ? Math.min(...fzArr) : 0;
+        // Count days where the daily max freezing level dips below base elevation
+        for (let i = 0; i < days7; i++) {
+          const dayFz = hourly.freezing_level_height ? hourly.freezing_level_height.slice(i*24, (i+1)*24).filter(v=>v!==null) : [];
+          if (dayFz.length && Math.max(...dayFz) < meta.base) fzDaysBelowBase++;
+        }
+      }
+
+      // Visibility — worst-case km over the 7-day window (ski-critical for off-piste/visibility closures)
+      const visArr = hourly.visibility ? hourly.visibility.slice(0, limit).filter(v=>v!==null) : [];
+      const minVis = visArr.length ? Math.min(...visArr) / 1000 : null; // m → km
+      const visibilityHtml = minVis !== null
+        ? `<div style="font-size:2rem; font-weight:800; color:${minVis < 0.2 ? '#ef4444' : minVis < 1 ? '#f59e0b' : 'var(--text-main)'}; line-height:1;">${minVis < 1 ? (minVis*1000).toFixed(0)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">m</span>' : minVis.toFixed(1)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">km</span>'}</div><div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Worst hourly in 7d</div>`
+        : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
 
       fcBoard.innerHTML = `
           <div class="fc-card">
@@ -609,8 +671,12 @@
           </div>
           <div class="fc-card">
               <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Freezing Line (0°C) 🏔️</div>
-              <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.4;">Max: <span style="color:${maxFz > meta.base ? '#ef4444' : 'var(--brand)'};">${Math.round(maxFz)}m</span><br>Min: ${Math.round(minFz)}m</div>
-              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">Base elevation is ${meta.base}m</div>
+              <div style="font-size:1.1rem; font-weight:800; color:var(--text-main); line-height:1.4;">Max: <span style="color:${maxFz > meta.base ? '#ef4444' : 'var(--brand)'};">${Math.round(maxFz)}m</span> · Min: ${Math.round(minFz)}m</div>
+              <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">${fzDaysBelowBase > 0 ? `<span style="color:#ef4444;font-weight:bold;">${fzDaysBelowBase}d below base (${meta.base}m) — freeze-thaw risk</span>` : `Base at ${meta.base}m — freezing line stays above`}</div>
+          </div>
+          <div class="fc-card">
+              <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Worst Visibility 👁️</div>
+              ${visibilityHtml}
           </div>
       `;
     };
@@ -631,7 +697,9 @@
       if (!ctxFc || !window.GLOBAL_RESORT || !FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
       ctxFc.clearRect(0,0,cvsFc.width,cvsFc.height);
 
-      const hourly = FORECAST_DATA.resorts[window.GLOBAL_RESORT];
+      const resortData = FORECAST_DATA.resorts[window.GLOBAL_RESORT];
+      // Support both new payload shape (resortData.hourly) and old flat shape
+      const hourly = resortData.hourly || resortData;
       if (!hourly.temperature_2m) return;
       const numDays = Math.floor(hourly.temperature_2m.length / 24);
       if (numDays === 0) return;
@@ -947,7 +1015,7 @@
         const pRight = actualWidth < 500 ? 40 : 60;
         const w = cvsFc.width - pX - pRight;
         
-        const numDays = Math.floor(FORECAST_DATA.resorts[window.GLOBAL_RESORT].temperature_2m.length / 24);
+        const numDays = Math.floor((FORECAST_DATA.resorts[window.GLOBAL_RESORT].hourly || FORECAST_DATA.resorts[window.GLOBAL_RESORT]).temperature_2m.length / 24);
         if (numDays === 0) return;
         fcHoverIdx = Math.floor((mouseX - pX) / (w / numDays));
         if (fcHoverIdx < 0 || fcHoverIdx >= numDays) fcHoverIdx = null;
@@ -966,7 +1034,7 @@
           const pRight = actualWidth < 500 ? 40 : 60;
           const w = cvsFc.width - pX - pRight;
           
-          const numDays = Math.floor(FORECAST_DATA.resorts[window.GLOBAL_RESORT].temperature_2m.length / 24);
+          const numDays = Math.floor((FORECAST_DATA.resorts[window.GLOBAL_RESORT].hourly || FORECAST_DATA.resorts[window.GLOBAL_RESORT]).temperature_2m.length / 24);
           if (numDays === 0) return;
           fcHoverIdx = Math.floor((mouseX - pX) / (w / numDays));
           if (fcHoverIdx < 0 || fcHoverIdx >= numDays) fcHoverIdx = null;
@@ -1042,11 +1110,11 @@
       const tMax   = r.base?.temperature_2m_max ?? r.temperature_2m_max ?? null;
       const depth  = r.summit?.snow_depth       ?? r.snow_depth         ?? null;
       const gust   = r.base?.wind_gusts_10m_max ?? r.wind_gusts_10m_max ?? null;
-      // sunshine_duration is at r.base.sunshine_duration — NOT r.sunshine_duration
       const sunSec = r.base?.sunshine_duration  ?? r.sunshine_duration  ?? null;
+      const fresh  = r.summit?.snowfall_sum     ?? r.snowfall_sum       ?? null;
 
       if (tMax === null && depth === null) {
-        return { score: null, metrics: { fSun:0, fDepth:0, fTemp:0, windMult:1 } };
+        return { score: null, metrics: { fSun:0, fDepth:0, fTemp:0, windMult:1, powderBonus:0 } };
       }
 
       const sunHours = (sunSec ?? 0) / 3600;
@@ -1057,7 +1125,6 @@
 
       const fDepth = depth !== null ? Math.min(1, depth / bounds.maxDepth) : 0;
 
-      // Temperature score: sweet spot -12°C to -2°C = 1.0, degrades above 0°C and below -20°C
       let fTemp = 0.5;
       if (tMax !== null) {
         if      (tMax <= -20) fTemp = 0.3;
@@ -1069,7 +1136,6 @@
         fTemp = Math.max(0, Math.min(1, fTemp));
       }
 
-      // Wind penalty multiplier — lifts close above ~70 km/h
       let windMult = 1.0;
       if (gust !== null) {
         if      (gust <= 30) windMult = 1.0;
@@ -1078,10 +1144,20 @@
         else                 windMult = 0.3;
       }
 
-      const raw   = 0.40*fSun + 0.25*fDepth + 0.20*fTemp + 0.15*windMult;
-      const score = Math.max(0, Math.min(1, raw * windMult));
+      // Powder bonus: fresh summit snow > 10cm + gusts < 50 km/h → up to +0.15
+      let powderBonus = 0;
+      if (fresh !== null && fresh > 10) {
+        const snowFactor = Math.min(1, (fresh - 10) / 20);
+        const windFactor = (gust === null || gust <= 30) ? 1.0
+                         : gust <= 50 ? 1.0 - (gust - 30) / 20
+                         : 0;
+        powderBonus = Math.round(0.15 * snowFactor * windFactor * 10000) / 10000;
+      }
 
-      return { score, metrics: { fSun, fDepth, fTemp, windMult } };
+      const raw   = 0.40*fSun + 0.25*fDepth + 0.20*fTemp + 0.15*windMult;
+      const score = Math.max(0, Math.min(1, (raw + powderBonus) * windMult));
+
+      return { score, metrics: { fSun, fDepth, fTemp, windMult, powderBonus } };
     };
 
     const generateRichTooltipHTML = (title, dScore, finalSc, extras = '') => {
@@ -1092,6 +1168,10 @@
       const tC = m.fTemp >= 0.8 ? '#22c55e' : m.fTemp <= 0.3 ? '#ef4444' : 'var(--text-main)';
       const dC = m.fDepth >= 0.6 ? '#60a5fa' : 'var(--text-main)';
       const wC = m.windMult <= 0.5 ? '#ef4444' : m.windMult <= 0.8 ? '#f59e0b' : '#22c55e';
+      const pC = (m.powderBonus || 0) >= 0.10 ? '#22c55e' : (m.powderBonus || 0) > 0 ? '#60a5fa' : 'var(--text-muted)';
+      const powderRow = (m.powderBonus || 0) > 0
+        ? `<span style="color:var(--text-muted)">🌨️ Powder bonus</span> <span class="tt-val" style="color:${pC}">+${((m.powderBonus||0)*100).toFixed(0)}%</span>`
+        : '';
 
       return `<div class="tt-data-node">
         <div style="font-size:0.9rem; font-weight:800; color:var(--brand); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.4rem; margin-bottom:0.4rem;">${title}</div>
@@ -1102,6 +1182,7 @@
           <span style="color:var(--text-muted)">🏔️ Depth (25%)</span>      <span class="tt-val" style="color:${dC}">${(m.fDepth*100).toFixed(0)}%</span>
           <span style="color:var(--text-muted)">🌡️ Temp (20%)</span>       <span class="tt-val" style="color:${tC}">${(m.fTemp*100).toFixed(0)}%</span>
           <span style="color:var(--text-muted)">💨 Wind mult</span>         <span class="tt-val" style="color:${wC}">${(m.windMult*100).toFixed(0)}%</span>
+          ${powderRow}
           <span style="color:var(--text-muted); font-weight:800;">⭐ Composite</span> <span class="tt-val" style="color:var(--brand);">${(finalSc*100).toFixed(0)}%</span>
         </div>
       </div>`;
@@ -1257,10 +1338,11 @@
               avgScoreObj = {
                  score: scoreAvg,
                  metrics: {
-                   fSun:     vs.reduce((a,c)=>a+c.scoreData.metrics.fSun,    0)/count,
-                   fDepth:   vs.reduce((a,c)=>a+c.scoreData.metrics.fDepth,  0)/count,
-                   fTemp:    vs.reduce((a,c)=>a+c.scoreData.metrics.fTemp,   0)/count,
-                   windMult: vs.reduce((a,c)=>a+c.scoreData.metrics.windMult,0)/count,
+                   fSun:       vs.reduce((a,c)=>a+c.scoreData.metrics.fSun,      0)/count,
+                   fDepth:     vs.reduce((a,c)=>a+c.scoreData.metrics.fDepth,    0)/count,
+                   fTemp:      vs.reduce((a,c)=>a+c.scoreData.metrics.fTemp,     0)/count,
+                   windMult:   vs.reduce((a,c)=>a+c.scoreData.metrics.windMult,  0)/count,
+                   powderBonus:vs.reduce((a,c)=>a+((c.scoreData.metrics.powderBonus)||0),0)/count,
                  }
               };
             }
