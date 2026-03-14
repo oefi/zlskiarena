@@ -2,9 +2,9 @@ name: Refresh Ski Dashboard
 
 on:
   schedule:
-    # Forecast data: every 6 hours (model updates 4×/day)
+    # Forecast data: every 1 hours (model updates 4×/day)
     # Historical ERA5-Land has a 5-7 day lag — daily rebuild is plenty
-    - cron: "0 */6 * * *"
+    - cron: "0 */1 * * *"
   workflow_dispatch:
     inputs:
       end_date:
