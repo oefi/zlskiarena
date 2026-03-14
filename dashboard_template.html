@@ -1129,7 +1129,6 @@
     };
 
     window.renderHeatmaps = () => {
-      const bounds = getResortBounds(window.GLOBAL_RESORT);
       hc.innerHTML = '';
       
       const rData = byResort[window.GLOBAL_RESORT];
@@ -1164,6 +1163,7 @@
             
             const vs = chunkDays.map(d => {
               if(!dataMap[d]) return null;
+              const bounds = getResortBounds(window.GLOBAL_RESORT, d.slice(5));
               return {
                  scoreData: computeDynamicScore(dataMap[d], bounds),
                  precipHours: dataMap[d].precipitation_hours ?? 0,
