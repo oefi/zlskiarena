@@ -25,7 +25,9 @@ on:
       - ".github/workflows/refresh.yml"
 
 permissions:
-  contents: write
+  contents: read      # no longer writing commits to main
+  pages: write        # upload Pages artifact
+  id-token: write     # required by actions/deploy-pages
 
 concurrency:
   group: refresh-${{ github.ref }}
@@ -35,6 +37,9 @@ jobs:
   refresh:
     name: Fetch → Build Dashboard
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -70,21 +75,25 @@ jobs:
           fi
           python3 scripts/action_refresh.py $ARGS
 
-      - name: Rename output for GitHub Pages
+      - name: Prepare Pages artifact
         if: steps.refresh.outputs.DASHBOARD_CHANGED == 'true'
         run: |
-          mv nauders_dashboard.html index.html
+          mkdir -p _site
+          mv nauders_dashboard.html _site/index.html
+          # og-image lives at repo root; copy if present
+          [ -f og-image.png ] && cp og-image.png _site/og-image.png || true
           echo "Dashboard built through: ${{ steps.refresh.outputs.BAKED_THROUGH }}"
 
-      - name: Commit and push updated dashboard
+      - name: Upload Pages artifact
         if: steps.refresh.outputs.DASHBOARD_CHANGED == 'true'
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html og-image.png
-          git diff --staged --quiet && echo "Nothing to commit" && exit 0
-          git commit -m "chore: refresh dashboard through ${{ steps.refresh.outputs.BAKED_THROUGH }} [skip ci]"
-          git push
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site/
+
+      - name: Deploy to GitHub Pages
+        if: steps.refresh.outputs.DASHBOARD_CHANGED == 'true'
+        id: deploy
+        uses: actions/deploy-pages@v4
 
       - name: Log no-op
         if: steps.refresh.outputs.DASHBOARD_CHANGED != 'true'
