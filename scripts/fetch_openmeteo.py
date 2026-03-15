@@ -72,7 +72,7 @@ _discovered_end_date: str | None = None
 
 def get_session() -> requests.Session:
     session = requests.Session()
-    retry = Retry(total=5, backoff_factor=1, status_forcelist=[429, 500, 502, 503, 504])
+    retry = Retry(total=5, backoff_factor=2, status_forcelist=[429, 500, 502, 503, 504])
     adapter = HTTPAdapter(max_retries=retry)
     session.mount("http://", adapter)
     session.mount("https://", adapter)
@@ -268,6 +268,7 @@ def fetch_merged(
     }
 
     era5_data  = _get(session, base_params)
+    time.sleep(2.0)   # pace between Call A and Call B — Open-Meteo free tier ~10 req/min
     depth_data = _get(session, depth_params)
 
     # Aggregate hourly snow_depth → daily MAX and inject into ERA5 daily dict.
@@ -472,7 +473,7 @@ def main() -> None:
                 print(f"  ✓ {elev_label.capitalize():<7} ({elev_m}m): "
                       f"+{n_fetched} new days, {total_days} total{lag_note}")
 
-            time.sleep(0.6)
+            time.sleep(3.0)   # between resorts — keeps full force-rebuild within rate limits
 
     except Exception as e:
         print(f"\n[!] CRITICAL: Open-Meteo fetch failed: {e}")
