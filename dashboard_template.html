@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Zwei Länder Skiarena — Ski conditions dashboard for 5 resorts across Reschenpass (AUT/ITA). Nov–Apr 2019/20–2025/26 · ERA5-Seamless · updated every 6 hours.">
+<meta name="description" content="Zwei Länder Skiarena — Daily ski conditions for 5 resorts across Reschenpass (AUT/ITA). 6 seasons of historical data · mid-Dec to Easter · updated every 6 hours.">
 <title>Zwei Länder Skiarena · Ski Conditions</title>
 
 <meta name="author" content="Zwei Länder Skiarena Dashboard">
@@ -260,7 +260,7 @@
   <section id="powder-alarm">
     <div class="flex-between" style="margin-bottom: 1.5rem;">
       <div>
-        <h2 style="margin:0; border:none; padding:0; border-bottom: none;">Forecast & Alpine Hazards 📡</h2>
+        <h2 style="margin:0; border:none; padding:0; border-bottom: none;">Today & Next 16 Days 📡</h2>
         <p id="forecast-subtitle" style="font-size: 0.85rem; color: var(--text-muted); margin: 0.2rem 0 0 0;">High-resolution aggregate models mapped to exact base and summit topography.</p>
       </div>
     </div>
@@ -535,11 +535,21 @@
   };
 
   const STATIC_METADATA = {
-    'nauders': { base: 1400, summit: 2750 },
-    'schoeneben': { base: 1460, summit: 2390 },
-    'watles': { base: 1500, summit: 2550 },
-    'sulden': { base: 1900, summit: 3250 },
-    'trafoi': { base: 1540, summit: 2800 }
+    'nauders':    { base: 1400, summit: 2750, label: 'Nauders',        region: 'Reschenpass / AUT',
+                    webcam: 'https://www.nauders.com/en/webcams',
+                    lifts:  'https://www.nauders.com/en/winter/piste-map-lifts' },
+    'schoeneben': { base: 1460, summit: 2390, label: 'Schöneben',      region: 'Reschenpass / ITA',
+                    webcam: 'https://www.schoeneben.it/en/webcam',
+                    lifts:  'https://www.schoeneben.it/en/winter/ski-area' },
+    'watles':     { base: 1500, summit: 2550, label: 'Watles',         region: 'Reschenpass / ITA',
+                    webcam: 'https://www.watles.it/en/webcam',
+                    lifts:  'https://www.watles.it/en/winter' },
+    'sulden':     { base: 1900, summit: 3250, label: 'Sulden / Ortler', region: 'South Tyrol / ITA · Glacier',
+                    webcam: 'https://www.sulden.com/en/webcam',
+                    lifts:  'https://www.sulden.com/en/winter/piste-map' },
+    'trafoi':     { base: 1540, summit: 2800, label: 'Trafoi',         region: 'South Tyrol / ITA',
+                    webcam: 'https://www.trafoi.com/en/webcam',
+                    lifts:  'https://www.trafoi.com/en/winter' },
   };
 
   let SKI_DATA = null, FORECAST_DATA = null;
@@ -718,8 +728,7 @@
     const renderTacticalSummary = (resort) => {
       if (fcSubtitle) {
         const meta = STATIC_METADATA[resort.toLowerCase()] || {};
-        const resortLabel = resort.charAt(0).toUpperCase() + resort.slice(1);
-        fcSubtitle.textContent = `${resortLabel} · 🏘 Village ${meta.base ?? '?'} m · ⛰ Mountain ${meta.summit ?? '?'} m · 16-day ECMWF/ICON/GFS blend · forecast at summit elevation`;
+        fcSubtitle.innerHTML = `<strong style="color:var(--text-main);">📍 ${meta.label ?? resort} &nbsp;<span style="font-weight:400;color:var(--text-muted);font-size:0.8rem;">${meta.region ?? ''}</span></strong>&ensp;·&ensp;${(meta.base ?? '?')}m base &nbsp;→&nbsp; ${(meta.summit ?? '?')}m summit&ensp;·&ensp;16-day ECMWF/ICON/GFS blend`;
       }
       if (!FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[resort]) {
           fcBoard.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">No forecast payload for ${resort}</div>`;
@@ -737,6 +746,11 @@
       const snow = daily?.snowfall_sum
         ? daily.snowfall_sum.slice(0, days7).reduce((a,b)=>a+(b||0),0)
         : (hourly.snowfall ? hourly.snowfall.slice(0, days7*24).reduce((a,b)=>a+(b||0),0) : 0);
+
+      // 24h new snow — the number skiers actually care about first
+      const snow24h = daily?.snowfall_sum?.[0] ?? (hourly.snowfall
+        ? hourly.snowfall.slice(0, 24).reduce((a,b)=>a+(b||0), 0)
+        : null);
 
       // Rain
       const rain = daily?.rain_sum
@@ -862,7 +876,31 @@
           ${fcSnowDepthCm !== null ? `<div style="margin-top:0.45rem;padding-top:0.4rem;border-top:1px solid var(--border-color);font-size:0.7rem;color:var(--text-muted);">Snow depth now: <b style="color:var(--text-main);">${fcSnowDepthCm} cm</b> · Lapse: 6.5°C/1000m (std. env.)</div>` : ''}
         </div>`;
 
-      fcBoard.innerHTML = profileHtml + `
+      // ── Ground truth & safety links ────────────────────────────────────────
+      const metaLinks = STATIC_METADATA[resort.toLowerCase()] || {};
+      const groundTruthHtml = `
+        <div class="fc-card" style="grid-column:span 2; background:var(--bg-main); border-color:var(--border-color);">
+          <div style="display:flex; flex-wrap:wrap; gap:0.6rem; align-items:center; justify-content:space-between;">
+            <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+              ${metaLinks.webcam ? `<a href="${metaLinks.webcam}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:600;color:var(--brand);text-decoration:none;background:var(--brand-light);border-radius:4px;padding:0.2rem 0.5rem;">📷 Live webcam</a>` : ''}
+              ${metaLinks.lifts  ? `<a href="${metaLinks.lifts}"  target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:600;color:#15803d;text-decoration:none;background:rgba(21,128,61,0.08);border:1px solid rgba(21,128,61,0.2);border-radius:4px;padding:0.2rem 0.5rem;">🟢 Lift status</a>` : ''}
+              <a href="https://lawinen.report" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:600;color:#b45309;text-decoration:none;background:rgba(180,83,9,0.08);border:1px solid rgba(180,83,9,0.2);border-radius:4px;padding:0.2rem 0.5rem;">⚠️ Avalanche bulletin (EAWS)</a>
+            </div>
+            <div style="font-size:0.65rem;color:var(--text-muted);">Ground truth — models don't see valley fog or closed roads</div>
+          </div>
+        </div>`;
+
+      // ── 24h fresh snow hero ─────────────────────────────────────────────────
+      const isPowderDay = (snow24h !== null && snow24h >= 15);
+      const snow24html = snow24h !== null ? `
+        <div class="fc-card" style="${isPowderDay ? 'border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,0.2);' : ''}">
+          <div style="color:var(--text-muted);font-size:0.75rem;font-weight:bold;text-transform:uppercase;margin-bottom:0.2rem;letter-spacing:0.05em;">New snow today ❄️</div>
+          <div style="font-size:${snow24h >= 10 ? '2.4' : '2'}rem; font-weight:800; color:${snow24h >= 20 ? '#1d4ed8' : snow24h >= 10 ? '#2563eb' : 'var(--text-main)'}; line-height:1;">${snow24h.toFixed(0)}<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">cm</span></div>
+          ${isPowderDay ? `<div style="font-size:0.7rem;color:#2563eb;font-weight:600;margin-top:0.3rem;">🎿 Powder conditions</div>` : `<div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">24h accumulation</div>`}
+          ${isPowderDay ? `<div style="font-size:0.65rem;margin-top:0.3rem;padding:0.2rem 0.4rem;background:rgba(180,83,9,0.08);border:1px solid rgba(180,83,9,0.2);border-radius:3px;color:#b45309;font-weight:600;">⚠ Check <a href="https://lawinen.report" target="_blank" style="color:#b45309;">avalanche bulletin</a> before off-piste</div>` : ''}
+        </div>` : '';
+
+      fcBoard.innerHTML = groundTruthHtml + snow24html + profileHtml + `
           <div class="fc-card">
               <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Snowfall 7d ❄️</div>
               <div style="font-size:2rem; font-weight:800; color:#2563eb; line-height:1;">${snow.toFixed(0)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">cm</span></div>
@@ -1030,22 +1068,24 @@
       strip.innerHTML = days.map((d, i) => {
         const isTop = topIdx.has(i);
         const isBest = i === bestIdx;
+        const isPowder  = d.freshCm >= 15 && (d.gustMax === null || d.gustMax < 60);
         const chipClass = isBest ? 'fc-day-chip fc-day-chip--top' : isTop ? 'fc-day-chip fc-day-chip--top3-1' : 'fc-day-chip';
-        const scoreColor = d.score >= 0.75 ? '#22c55e' : d.score >= 0.55 ? '#84cc16' : d.score >= 0.40 ? '#f59e0b' : '#ef4444';
+        const scoreColor = d.score >= 0.75 ? '#16a34a' : d.score >= 0.55 ? '#84cc16' : d.score >= 0.40 ? '#f59e0b' : '#ef4444';
         const dayLabel  = d.dt.toLocaleDateString('en-US', {weekday:'short'});
         const dateLabel = d.dt.toLocaleDateString('en-US', {month:'short', day:'numeric'});
         const snowStr   = d.freshCm > 0.5 ? `❄️${d.freshCm.toFixed(0)}cm` : '';
         const probStr   = d.probMax !== null && d.probMax > 20 ? `☔ ${Math.round(d.probMax)}%` : '';
         const bestMark  = isBest ? '⭐' : isTop ? '✓' : '';
-        return `<div class="${chipClass}" title="${dayLabel} ${dateLabel} · Bluebird ${(d.score*100).toFixed(0)}% · ${d.tMax !== null ? 'T max '+d.tMax.toFixed(0)+'°C' : ''} · ${d.freshCm > 0 ? d.freshCm.toFixed(0)+' cm snow' : 'no new snow'} · gust ${d.gustMax !== null ? d.gustMax.toFixed(0)+' km/h' : '—'}">
+        const titleStr  = `Projected score ${(d.score*100).toFixed(0)}% · ${dayLabel} ${dateLabel}${isPowder ? ' · 🌨 Powder override' : ''} · ${d.tMax !== null ? 'T max '+d.tMax.toFixed(0)+'°C' : ''} · ${d.freshCm > 0 ? d.freshCm.toFixed(0)+' cm snow' : 'no new snow'} · gust ${d.gustMax !== null ? d.gustMax.toFixed(0)+' km/h' : '—'}`;
+        return `<div class="${chipClass}" title="${titleStr}"${isPowder ? ' style="border-color:#2563eb;box-shadow:0 0 0 1px rgba(37,99,235,0.25);"' : ''}>
           <div style="font-size:0.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;display:flex;justify-content:space-between;">
-            <span>${dayLabel}</span><span style="color:${isTop?'#fbbf24':'var(--text-muted)'};">${bestMark}</span>
+            <span>${dayLabel}</span><span style="color:${isTop?'#d97706':'var(--text-muted)'};">${bestMark}</span>
           </div>
           <div style="font-size:0.65rem;color:var(--text-muted);">${dateLabel}</div>
-          <div style="font-size:1.3rem;line-height:1.1;text-align:center;">${d.wmoEmoji}</div>
+          <div style="font-size:1.3rem;line-height:1.1;text-align:center;">${isPowder ? '🌨️' : d.wmoEmoji}</div>
           <div style="font-size:0.85rem;font-weight:800;color:${scoreColor};text-align:center;">${(d.score*100).toFixed(0)}%</div>
           ${d.tMax !== null ? `<div style="font-size:0.6rem;color:var(--text-muted);text-align:center;">${d.tMax.toFixed(0)}°C</div>` : ''}
-          ${snowStr ? `<div style="font-size:0.6rem;color:#93c5fd;">${snowStr}</div>` : ''}
+          ${snowStr ? `<div style="font-size:0.6rem;color:#2563eb;">${snowStr}</div>` : ''}
           ${probStr ? `<div style="font-size:0.6rem;color:#60a5fa;">${probStr}</div>` : ''}
         </div>`;
       }).join('');
@@ -1535,6 +1575,11 @@
 
     const getHistoricalAverage = (resort, mmdd) => {
       if(!byResort[resort]) return null;
+      const mo = parseInt(mmdd.slice(0,2)), dy = parseInt(mmdd.slice(3,5));
+      // Exclude shoulder season from the average — same window as hm-cell-shoulder dimming
+      // Nov is pre-season; Apr 15+ is post-season for most resorts
+      const isShoulder = mo === 11 || (mo === 4 && dy >= 15);
+      if (isShoulder) return null;
       const valid = byResort[resort].filter(r => {
         const y = parseInt(r.date.slice(0,4)), m = parseInt(r.date.slice(5,7));
         const rSeason = m >= 11 ? y : y - 1;
@@ -1625,8 +1670,10 @@
         raw = 0.45 * fSun + 0.30 * fDepth + 0.25 * fTemp;
       }
 
+      const powderOverrideActive = freshCm >= 15 && gustKmh < 60;
+
       const score = Math.max(0, Math.min(1, (raw + powderBonus) * windMult));
-      return { score, metrics: { fSun, fDepth, fTemp, windMult, powderBonus } };
+      return { score, metrics: { fSun, fDepth, fTemp, windMult, powderBonus, powderOverride: powderOverrideActive } };
     };
 
     const generateRichTooltipHTML = (title, dScore, finalSc, extras = '') => {
@@ -1638,23 +1685,41 @@
       const dC = m.fDepth >= 0.6 ? '#2563eb' : 'var(--text-main)';
       const wC = m.windMult <= 0.5 ? '#ef4444' : m.windMult <= 0.8 ? '#d97706' : '#15803d';
       const pC = (m.powderBonus || 0) >= 0.10 ? '#22c55e' : (m.powderBonus || 0) > 0 ? '#60a5fa' : 'var(--text-muted)';
+
+      // Contextual temperature label — tell skiers what the score means, not the maths
+      const dateMonth = title.length >= 7 ? parseInt(title.slice(5,7)) : 1;
+      const dateDayN  = title.length >= 10 ? parseInt(title.slice(8,10)) : 1;
+      const isSpring  = dateMonth > 3 || (dateMonth === 3 && dateDayN >= 21);
+      const isTrans   = !isSpring && (dateMonth === 3);
+      const tempLabel = isSpring  ? '🌸 Snow quality (spring)' :
+                        isTrans   ? '🌡️ Snow quality (transition)' :
+                                    '🌡️ Snow quality (freeze)';
+
       const powderRow = (m.powderBonus || 0) > 0
         ? `<span style="color:var(--text-muted)">🌨️ Powder bonus</span> <span class="tt-val" style="color:${pC}">+${((m.powderBonus||0)*100).toFixed(0)}%</span>`
         : '';
+
+      // Contextual bottom caption
+      const isOverride = m.powderOverride;
+      const captionText = isOverride
+        ? '🌨️ Powder override — sunshine irrelevant during a storm. Score driven by snow depth and snowfall intensity.'
+        : isSpring
+        ? 'Spring day — soft corn snow, warm sun. Temp score reflects Firn conditions (+6°C is ideal, not a penalty).'
+        : 'Score = (sun·45 + depth·30 + snow quality·25) × wind factor · 100% = perfect day';
 
       return `<div class="tt-data-node">
         <div style="font-size:0.9rem; font-weight:800; color:var(--brand); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.4rem; margin-bottom:0.4rem;">${title}</div>
         ${extras}
         <div style="color:var(--text-muted); font-size:0.7rem; margin-top:0.4rem; text-transform:uppercase;">Bluebird Score · higher = better ski day</div>
         <div class="tt-grid">
-          <span style="color:var(--text-muted)">☀️ Sun (45%)</span>        <span class="tt-val" style="color:${sC}">${(m.fSun*100).toFixed(0)}%</span>
-          <span style="color:var(--text-muted)">🏔️ Depth (30%)</span>      <span class="tt-val" style="color:${dC}">${(m.fDepth*100).toFixed(0)}%</span>
-          <span style="color:var(--text-muted)">🌡️ Temp (25%)</span>       <span class="tt-val" style="color:${tC}">${(m.fTemp*100).toFixed(0)}%</span>
-          <span style="color:var(--text-muted)">💨 Wind ×</span>            <span class="tt-val" style="color:${wC}">${(m.windMult*100).toFixed(0)}%</span>
+          <span style="color:var(--text-muted)">☀️ Sunshine (45%)</span>   <span class="tt-val" style="color:${sC}">${(m.fSun*100).toFixed(0)}%</span>
+          <span style="color:var(--text-muted)">❄️ Base depth (30%)</span> <span class="tt-val" style="color:${dC}">${(m.fDepth*100).toFixed(0)}%</span>
+          <span style="color:var(--text-muted)">${tempLabel} (25%)</span>  <span class="tt-val" style="color:${tC}">${(m.fTemp*100).toFixed(0)}%</span>
+          <span style="color:var(--text-muted)">💨 Wind factor</span>       <span class="tt-val" style="color:${wC}">${(m.windMult*100).toFixed(0)}%</span>
           ${powderRow}
           <span style="color:var(--text-muted); font-weight:800;">⭐ Score</span> <span class="tt-val" style="color:var(--brand);">${(finalSc*100).toFixed(0)}%</span>
         </div>
-        <div style="font-size:0.65rem; color:var(--text-muted); margin-top:0.5rem; border-top:1px solid var(--border-color); padding-top:0.35rem;">Score = (sun·45 + depth·30 + temp·25) × wind${(m.powderBonus||0)>0?' + powder bonus':''}${m.powderOverride?' — ☁ powder override active':''} · 100% = perfect day</div>
+        <div style="font-size:0.65rem; color:var(--text-muted); margin-top:0.5rem; border-top:1px solid var(--border-color); padding-top:0.35rem;">${captionText}</div>
       </div>`;
     };
 
@@ -2542,6 +2607,10 @@
 
 <footer style="text-align: center; padding: 1.5rem; color: var(--text-muted); font-size: 0.8rem; border-top: 1px solid var(--border-color); margin-top: 0;">
   Zwei Länder Skiarena · Open-Meteo ERA5-Seamless + ECMWF/ICON/GFS · Refreshed every 6 hours
+  &ensp;·&ensp;
+  <a href="https://lawinen.report" target="_blank" rel="noopener" style="color:var(--text-muted);text-decoration:underline;text-underline-offset:2px;">⚠️ EAWS Avalanche Bulletin (Tirol/South Tyrol)</a>
+  &ensp;·&ensp;
+  Optimised for piste skiers · Off-piste always requires local avalanche assessment
 </footer>
 </body>
 </html>
