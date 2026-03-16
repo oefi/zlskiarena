@@ -47,6 +47,7 @@ ERA5_VARS = [
     "temperature_2m_max",
     "temperature_2m_min",
     "apparent_temperature_min",
+    "apparent_temperature_max",
     "snowfall_sum",
     "precipitation_sum",
     "precipitation_hours",
