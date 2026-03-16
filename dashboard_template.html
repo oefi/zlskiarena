@@ -844,10 +844,8 @@
       return { score: Math.round(score*1000)/1000, fSun, fDepth, fTemp, wMult, pBonus, probFactor };
     };
 
-    }
-
     const cvsFc = document.getElementById('forecast-canvas');
-    if (cvsFc) setupHiDPI(cvsFc, 2000, 760);
+    if (cvsFc) setupHiDPI(cvsFc, 2000, 960);
     const ctxFc = cvsFc ? cvsFc.getContext('2d') : null;
     let fcHoverIdx = null; let fcTouch = false;
 
