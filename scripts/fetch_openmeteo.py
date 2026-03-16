@@ -3,12 +3,12 @@
 Zwei Länder Skiarena — Open-Meteo Historical Weather Fetcher
 
 Dual-call strategy per elevation:
-  Call A — ERA5 best-match (elevation + models=best_match): all daily weather variables.
-            sunshine_duration, shortwave_radiation_sum, snowfall_sum, temperature,
-            wind, precipitation, weather_code are all available as daily aggregates.
-            The elevation param triggers Open-Meteo's statistical downscaling so
-            base and summit temperatures/wind reflect their actual altitudes, not
-            the raw ~25 km ERA5 grid cell average.
+  Call A — ERA5-Seamless (elevation + models=era5_seamless): all daily weather variables.
+            Probe (2026-03-16) confirmed era5_seamless returns sunshine_duration natively
+            and self-consistently — using it directly is more accurate than deriving via
+            Angstrom-Prescott, which was calibrated for ERA5/best_match radiation schemes
+            and produces ~67% error against era5_seamless shortwave values.
+            Effective data lag: ~6 days (reduced from 7 under best_match; lag machinery kept).
   Call B — ERA5-Land (elevation + models=era5_land): snow_depth HOURLY.
             snow_depth has NO daily aggregate in the archive API — we request
             hourly and compute the daily MAX ourselves.
@@ -39,9 +39,10 @@ OUTPUT_DIR    = Path(__file__).parent.parent / "data" / "raw"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 BASE_URL      = "https://archive-api.open-meteo.com/v1/archive"
 START_DATE    = "2019-11-01"
-ERA5_LAG_DAYS = 7
+ERA5_LAG_DAYS = 6   # era5_seamless lag ~6 days (probed 2026-03-16)
 
-# Call A — ERA5 best-match (elevation param supplied). All variables except snow_depth.
+# Call A — ERA5-Seamless (elevation param supplied). All variables including snow_depth.
+# Probe confirmed era5_seamless returns sunshine_duration non-null and self-consistent.
 ERA5_VARS = [
     "temperature_2m_max",
     "temperature_2m_min",
@@ -49,8 +50,8 @@ ERA5_VARS = [
     "snowfall_sum",
     "precipitation_sum",
     "precipitation_hours",
-    "sunshine_duration",
-    "shortwave_radiation_sum",
+    "sunshine_duration",       # native from era5_seamless — more accurate than A-P derivation
+    "shortwave_radiation_sum",  # retained for diagnostics and record completeness
     "wind_speed_10m_max",
     "wind_gusts_10m_max",
     "weather_code",
@@ -254,7 +255,7 @@ def fetch_merged(
         "daily":      ",".join(ERA5_VARS),
         "timezone":   "Europe/Berlin",
         "elevation":  elevation_m,   # triggers lapse-rate downscaling for temp/wind
-        "models":     "best_match",  # explicit; default but documents intent
+        "models":     "era5_seamless", # blends ERA5-Land + IFS; native sunshine_duration; ~6d lag
     }
     depth_params = {
         "latitude":   lat,
