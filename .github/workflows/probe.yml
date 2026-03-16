@@ -1,7 +1,6 @@
 name: Open-Meteo 2026 Probe
 
 on:
-  workflow_dispatch:
   # Disabled — run manually by temporarily restoring workflow_dispatch
   # workflow_dispatch:
 jobs:
