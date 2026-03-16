@@ -840,20 +840,6 @@
         ? `<div style="font-size:2rem; font-weight:800; color:${uvColor}; line-height:1;">${peakUV.toFixed(0)}<span style="font-size:0.85rem; color:var(--text-muted); margin-left:0.3rem;">UV</span></div><div style="font-size:0.7rem;color:${uvColor};margin-top:0.2rem;font-weight:600;" title="UV rises ~10% per 1000 m. At summit, sunscreen mandatory.">${uvLabel} · ${meta.summit} m</div>`
         : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
 
-      
-      // Forecast data is fetched at summit elevation only. Village temps are
-      // derived using the standard environmental lapse rate (6.5°C / 1000 m).
-      const LAPSE_RATE = 6.5;
-      const altDelta   = (meta.summit || 0) - (meta.base || 0);
-      const lapseOffset = +(altDelta / 1000 * LAPSE_RATE).toFixed(1);
-      const mtnTMax = daily?.temperature_2m_max?.[0] ?? null;
-      const mtnTMin = daily?.temperature_2m_min?.[0] ?? null;
-      const villTMax = mtnTMax !== null ? +(mtnTMax + lapseOffset).toFixed(1) : null;
-      const villTMin = mtnTMin !== null ? +(mtnTMin + lapseOffset).toFixed(1) : null;
-      const fcSnowDepthCm = hourly?.snow_depth?.[0] != null ? (hourly.snow_depth[0] * 100).toFixed(0) : null;
-      const fcDay0Date = hourly?.time?.[0] ? new Date(hourly.time[0]).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) : null;
-      const tColor = t => t === null ? 'var(--text-muted)' : t > 2 ? '#ef4444' : t > -5 ? '#f97316' : t > -12 ? 'var(--text-main)' : '#3b82f6';
-      const tStr   = (mx, mn) => mx !== null ? `${mx > 0 ? '+' : ''}${mx.toFixed(1)} / ${mn !== null ? (mn > 0 ? '+' : '') + mn.toFixed(1) : '—'}°C` : '—';
 
       // ── Card helpers ───────────────────────────────────────────────────
       const cardLabel = (text) =>
