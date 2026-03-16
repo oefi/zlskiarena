@@ -194,7 +194,7 @@
     .hm-season-row { grid-template-columns: 1fr; gap: 0.2rem; align-items: start; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; }
     .hm-season-row > div:first-child { text-align: left !important; font-size: 1rem; color: var(--text-main) !important; }
     section { padding: 1rem; }
-    #toc { display: none !important; } /* Hide TOC entirely on tiny screens to save space */
+    #toc { display: none !important; }
   }
   @media (max-width: 500px) {
     .resort-name-full { display: none; }
@@ -211,10 +211,10 @@
 </head>
 <body>
 
-<!-- Global Glassmorphic Tooltip Container -->
+<!-- Global tooltip — positioned by JS mousemove, populated by .tt-data-node children -->
 <div id="global-tooltip"></div>
 
-<!-- ── LEAN HEADER (UNPINNED) ── -->
+<!-- Site header — unpinned, collapses to flex column below 1024px -->
 <header class="main-header" style="position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding: 0.6rem 1rem; background: var(--bg-header); border-bottom: 1px solid var(--border-color); box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
   
   <!-- Left: TOC -->
@@ -260,7 +260,6 @@
       </div>
     </div>
 
-    <!-- The Consolidated Forecast Wrapper -->
     <div id="forecast-wrapper">
       
       <!-- The 7-Day Tactical Overview (Left Panel) -->
@@ -314,7 +313,7 @@
     <div id="heatmap-container" style="display: flex; flex-direction: column; gap: 2rem; margin-top: 1rem;"></div>
   </section>
 
-  <!-- ── DAILY TELEMETRY (CONTEXT AWARE) ── -->
+  <!-- ── DAILY CONDITIONS TABLE ── -->
   <section id="drilldown">
     <div class="flex-between" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
       <h2 style="margin:0; border:none; padding:0;">Daily Conditions 📅</h2>
@@ -352,16 +351,16 @@
   <!-- ── SNOWPACK CANVAS ── -->
   <section id="snowpack">
     <h2>Snowpack Evolution 🏔️</h2>
-    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;"><strong>Solid lines = Mountain (summit)</strong> &nbsp;·&nbsp; <strong>Dashed lines = Village (base)</strong> &nbsp;·&nbsp; Historical Mean from prior seasons only.</p>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">Summit snow depth (ERA5-Land). Reference bands: <span style="color:#b45309;font-weight:600;">▬ min skiable 30cm</span> · <span style="color:#d97706;font-weight:600;">▬ good 80cm</span> · <span style="color:#15803d;font-weight:600;">▬ excellent 150cm</span></p>
     
     <div style="margin-bottom: 1rem; display: flex; flex-direction: column; gap: 1rem;">
       <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; align-items: center;">
         
         <div style="display: flex; gap: 0.5rem; align-items: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
           <span style="font-size: 0.75rem; color: var(--text-muted); padding: 0 0.5rem; font-weight: bold; text-transform: uppercase;">Smooth:</span>
-          <button class="control-btn filter-btn active" data-ma="1" style="border:none; border-radius:0;">Raw</button>
+          <button class="control-btn filter-btn" data-ma="1" style="border:none; border-radius:0;">Raw</button>
           <button class="control-btn filter-btn" data-ma="3" style="border:none; border-left:1px solid var(--border-color); border-radius:0;">3d Avg</button>
-          <button class="control-btn filter-btn" data-ma="7" style="border:none; border-left:1px solid var(--border-color); border-radius:0;">7d Avg</button>
+          <button class="control-btn filter-btn active" data-ma="7" style="border:none; border-left:1px solid var(--border-color); border-radius:0;">7d Avg</button>
         </div>
       </div>
       
@@ -408,8 +407,8 @@
 </footer>
 
 <script>
-  // ── CORE SYSTEM & HSL GRADIENT ENGINE ──
-  
+  // ── CONSTANTS & COLOR UTILITIES ──
+
   const RESORT_ABBREVIATIONS = {
     'nauders': 'naud',
     'schoeneben': 'schoen',
@@ -471,7 +470,7 @@
     }
   })();
 
-  // ── TEMPORAL GUILLOTINE ──
+  // Strip any records dated beyond today (guards against pipeline runs that fetch ahead).
   const localNow = new Date();
   const yyyy = localNow.getFullYear(), mm = String(localNow.getMonth() + 1).padStart(2, '0'), dd = String(localNow.getDate()).padStart(2, '0');
   const localTodayStr = `${yyyy}-${mm}-${dd}`;
@@ -486,15 +485,8 @@
 
   const getStyleVar = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const seasonColors = ['#64748b', '#d946ef', '#0ea5e9', '#f59e0b', '#10b981', '#f43f5e', '#8b5cf6'];
-  const RESORT_ELEVATIONS = {
-    nauders:    { base: 1400, summit: 2750 },
-    schoeneben: { base: 1460, summit: 2390 },
-    watles:     { base: 1500, summit: 2550 },
-    sulden:     { base: 1900, summit: 3250 },
-    trafoi:     { base: 1540, summit: 2800 },
-  };
   // Per-resort functional snow depth cap (m) — mirrors compute_metrics.py OPTIMAL_DEPTH_CM.
-  // Full marks above the cap; a freak record season never devalues a good normal one.
+  // Full marks above cap; a freak record season never devalues a good normal one.
   const OPTIMAL_DEPTH_M = { nauders: 1.50, schoeneben: 1.30, watles: 1.20, sulden: 2.00, trafoi: 1.60 };
 
   // ── 6-HOUR SYNC CHRONOMETER (matches CI schedule) ──
@@ -523,7 +515,7 @@
     _lastSyncPeriod = currentPeriod;
   }, 1000);
 
-  // ── GLOBAL GLASSMORPHIC TOOLTIP ENGINE ──
+  // Tooltip engine — shows .tt-data-node contents in #global-tooltip on .has-tooltip hover.
   const gTooltip = document.getElementById('global-tooltip');
   document.addEventListener('mouseover', (e) => {
     const node = e.target.closest('.has-tooltip');
@@ -606,9 +598,7 @@
       glbHeader.appendChild(b);
     });
 
-    // =========================================================
-    // MODULE 1: FORECAST ENGINE
-    // =========================================================
+    // ── MODULE 1: FORECAST ──────────────────────────────────
     const fcBoard = document.getElementById('tactical-summary-board');
     const fcSubtitle = document.getElementById('forecast-subtitle');
 
@@ -623,9 +613,9 @@
           return;
       }
       const resortData = FORECAST_DATA.resorts[resort];
-      // Prefer daily aggregates if the updated fetch_forecast.py ran; fall back to hourly
+      // Daily aggregates preferred; hourly fallback for older cached payloads.
       const daily  = resortData.daily  || null;
-      const hourly = resortData.hourly || resortData;  // backwards compat with old payload shape
+      const hourly = resortData.hourly || resortData;
       const limit  = Math.min(168, (hourly.temperature_2m?.length || 0));
       if (limit === 0 && !daily) return;
       const days7 = 7;
@@ -805,12 +795,11 @@
     }
 
     // ── BEST DAYS STRIP ──────────────────────────────────────────────────
-    // Scores each forecast day using the same Bluebird formula (sun/depth/temp/wind/powder).
-    // snow_depth and precipitation_probability are now fetched in the payload.
-    // Highlights the top 3 days so a tourist can plan instantly.
-    // maxSun: resort's historical peak sunshine hours (from getResortBounds), used to normalise
-    //         forecast sun hours on the same scale as historical scores. Falls back to 10h.
-    // probPct: precipitation probability 0–100. Acts as a confidence weight on snow-day scores.
+    // Projected Score (not Bluebird): same sun/depth/temp/wind/powder formula but multiplied
+    // by a precipitation-probability confidence factor (probFactor). Top 3 days highlighted.
+    // maxSun: resort's historical peak sunshine hours from getResortBounds — normalises forecast
+    //         sun hours onto the same scale as historical bounds. Falls back to 10h.
+    // probPct: precipitation probability 0–100; low probability lowers score confidence.
     const computeForecastDayScore = (tMax, tMin, sunH, depthM, gustKmh, freshCm, probPct, maxSun) => {
       const sunPeak = (maxSun && maxSun > 0) ? maxSun : 10;
       const fSun  = Math.min(1, sunH / sunPeak);
@@ -933,7 +922,7 @@
       ctxFc.clearRect(0,0,cvsFc.width,cvsFc.height);
 
       const resortData = FORECAST_DATA.resorts[window.GLOBAL_RESORT];
-      // Support both new payload shape (resortData.hourly) and old flat shape
+      // Prefer resortData.hourly; fall back to flat shape for older cached payloads.
       const hourly = resortData.hourly || resortData;
       if (!hourly.temperature_2m) return;
       const numDays = Math.floor(hourly.temperature_2m.length / 24);
@@ -1027,7 +1016,6 @@
         });
       }
 
-      // Responsive Frame Matrix
       const actualWidth = cvsFc.clientWidth || cvsFc.width;
       const isNarrow = actualWidth < 700;
       const isMobile = actualWidth < 500;
@@ -1067,8 +1055,7 @@
         ? Math.max(300, ...daily.map(d => d.directMean || 0))
         : Math.ceil(Math.max(12, ...daily.map(d => d.astroMax || 12)));
       const mapYDirect = val => yP2 + hP2 - (Math.min(val, maxDirect) / maxDirect) * hP2;
-      // Keep mapYSun alias for any other consumers that may use it
-      const mapYSun = mapYDirect;
+
 
       const maxGust = Math.max(60, ...daily.map(d=>d.gust));
       const mapYGust = g => yP2 + hP2 - (Math.min(g, maxGust) / maxGust) * hP2;
@@ -1275,7 +1262,6 @@
         // Expand the glass tooltip bounding box if we have extra density or soil data
         let rows = 6;
         if (d.soil !== null) rows++;
-        // density row removed — circular calculation
         if (hasDirectRad) rows++;          // direct solar row
         if (d.ccLow > 5 || d.ccMid > 5 || d.ccHigh > 5) rows++; // cloud layers row
         const boxW = 190 * scale, boxH = (30 + (rows * 20)) * scale, padding = 15 * scale;
@@ -1327,8 +1313,8 @@
         const mouseX = (e.clientX - rect.left) * (cvsFc.width / rect.width);
         
         const actualWidth = cvsFc.clientWidth || cvsFc.width;
-        const pX = actualWidth < 500 ? 40 : 60;
-        const pRight = actualWidth < 500 ? 40 : 60;
+        const pX = actualWidth < 500 ? 48 : 72;
+        const pRight = actualWidth < 500 ? 48 : 72;
         const w = cvsFc.width - pX - pRight;
         
         const numDays = Math.floor((FORECAST_DATA.resorts[window.GLOBAL_RESORT].hourly || FORECAST_DATA.resorts[window.GLOBAL_RESORT]).temperature_2m.length / 24);
@@ -1346,8 +1332,8 @@
           const mouseX = (e.touches[0].clientX - rect.left) * (cvsFc.width / rect.width);
           
           const actualWidth = cvsFc.clientWidth || cvsFc.width;
-          const pX = actualWidth < 500 ? 40 : 60;
-          const pRight = actualWidth < 500 ? 40 : 60;
+          const pX = actualWidth < 500 ? 48 : 72;
+          const pRight = actualWidth < 500 ? 48 : 72;
           const w = cvsFc.width - pX - pRight;
           
           const numDays = Math.floor((FORECAST_DATA.resorts[window.GLOBAL_RESORT].hourly || FORECAST_DATA.resorts[window.GLOBAL_RESORT]).temperature_2m.length / 24);
@@ -1362,9 +1348,7 @@
       setTimeout(window.repaintForecastCanvas, 100);
     }
 
-    // =========================================================
-    // MODULE 2: HISTORICAL MATRIX & COMPOSITE SCORE ENGINE
-    // =========================================================
+    // ── MODULE 2: HISTORICAL MATRIX ─────────────────────────
     if (!SKI_DATA || !SKI_DATA.records || SKI_DATA.records.length === 0) { 
       sb.innerHTML = `⚠ Historical Data Offline`; 
       ts.innerText = `Forecast engine isolated.`;
@@ -1531,13 +1515,13 @@
 
       dtb.innerHTML = byDate[dStr].map(r => {
         const meta = STATIC_METADATA[r.resort.toLowerCase()] || {base:'?', summit:'?'};
-        const tb = r.base?.temperature_2m_max ?? r.temperature_2m_max, ts = r.summit?.temperature_2m_max;
+        const tb = r.base?.temperature_2m_max ?? r.temperature_2m_max, tSummit = r.summit?.temperature_2m_max;
         const rawSn = r.summit?.snow_depth ?? r.snow_depth;
         const fs = r.summit?.snowfall_sum ?? r.snowfall_sum ?? 0;
         const rawGust = r.base?.wind_gusts_10m_max ?? r.wind_gusts_10m_max ?? null;
         const rawSunSec = r.base?.sunshine_duration ?? r.sunshine_duration ?? null;
         const rawSunH = rawSunSec !== null ? rawSunSec / 3600 : null;
-        const fmt = (t) => t !== null && t !== undefined ? `${t.toFixed(1)}°C` : '—'; 
+        const fmtTemp = (t) => t !== null && t !== undefined ? `${t.toFixed(1)}°C` : '—';
         const warn = (r.flags && r.flags.length) ? `<span title="Data Flag: ${r.flags.join(',')}" style="cursor:help;">⚠️</span> ` : '';
         
         // Primary: use baked score + metrics from enriched_data.json.
@@ -1557,7 +1541,7 @@
 
         const extrasHtml = `
           <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:0.5rem; display:grid; grid-template-columns:1fr 1fr; gap:0.4rem;">
-            <span>Summit Temp: <b style="color:var(--text-main)">${fmt(ts)}</b></span>
+            <span>Summit Temp: <b style="color:var(--text-main)">${fmtTemp(tSummit)}</b></span>
             <span>New Snow: <b style="color:var(--text-main)">${fs>0?'+'+fs.toFixed(1)+'cm':'0'}</b></span>
           </div>`;
           
@@ -1582,8 +1566,8 @@
 
         return `<tr>
           <td><div style="font-weight:bold;text-transform:capitalize;">${warn}${r.resort}</div><div style="font-size:0.7rem; color:var(--text-muted);">${meta.base}m · ${meta.summit}m</div></td>
-          <td>${fmt(tb)}</td>
-          <td>${fmt(ts)}</td>
+          <td>${fmtTemp(tb)}</td>
+          <td>${fmtTemp(tSummit)}</td>
           <td>${snHtml}</td>
           <td>${fs>0?`<span style="color:#3b82f6;font-weight:bold;">+${fs.toFixed(1)}cm</span>`:'0'}</td>
           <td>${gustHtml}</td>
@@ -1674,8 +1658,12 @@
             
             const vs = chunkDays.map(d => {
               if(!dataMap[d]) return null;
+              const rec = dataMap[d];
+              const scoreData = (rec.score !== null && rec.score !== undefined && rec.metrics)
+                ? { score: rec.score, metrics: rec.metrics }
+                : computeDynamicScore(rec, bounds);
               return {
-                 scoreData: computeDynamicScore(dataMap[d], bounds),
+                 scoreData,
                  precipHours: dataMap[d].base?.precipitation_hours ?? dataMap[d].precipitation_hours ?? 0,
                  snowSum: dataMap[d].summit?.snowfall_sum ?? dataMap[d].snowfall_sum ?? 0,
                  precipSum: dataMap[d].base?.precipitation_sum ?? dataMap[d].precipitation_sum ?? 0
@@ -1743,7 +1731,7 @@
     const cvs = document.getElementById('snow-canvas'), ctx = cvs.getContext('2d');
     setupHiDPI(cvs, 2000, 800);
     const legend = document.getElementById('canvas-legend'), avgBtn = document.getElementById('toggle-avg-btn');
-    let hoverDayOffset = null, maWindow = 1, showHistoricalAvg = true;
+    let hoverDayOffset = null, maWindow = 7, showHistoricalAvg = true;
     let isSnowTouch = false;
     const SNOW_PAD_X = 120, SNOW_DAYS = 182;
     
@@ -1813,9 +1801,8 @@
         }
       }
       
-      const elev = RESORT_ELEVATIONS[window.GLOBAL_RESORT] || { base: '—', summit: '—' };
-      let legendHtml = `<div class="legend-item"><span style="display:inline-block;width:20px;height:3px;background:var(--snow-stroke);vertical-align:middle;margin-right:4px;border-radius:2px;"></span>⛰ Mountain (${elev.summit}m)</div>`;
-      legendHtml += `<div class="legend-item"><span style="display:inline-block;width:20px;height:0;border-top:3px dashed rgba(77,127,255,0.5);vertical-align:middle;margin-right:4px;"></span>🏘 Village (${elev.base}m)</div>`;
+      const elev = STATIC_METADATA[window.GLOBAL_RESORT] || { base: '—', summit: '—' };
+      let legendHtml = `<div class="legend-item"><span style="display:inline-block;width:20px;height:3px;background:var(--snow-stroke);vertical-align:middle;margin-right:4px;border-radius:2px;"></span>⛰ Summit (${elev.summit}m)</div>`;
       legendHtml += seasonKeys.map((s, idx) => {
         const c = s === currentSeason ? getStyleVar('--snow-stroke') : seasonColors[idx % seasonColors.length];
         return `<div class="legend-item"><div class="legend-color" style="background:${c}"></div>${s}</div>`;
@@ -1826,6 +1813,43 @@
       const pX = SNOW_PAD_X, pY = 80, w = cvs.width-pX*2, h = cvs.height-pY*2 - 40; 
       const mapX = x => pX+(x/SNOW_DAYS)*w, mapY = y => pY+h-(y/maxD)*h;
       const fonts = getResponsiveCanvasFonts(cvs, 14, 16);
+
+      // ── Reference bands (drawn first, under grid) ──────────────────────────
+      // Only draw bands that fall within the current scale
+      const bands = [
+        { lo: 0,   hi: 30,  fill: 'rgba(239,68,68,0.06)',   label: 'Below min (30cm)',  labelColor: '#ef4444' },
+        { lo: 30,  hi: 80,  fill: 'rgba(251,146,60,0.06)',  label: 'Min–Good (80cm)',   labelColor: '#d97706' },
+        { lo: 80,  hi: 150, fill: 'rgba(234,179,8,0.06)',   label: 'Good–Excellent',    labelColor: '#d97706' },
+        { lo: 150, hi: null, fill: 'rgba(34,197,94,0.07)',  label: 'Excellent (150+cm)', labelColor: '#15803d' },
+      ];
+      bands.forEach(b => {
+        const yTop = mapY(Math.min(b.hi ?? maxD, maxD));
+        const yBot = mapY(Math.max(b.lo, 0));
+        if (yBot <= pY || yTop >= pY+h) return; // out of visible range
+        ctx.fillStyle = b.fill;
+        ctx.fillRect(pX, Math.max(yTop, pY), w, Math.min(yBot, pY+h) - Math.max(yTop, pY));
+      });
+      // Reference line strokes and labels
+      const refLines = [
+        { val: 30,  color: 'rgba(239,68,68,0.4)',  label: '▸ 30cm min' },
+        { val: 80,  color: 'rgba(217,119,6,0.45)', label: '▸ 80cm good' },
+        { val: 150, color: 'rgba(21,128,61,0.45)', label: '▸ 150cm excellent' },
+      ];
+      ctx.save();
+      ctx.setLineDash([6, 4]);
+      ctx.lineWidth = 1.5;
+      ctx.font = fonts.axis;
+      ctx.textBaseline = 'bottom';
+      refLines.forEach(rl => {
+        if (rl.val > maxD) return;
+        const ry = mapY(rl.val);
+        ctx.strokeStyle = rl.color;
+        ctx.beginPath(); ctx.moveTo(pX, ry); ctx.lineTo(pX + w, ry); ctx.stroke();
+        ctx.fillStyle = rl.color.replace(/[\d.]+\)$/, '0.85)');
+        ctx.textAlign = 'right';
+        ctx.fillText(rl.label, pX + w - 4, ry - 3);
+      });
+      ctx.restore();
       
       ctx.strokeStyle = getStyleVar('--grid-line'); ctx.fillStyle = getStyleVar('--text-muted'); ctx.font = fonts.axis; ctx.textBaseline = 'middle'; ctx.textAlign = 'right'; 
       for(let i=0; i<=maxD; i+=50) { const y = pY+h-(i/maxD)*h; ctx.beginPath(); ctx.moveTo(pX,y); ctx.lineTo(pX+w,y); ctx.lineWidth = 2; ctx.stroke(); ctx.fillText(`${i} cm`, pX-20, y); }
@@ -1842,14 +1866,6 @@
         if (isDashed) ctx.setLineDash([10, 8]); else ctx.setLineDash([]);
         ctx.stroke(); ctx.setLineDash([]);
       };
-
-      // Village (base) snow — dashed, same season colors, reduced opacity
-      ctx.globalAlpha = 0.55;
-      seasonKeys.forEach((ss, idx) => {
-        const c = ss === currentSeason ? getStyleVar('--snow-stroke') : seasonColors[idx % seasonColors.length];
-        drawPath(linesBase[ss] || [], c, ss === currentSeason ? 3 : 1.5, true);
-      });
-      ctx.globalAlpha = 1.0;
 
       // Mountain (summit) snow — solid, full opacity
       seasonKeys.forEach((ss, idx) => { const c = ss === currentSeason ? getStyleVar('--snow-stroke') : seasonColors[idx % seasonColors.length]; drawPath(lines[ss], c, ss === currentSeason ? 6 : 3); });
@@ -1876,7 +1892,7 @@
 
         if (readouts.length > 0) {
           const scale = cvs.width / (cvs.clientWidth || 1000);
-          const boxW = 220 * scale, boxH = 24*scale + (readouts.length * 36 * scale), padding = 15*scale;
+          const boxW = 280 * scale, boxH = 24*scale + (readouts.length * 36 * scale), padding = 15*scale;
           let boxX = hx + padding, boxY = pY;
           if (isSnowTouch) { boxY = pY - (50*scale); if (boxY < 0) boxY = 0; }
           if (boxX + boxW > pX + w) boxX = hx - boxW - padding;
@@ -1886,10 +1902,14 @@
           ctx.fillRect(boxX, boxY, boxW, boxH); ctx.strokeStyle = getStyleVar('--border-color'); ctx.strokeRect(boxX, boxY, boxW, boxH);
           ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = fonts.tooltip;
           readouts.sort((a,b) => b.yMtn - a.yMtn).forEach((r, i) => {
-            const baseStr = r.yBase !== null ? ` / ${r.yBase.toFixed(0)}` : ' / —';
+            const dep = r.yMtn;
+            const cond = dep >= 150 ? '❄ Excellent' : dep >= 80 ? '✓ Good' : dep >= 30 ? '~ OK' : '✗ Low';
+            const condColor = dep >= 150 ? '#15803d' : dep >= 80 ? '#d97706' : dep >= 30 ? '#b45309' : '#ef4444';
             ctx.fillStyle = r.c; ctx.fillText(`■`, boxX + padding, boxY + padding + (i*36*scale));
             ctx.fillStyle = getStyleVar('--text-main');
-            ctx.fillText(`${r.s}:  ⛰ ${r.yMtn.toFixed(0)}cm${baseStr}cm 🏘`, boxX + padding*3, boxY + padding + (i*36*scale));
+            ctx.fillText(`${r.s}:  ${dep.toFixed(0)} cm`, boxX + padding*3, boxY + padding + (i*36*scale));
+            ctx.fillStyle = condColor;
+            ctx.fillText(cond, boxX + padding*3 + 120*scale, boxY + padding + (i*36*scale));
           });
         }
       }
@@ -2042,7 +2062,7 @@
         ctxA.fillRect(boxX, boxY, boxW, boxH); ctxA.strokeStyle = getStyleVar('--border-color'); ctxA.strokeRect(boxX, boxY, boxW, boxH);
         ctxA.textAlign = 'left'; ctxA.textBaseline = 'top'; ctxA.font = fonts.tooltip;
         
-        const elev = RESORT_ELEVATIONS[window.GLOBAL_RESORT] || { base: 'base', summit: 'summit' };
+        const elev = STATIC_METADATA[window.GLOBAL_RESORT] || { base: 'base', summit: 'summit' };
         let row = 0;
         const line = (txt, color) => { ctxA.fillStyle = color || getStyleVar('--text-main'); ctxA.fillText(txt, boxX + padding, boxY + padding + row++ * 28 * scale); };
 
