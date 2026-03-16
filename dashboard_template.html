@@ -1994,7 +1994,6 @@
       const tMinLimit = Math.min(-20, Math.floor((rawTMin - 3) / 5) * 5);
       const tRange = tMaxLimit - tMinLimit;
       const mapTempY = t => (pY + topH) - ((t - tMinLimit) / tRange) * topH;
-      const tRange = tMaxLimit - tMinLimit;
 
       const rawMaxSun  = validTemps.length ? Math.max(...validTemps.map(d => d.sun))  : 12;
       const rawMaxSnow = validTemps.length ? Math.max(...validTemps.map(d => d.snow)) : 30;
