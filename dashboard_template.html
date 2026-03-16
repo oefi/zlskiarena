@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="night" data-font="md">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,44 +18,31 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎿</text></svg>">
 
 <style>
-  /* ── DESIGN TOKENS ── */
+  /* ── DESIGN TOKENS — Alpine Day Theme ── */
   :root {
-    --font-base: 16px;
-    --snow-stroke: rgba(77, 127, 255, 1);
-    --sun-yield: rgba(234, 179, 8, 0.6);
-    --snow-yield: rgba(147, 197, 253, 0.9); 
-    --rain-yield: rgba(37, 99, 235, 0.9);  
-    --cloud-base: rgba(156, 163, 175, 0.3);
-    scroll-padding-top: 5rem; 
+    --font-base:    16px;
+    /* Brand — deep cobalt: alpine sky, classic ski signage */
+    --brand:        #1e40af;
+    --brand-light:  #dbeafe;
+    /* Backgrounds — layered cool whites */
+    --bg-main:      #f8fafd;
+    --bg-header:    #ffffff;
+    --bg-card:      #ffffff;
+    /* Typography */
+    --text-main:    #0f172a;
+    --text-muted:   #64748b;
+    /* Borders */
+    --border-color: #e2e8f0;
+    --grid-line:    rgba(0, 0, 0, 0.055);
+    /* Canvas data colors */
+    --snow-stroke:  #2563eb;
+    --sun-yield:    rgba(217, 163, 0, 0.45);
+    --snow-yield:   rgba(59, 130, 246, 0.42);
+    --rain-yield:   rgba(37, 99, 235, 0.72);
+    --cloud-base:   rgba(100, 116, 139, 0.20);
+    color-scheme:   light;
+    scroll-padding-top: 5rem;
     scroll-behavior: smooth;
-  }
-  
-  [data-font="sm"] { --font-base: 14px; }
-  [data-font="lg"] { --font-base: 18px; }
-
-  [data-theme="light"] {
-    --brand: #2563eb; 
-    --bg-main: #f8fafc; --bg-header: #ffffff; --bg-card: #ffffff;
-    --text-main: #0f172a; --text-muted: #475569; --border-color: #cbd5e1;
-    --grid-line: rgba(0, 0, 0, 0.1); color-scheme: light;
-  }
-  [data-theme="grey"] {
-    --brand: #3b82f6; 
-    --bg-main: #374151; --bg-header: #374151; --bg-card: #4b5563;
-    --text-main: #f3f4f6; --text-muted: #d1d5db; --border-color: #6b7280;
-    --grid-line: rgba(255, 255, 255, 0.15); color-scheme: dark;
-  }
-  [data-theme="night"] {
-    --brand: #3b82f6; 
-    --bg-main: #0d1829; --bg-header: #0d1829; --bg-card: #1a2d4e;
-    --text-main: #e8edf5; --text-muted: #8fa0ba; --border-color: #1e3260;
-    --grid-line: rgba(255, 255, 255, 0.15); color-scheme: dark;
-  }
-  [data-theme="print"] {
-    --brand: #000000;
-    --bg-main: #ffffff; --bg-header: #ffffff; --bg-card: #ffffff;
-    --text-main: #000000; --text-muted: #333333; --border-color: #000000;
-    --snow-stroke: #000; --grid-line: rgba(0,0,0,0.2); color-scheme: light;
   }
 
   /* ── RESETS & BASE ── */
@@ -71,51 +58,49 @@
   }
   
   .container { max-width: 1440px; margin: 0 auto; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 2rem; }
-  section { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.5rem; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-  h2 { margin-top: 0; color: var(--brand); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; }
+  section { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 10px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02); }
+  h2 { margin-top: 0; color: var(--brand); border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem; letter-spacing: -0.02em; }
   
   .grid-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
   .flex-between { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
 
   /* ── ANIMATIONS & FLASHING ── */
   @keyframes updatePulse {
-    0% { background-color: rgba(59, 130, 246, 0.8); color: #fff; transform: scale(1.05); border-color: transparent; }
+    0% { background-color: rgba(30, 64, 175, 0.12); color: var(--brand); transform: scale(1.04); }
     100% { background-color: transparent; transform: scale(1); }
   }
   .flash-update { animation: updatePulse 0.6s ease-out forwards; border-radius: 4px; }
 
   /* ── CONTROLS & HEADER ── */
-  .font-resizers span, #theme-cycle-btn { cursor: pointer; transition: transform 0.1s; display: inline-block; user-select: none; padding: 0.3rem; border-radius: 4px; }
-  .font-resizers span:hover, #theme-cycle-btn:hover { transform: scale(1.2); background: var(--border-color); }
-
   #toc a { padding: 0.2rem 0.4rem; border-radius: 4px; transition: background 0.2s, color 0.2s; text-decoration: none; color: inherit; opacity: 0.7; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 0.2rem; }
-  #toc a:hover { background: var(--border-color); opacity: 1; }
+  #toc a:hover { background: var(--brand-light); color: var(--brand); opacity: 1; }
   .toc-label { font-size: 0.7rem; }
   @media (max-width: 640px) { .toc-label { display: none; } }
 
   .control-btn { 
     padding: 0.4rem 0.8rem; height: 36px;
-    background: var(--bg-main); color: var(--text-main); 
-    border: 1px solid var(--border-color); border-radius: 4px; 
+    background: var(--bg-card); color: var(--text-main); 
+    border: 1px solid var(--border-color); border-radius: 6px; 
     cursor: pointer; font-size: 0.85rem; font-weight: 600; font-family: inherit; 
     transition: all 0.15s ease; display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
-  .control-btn:hover:not(:disabled) { background: var(--border-color); }
+  .control-btn:hover:not(:disabled) { background: var(--brand-light); border-color: #bfdbfe; }
   .control-btn:active:not(:disabled) { transform: translateY(1px); }
   .control-btn:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
   .control-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .control-btn.active { background: var(--brand); color: #ffffff; border-color: var(--brand); }
-  .control-btn.toggle-btn { border: 1px dashed var(--text-muted); color: var(--text-muted); background: transparent; }
-  .control-btn.toggle-btn.active { background: var(--text-main); color: var(--bg-main); border-style: solid; border-color: var(--text-main); }
+  .control-btn.active { background: var(--brand); color: #ffffff; border-color: var(--brand); box-shadow: 0 2px 4px rgba(30,64,175,0.25); }
+  .control-btn.toggle-btn { border: 1px dashed var(--border-color); color: var(--text-muted); background: transparent; box-shadow: none; }
+  .control-btn.toggle-btn.active { background: var(--text-main); color: var(--bg-card); border-style: solid; border-color: var(--text-main); }
 
   /* ── GLOBAL RESORT TABS ── */
   .resort-tab-btn {
     padding: 0.4rem 1rem; background: transparent; border: 1px solid transparent; 
-    border-radius: 4px; color: var(--text-muted); font-weight: bold; font-size: 0.85rem; 
+    border-radius: 6px; color: var(--text-muted); font-weight: 600; font-size: 0.85rem; 
     cursor: pointer; white-space: nowrap; transition: all 0.2s;
   }
-  .resort-tab-btn:hover { color: var(--text-main); background: var(--border-color); }
-  .resort-tab-btn.active { color: #fff; background: var(--brand); border-color: var(--brand); }
+  .resort-tab-btn:hover { color: var(--brand); background: var(--brand-light); border-color: #bfdbfe; }
+  .resort-tab-btn.active { color: #fff; background: var(--brand); border-color: var(--brand); box-shadow: 0 2px 4px rgba(30,64,175,0.2); }
   
   .resort-name-full { display: inline; }
   .resort-name-short { display: none; }
@@ -123,16 +108,18 @@
   /* Forms & Sliders */
   input[type="date"] {
     height: 36px; padding: 0 0.5rem;
-    background: var(--bg-main); color: var(--text-main); 
-    border: 1px solid var(--border-color); border-radius: 4px; 
+    background: var(--bg-card); color: var(--text-main); 
+    border: 1px solid var(--border-color); border-radius: 6px; 
     font-family: inherit; font-size: 0.85rem; font-weight: 600;
-    color-scheme: inherit; outline: none; transition: border-color 0.2s;
+    color-scheme: light; outline: none; transition: border-color 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
+  input[type="date"]:focus { border-color: var(--brand); }
 
   /* ── FORECAST CARDS ── */
   #forecast-wrapper { display: grid; grid-template-columns: 1fr; gap: 1.5rem; align-items: stretch; }
   @media (min-width: 1024px) { #forecast-wrapper { grid-template-columns: 320px 1fr; } }
-  .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; padding: 1rem; display: flex; flex-direction: column; justify-content: center; }
+  .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; padding: 1rem; display: flex; flex-direction: column; justify-content: center; }
 
   /* ── BEST-DAYS STRIP ── */
   #best-days-strip { display: flex; gap: 0.4rem; flex-wrap: nowrap; overflow-x: auto; padding: 0.75rem 0 0.5rem; scrollbar-width: thin; }
@@ -145,8 +132,8 @@
   .avl-warning { font-size: 0.75rem; font-weight: 700; color: #fbbf24; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 3px; padding: 0.2rem 0.4rem; margin-top: 0.3rem; display: inline-block; }
 
   /* ── ATMOS SEASON NAV ── */
-  .atmos-nav-btn { background: transparent; border: 1px solid var(--border-color); border-radius: 4px; color: var(--text-muted); cursor: pointer; padding: 0.2rem 0.5rem; font-size: 0.85rem; transition: all 0.15s; }
-  .atmos-nav-btn:hover { background: var(--border-color); color: var(--text-main); }
+  .atmos-nav-btn { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-muted); cursor: pointer; padding: 0.2rem 0.6rem; font-size: 0.85rem; transition: all 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .atmos-nav-btn:hover { background: var(--brand-light); border-color: #bfdbfe; color: var(--brand); }
   .atmos-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
   /* ── HEATMAP ── */
@@ -158,11 +145,8 @@
   .hm-cell { flex-grow: 1; height: 100%; border-radius: 2px; position: relative; cursor: crosshair; transition: background 0.3s ease; overflow: hidden; }
   .hm-cell:hover { opacity: 0.7; }
   .hm-cell-future {
-    background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(255,255,255,0.05) 4px, rgba(255,255,255,0.05) 8px) !important;
-    border: 1px solid var(--grid-line); opacity: 0.4; cursor: not-allowed;
-  }
-  [data-theme="light"] .hm-cell-future, [data-theme="print"] .hm-cell-future {
-    background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.05) 4px, rgba(0,0,0,0.05) 8px) !important;
+    background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.04) 4px, rgba(0,0,0,0.04) 8px) !important;
+    border: 1px solid var(--grid-line); opacity: 0.5; cursor: not-allowed;
   }
   
   .hm-cell-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
@@ -174,19 +158,19 @@
   th, td { padding: 0.85rem 0.5rem; border-bottom: 1px solid var(--border-color); text-align: left; white-space: nowrap; transition: background 0.2s; }
   th { color: var(--text-muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
   .diff-badge { font-size: 0.75rem; padding: 0.1rem 0.3rem; border-radius: 3px; margin-left: 0.4rem; font-weight: bold; }
-  .diff-pos { background: rgba(77, 127, 255, 0.15); color: var(--brand); }
+  .diff-pos { background: var(--brand-light); color: var(--brand); }
   .diff-neg { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
   .diff-neu { background: rgba(156, 163, 175, 0.15); color: var(--text-muted); }
   
-  .quality-badge { cursor: help; display: flex; align-items: center; gap: 0.5rem; padding: 0.2rem 0.5rem; border-radius: 4px; transition: background 0.2s; width: max-content; }
-  .quality-badge:hover { background: var(--border-color); }
+  .quality-badge { cursor: help; display: flex; align-items: center; gap: 0.5rem; padding: 0.2rem 0.5rem; border-radius: 4px; transition: background 0.2s; width: max-content; background: #f1f5f9; }
+  .quality-badge:hover { background: var(--brand-light); }
 
   /* ── GLOBAL ADVANCED TOOLTIP ── */
   #global-tooltip {
     display: none; position: absolute; pointer-events: none; z-index: 9999;
-    background: var(--bg-header); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    color: var(--text-main); padding: 1rem; border-radius: 8px; font-size: 0.8rem;
-    box-shadow: 0 10px 30px -5px rgba(0,0,0,0.6); border: 1px solid var(--border-color);
+    background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    color: var(--text-main); padding: 1rem; border-radius: 10px; font-size: 0.8rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px var(--border-color);
     min-width: 220px; transition: opacity 0.1s;
   }
   .tt-grid { display: grid; grid-template-columns: 1fr auto; gap: 0.4rem; margin-top: 0.5rem; align-items: center; }
@@ -194,7 +178,7 @@
   .tt-data-node { display: none; }
 
   /* ── CANVAS ── */
-  canvas { width: 100%; max-width: 100%; height: auto; display: block; border: 1px solid var(--border-color); border-radius: 4px; cursor: crosshair; touch-action: none; background: var(--bg-card); }
+  canvas { width: 100%; max-width: 100%; height: auto; display: block; border: 1px solid var(--border-color); border-radius: 6px; cursor: crosshair; touch-action: none; background: var(--bg-main); }
   .legend-item { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-muted); margin-right: 1rem; font-weight: 600; }
   .legend-color { width: 16px; height: 4px; border-radius: 2px; }
   .legend-dotted { border-bottom: 3px dotted var(--text-main); background: transparent !important; height: 0; width: 16px; }
@@ -231,9 +215,9 @@
 <div id="global-tooltip"></div>
 
 <!-- ── LEAN HEADER (UNPINNED) ── -->
-<header class="main-header" style="position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding: 0.6rem 1rem; background: var(--bg-header); border-bottom: 1px solid var(--border-color);">
+<header class="main-header" style="position: relative; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 1rem; padding: 0.6rem 1rem; background: var(--bg-header); border-bottom: 1px solid var(--border-color); box-shadow: 0 1px 4px rgba(0,0,0,0.06);">
   
-  <!-- Left: Controls & TOC (Architectural Requirement) -->
+  <!-- Left: TOC -->
   <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
     <nav id="toc" style="display: flex; gap: 0.25rem;">
       <a href="#powder-alarm" title="Forecast">📡 <span class="toc-label">Forecast</span></a>
@@ -242,13 +226,6 @@
       <a href="#snowpack" title="Snowpack">🏔️ <span class="toc-label">Snowpack</span></a>
       <a href="#atmosphere" title="Season Overview">🌡️ <span class="toc-label">Season</span></a>
     </nav>
-    <div style="display: flex; gap: 0.25rem; align-items: center; border-left: 1px solid var(--border-color); padding-left: 0.5rem;">
-      <span class="font-resizers" style="display: flex; gap: 0.1rem;">
-        <span tabindex="0" role="button" onclick="setLocalFont('sm')" title="Compact Font">➖</span> 
-        <span tabindex="0" role="button" onclick="setLocalFont('lg')" title="Large Font">➕</span>
-      </span>
-      <span tabindex="0" role="button" id="theme-cycle-btn" onclick="cycleTheme()" title="Cycle Theme" style="margin-left: 0.25rem;">🎨</span>
-    </div>
   </div>
 
   <!-- Center: Title -->
@@ -268,7 +245,7 @@
 </header>
 
 <!-- ── GLOBAL RESORT SELECTOR (PINNED) ── -->
-<div id="global-resort-header" style="position: sticky; top: 0; z-index: 998; background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.5rem 1rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: nowrap; overflow-x: auto; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+<div id="global-resort-header" style="position: sticky; top: 0; z-index: 998; background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.5rem 1rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: nowrap; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.07);">
   <!-- Buttons injected via JS -->
 </div>
 
@@ -294,7 +271,7 @@
       <!-- The Extended Visual Outlook (Right Panel) -->
       <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; display: flex; flex-direction: column;">
         
-        <div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); flex-wrap: wrap; align-items: center;">
+        <div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); flex-wrap: nowrap; overflow-x: auto; align-items: center; padding-bottom: 0.25rem; scrollbar-width: thin;">
           <span title="Daily air temperature range at base elevation. Red line = daily max, blue line = daily min." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:12px;height:10px;background:linear-gradient(to bottom,rgba(239,68,68,0.5),rgba(59,130,246,0.5));border-radius:2px;"></span>T max/min</span>
           <span title="Soil surface temperature (0 cm depth). Stays negative = snowpack stable. Above 0°C = melt from below." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #a16207;"></span>Soil 0 cm</span>
           <span title="24h snowfall accumulation (cm). Plotted as water-equivalent mm on precip axis." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:var(--snow-yield);border-radius:2px;"></span>Snowfall</span>
@@ -314,7 +291,7 @@
     <!-- ── BEST FORECAST DAYS STRIP ── -->
     <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
       <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-        16-Day Ski Score <span style="font-weight:400; text-transform:none; letter-spacing:0; opacity:0.7;" title="Bluebird Score: composite of sun intensity (40%), snow depth (25%), temperature (20%), wind (15%) + powder bonus. Higher = better ski conditions.">⭐ best · ✓ top 3 · score = sun/depth/temp/wind</span>
+        16-Day Projected Score <span style="font-weight:500; text-transform:none; letter-spacing:0; font-size:0.72rem; color:var(--text-muted);" title="Projected Score: same formula as Bluebird Score applied to forecast data. Includes a confidence multiplier based on precipitation probability — scores are typically lower than historical Bluebird Scores on uncertain forecast days.">⭐ best day · ✓ top 3 · includes forecast confidence weighting</span>
       </div>
       <div id="best-days-strip"><div style="color:var(--text-muted); font-style:italic; font-size:0.85rem;">Awaiting forecast…</div></div>
     </div>
@@ -359,7 +336,9 @@
             <th>New Snow (24h)</th>
             <th>Gusts</th>
             <th>Sun</th>
-            <th style="text-align: right;">Bluebird Score <span style="opacity:0.6; font-size:0.65rem; font-weight:normal;">(Hover)</span></th>
+            <th style="text-align: right;">Bluebird Score
+              <div style="font-weight:400; font-size:0.65rem; opacity:0.65; text-transform:none; letter-spacing:0; margin-top:0.15rem;">0–100% · hover for breakdown</div>
+            </th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -430,8 +409,6 @@
 
 <script>
   // ── CORE SYSTEM & HSL GRADIENT ENGINE ──
-  const themesList = ['light', 'grey', 'night', 'print'];
-  const themeIcons = { 'light': '☀️', 'grey': '🌥️', 'night': '🌙', 'print': '🖨️' };
   
   const RESORT_ABBREVIATIONS = {
     'nauders': 'naud',
@@ -442,33 +419,9 @@
   };
 
   const getColor = (s) => {
-    if (s === null || s === undefined) return 'transparent';
-    return `hsl(${Math.round(s * 120)}, 80%, 45%)`;
+    if (s === null || s === undefined) return '#f1f5f9';
+    return `hsl(${Math.round(s * 120)}, 75%, 42%)`;
   };
-
-  function setLocalTheme(t) { 
-    document.documentElement.dataset.theme = t; 
-    localStorage.setItem('zl_theme', t);
-    const btn = document.getElementById('theme-cycle-btn');
-    if (btn) btn.innerText = themeIcons[t] || '🎨';
-    if(window.repaintCanvas) window.repaintCanvas(); 
-    if(window.repaintAtmosCanvas) window.repaintAtmosCanvas();
-    if(window.repaintForecastCanvas) window.repaintForecastCanvas();
-  }
-  
-  function cycleTheme() {
-    let current = document.documentElement.dataset.theme;
-    let nextIdx = (themesList.indexOf(current) + 1) % themesList.length;
-    setLocalTheme(themesList[nextIdx]);
-  }
-
-  function setLocalFont(f) { 
-    document.documentElement.dataset.font = f; 
-    localStorage.setItem('zl_font', f); 
-  }
-  
-  document.documentElement.dataset.theme = localStorage.getItem('zl_theme') || 'night';
-  document.documentElement.dataset.font = localStorage.getItem('zl_font') || 'md';
 
   const STATIC_METADATA = {
     'nauders': { base: 1400, summit: 2750 },
@@ -489,17 +442,26 @@
     const isSynthetic = SKI_DATA && SKI_DATA._meta &&
       typeof SKI_DATA._meta.source === 'string' &&
       SKI_DATA._meta.source.includes('SYNTHETIC');
-    if (!isSynthetic) return;
+    const forecastFailed = FORECAST_DATA && FORECAST_DATA.error;
+
+    if (!isSynthetic && !forecastFailed) return;
+
     const banner = document.createElement('div');
     banner.id = 'synthetic-banner';
     banner.style.cssText = [
       'position:sticky','top:0','z-index:9999',
-      'background:#92400e','color:#fef3c7',
-      'padding:0.5rem 1rem','text-align:center',
-      'font-size:0.8rem','font-weight:700','letter-spacing:0.05em',
-      'border-bottom:2px solid #d97706',
+      'background:#fef9c3','color:#713f12',
+      'padding:0.4rem 1rem','text-align:center',
+      'font-size:0.8rem','font-weight:700','letter-spacing:0.03em',
+      'border-bottom:2px solid #ca8a04',
     ].join(';');
-    banner.textContent = '⚠ SYNTHETIC DATA — Real Open-Meteo fetch failed. Charts show generated placeholder data, not actual conditions.';
+    if (isSynthetic && forecastFailed) {
+      banner.textContent = '⚠ SYNTHETIC DATA + FORECAST FAILURE — All charts show generated placeholder data, not actual conditions.';
+    } else if (isSynthetic) {
+      banner.textContent = '⚠ SYNTHETIC DATA — Real Open-Meteo historical fetch failed. Charts show generated placeholder data, not actual conditions.';
+    } else {
+      banner.textContent = '⚠ FORECAST UNAVAILABLE — Live forecast fetch failed. Historical data is real; forward-looking cards are empty.';
+    }
     document.body.insertBefore(banner, document.body.firstChild);
     // Push the sticky resort tab bar down so it sits below the banner, not under it.
     const tabBar = document.getElementById('global-resort-header');
@@ -531,6 +493,9 @@
     sulden:     { base: 1900, summit: 3250 },
     trafoi:     { base: 1540, summit: 2800 },
   };
+  // Per-resort functional snow depth cap (m) — mirrors compute_metrics.py OPTIMAL_DEPTH_CM.
+  // Full marks above the cap; a freak record season never devalues a good normal one.
+  const OPTIMAL_DEPTH_M = { nauders: 1.50, schoeneben: 1.30, watles: 1.20, sulden: 2.00, trafoi: 1.60 };
 
   // ── 6-HOUR SYNC CHRONOMETER (matches CI schedule) ──
   // Triggers a reload within 2 seconds of each 6-hour boundary (0h, 6h, 12h, 18h).
@@ -611,13 +576,6 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => {
-    
-    const themeBtn = document.getElementById('theme-cycle-btn');
-    if(themeBtn) themeBtn.innerText = themeIcons[document.documentElement.dataset.theme] || '🎨';
-
-    document.querySelectorAll('.font-resizers span, #theme-cycle-btn').forEach(el => {
-      el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }});
-    });
 
     const sb = document.getElementById('status-badge'), ts = document.getElementById('update-time');
 
@@ -750,8 +708,8 @@
         }
       }
       const avlHtml = avlDays > 0
-        ? `<div style="font-size:1.4rem; font-weight:800; color:#fbbf24; line-height:1;">${avlDays}d</div><div class="avl-warning" title="Wind slab forms when fresh snow (&gt;15 cm/24h) is transported by gusts &gt;40 km/h, creating dense unstable layers on leeward slopes.">⚠ Slab load: ${avlDayLabels.join(', ')}</div>`
-        : `<div style="font-size:1.1rem; font-weight:800; color:#22c55e; line-height:1.4;">None</div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">No slab load days (&gt;15 cm + &gt;40 km/h)</div>`;
+        ? `<div style="font-size:1.4rem; font-weight:800; color:#b45309; line-height:1;">${avlDays}d</div><div class="avl-warning" title="Wind slab forms when fresh snow (&gt;15 cm/24h) is transported by gusts &gt;40 km/h, creating dense unstable layers on leeward slopes.">⚠ Slab load: ${avlDayLabels.join(', ')}</div>`
+        : `<div style="font-size:1.1rem; font-weight:800; color:#15803d; line-height:1.4;">None</div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">No slab load days (&gt;15 cm + &gt;40 km/h)</div>`;
 
       // UV at summit — peak daily UV index across the week
       const uvArr = daily?.uv_index_max ? daily.uv_index_max.slice(0, days7).filter(v=>v!==null) : [];
@@ -781,7 +739,7 @@
         <div class="fc-card" style="grid-column:span 2; min-width:260px;">
           <div style="color:var(--text-muted);font-size:0.75rem;font-weight:bold;text-transform:uppercase;margin-bottom:0.6rem;letter-spacing:0.05em;">Altitude Profile ↕️</div>
           <div style="display:flex;gap:0.75rem;">
-            <div style="width:7px;background:linear-gradient(to bottom,#3b82f6,#94a3b8,#ef4444);border-radius:4px;min-height:72px;flex-shrink:0;"></div>
+            <div style="width:9px;background:linear-gradient(to bottom,#3b82f6,#94a3b8,#ef4444);border-radius:4px;min-height:72px;flex-shrink:0;"></div>
             <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;gap:0.25rem;">
               <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:0.3rem;border-bottom:1px dashed var(--border-color);">
                 <span style="font-size:0.78rem;color:var(--text-muted);">⛰ <b style="color:var(--text-main);">${meta.summit ?? '?'}m</b> Mountain</span>
@@ -800,7 +758,7 @@
       fcBoard.innerHTML = profileHtml + `
           <div class="fc-card">
               <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Snowfall 7d ❄️</div>
-              <div style="font-size:2rem; font-weight:800; color:var(--snow-yield); line-height:1;">${snow.toFixed(0)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">cm</span></div>
+              <div style="font-size:2rem; font-weight:800; color:#2563eb; line-height:1;">${snow.toFixed(0)}<span style="font-size:1rem; color:var(--text-muted); margin-left:0.2rem;">cm</span></div>
           </div>
           <div class="fc-card">
               <div style="color:var(--text-muted); font-size:0.75rem; font-weight:bold; text-transform:uppercase; margin-bottom:0.2rem; letter-spacing:0.05em;">Rainfall 7d 🌧️</div>
@@ -853,10 +811,11 @@
     // maxSun: resort's historical peak sunshine hours (from getResortBounds), used to normalise
     //         forecast sun hours on the same scale as historical scores. Falls back to 10h.
     // probPct: precipitation probability 0–100. Acts as a confidence weight on snow-day scores.
-    const computeForecastDayScore = (tMax, tMin, sunH, depthM, gustKmh, freshCm, maxDepth, probPct, maxSun) => {
+    const computeForecastDayScore = (tMax, tMin, sunH, depthM, gustKmh, freshCm, probPct, maxSun) => {
       const sunPeak = (maxSun && maxSun > 0) ? maxSun : 10;
       const fSun  = Math.min(1, sunH / sunPeak);
-      const fDepth= maxDepth > 0 ? Math.min(1, (depthM || 0) / maxDepth) : 0.5;
+      const optDepth = OPTIMAL_DEPTH_M[window.GLOBAL_RESORT] || 1.50;
+      const fDepth= Math.min(1, (depthM || 0) / optDepth);
       let fTemp = 0.5;
       if (tMax !== null) {
         if      (tMax <= -20) fTemp = 0.3;
@@ -884,7 +843,7 @@
       // Clamped at 0.3 minimum so a low-prob day still gets partial credit.
       // Applied to the entire score (not just pBonus) to reflect forecast uncertainty.
       const probFactor = probPct !== null ? Math.min(1, 0.3 + (probPct / 100) * 0.7) : 1.0;
-      const raw = 0.40*fSun + 0.25*fDepth + 0.20*fTemp + 0.15*wMult;
+      const raw = 0.45*fSun + 0.30*fDepth + 0.25*fTemp;
       const score = Math.max(0, Math.min(1, (raw + pBonus) * wMult * probFactor));
       return { score: Math.round(score * 1000) / 1000, fSun, fDepth, fTemp, wMult, pBonus, probFactor };
     };
@@ -902,13 +861,8 @@
       const numDays = Math.min(16, Math.floor(hourly.temperature_2m.length / 24));
       if (numDays === 0) { strip.innerHTML = ''; return; }
 
-      // Historical max depth for normalisation
-      // NOTE: uses window.getResortBounds (not the const) — this function is called during Module 1
-      // setup (line ~872) before the const declaration in Module 2 is reached, which would cause a
-      // TDZ ReferenceError and kill the entire DOMContentLoaded handler. Accessing a window property
-      // is always safe: returns undefined before assignment, no TDZ.
-      const histBounds = typeof window.getResortBounds === 'function' ? window.getResortBounds(window.GLOBAL_RESORT) : { maxDepth: 2, maxSun: 10 };
-      const maxDepth = histBounds.maxDepth || 2;
+      // Historical max sun for normalisation — depth now uses OPTIMAL_DEPTH_M cap internally
+      const histBounds = typeof window.getResortBounds === 'function' ? window.getResortBounds(window.GLOBAL_RESORT) : { maxSun: 10 };
       const maxSun   = histBounds.maxSun   || 10;
 
       const days = [];
@@ -928,7 +882,7 @@
         const probArr= slice('precipitation_probability');
         const probMax= probArr.length ? Math.max(...probArr) : null;
         const dt     = hourly.time ? new Date(hourly.time[s]) : new Date(localNow.getTime()+i*86400000);
-        const scored = computeForecastDayScore(tMax, tMin, sunH, depthM, gustMax, freshCm, maxDepth, probMax, maxSun);
+        const scored = computeForecastDayScore(tMax, tMin, sunH, depthM, gustMax, freshCm, probMax, maxSun);
         const dayWmo = hourly.weather_code ? (hourly.weather_code.slice(s,e).filter(v=>v!==null)[12] || null) : null;
         const wmoEmoji = dayWmo === null ? '🌤️' : dayWmo === 0 ? '☀️' : dayWmo <= 2 ? '🌤️' : dayWmo === 3 ? '☁️' :
                          dayWmo <= 48 ? '🌫️' : dayWmo <= 57 ? '🌧️' : dayWmo <= 67 ? '🌨️' :
@@ -970,6 +924,7 @@
     }
 
     const cvsFc = document.getElementById('forecast-canvas');
+    if (cvsFc) setupHiDPI(cvsFc, 2000, 760);
     const ctxFc = cvsFc ? cvsFc.getContext('2d') : null;
     let fcHoverIdx = null; let fcTouch = false;
 
@@ -1403,7 +1358,7 @@
         }
       }, {passive: false});
       
-      window.addEventListener('resize', () => { window.repaintForecastCanvas(); });
+      window.addEventListener('resize', () => { if (cvsFc) setupHiDPI(cvsFc, 2000, 760); window.repaintForecastCanvas(); });
       setTimeout(window.repaintForecastCanvas, 100);
     }
 
@@ -1415,8 +1370,10 @@
       ts.innerText = `Forecast engine isolated.`;
       return; 
     }
-    sb.innerHTML = `✓ Matrix Online`;
-    ts.innerText = `Baked: ${latestDataDate}`;
+    sb.innerHTML = `✓ Live Data`;
+    const d = new Date(latestDataDate + 'T12:00:00');
+    const fmt = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    ts.innerHTML = `Data through <b style="color:var(--text-main);">${fmt}</b> · <span style="opacity:0.7;">Open-Meteo ERA5</span>`;
 
     const byDate = {}, byResort = {}, dates = [];
     SKI_DATA.records.forEach(r => {
@@ -1484,7 +1441,9 @@
         : 0;
       fSun = Math.max(0, Math.min(1, fSun));
 
-      const fDepth = depth !== null ? Math.min(1, depth / bounds.maxDepth) : 0;
+      const fDepth = depth !== null
+        ? Math.min(1, depth / (OPTIMAL_DEPTH_M[r.resort] || 1.50))
+        : 0;
 
       let fTemp = 0.5;
       if (tMax !== null) {
@@ -1515,7 +1474,7 @@
         powderBonus = Math.round(0.15 * snowFactor * windFactor * 10000) / 10000;
       }
 
-      const raw   = 0.40*fSun + 0.25*fDepth + 0.20*fTemp + 0.15*windMult;
+      const raw   = 0.45*fSun + 0.30*fDepth + 0.25*fTemp;
       const score = Math.max(0, Math.min(1, (raw + powderBonus) * windMult));
 
       return { score, metrics: { fSun, fDepth, fTemp, windMult, powderBonus } };
@@ -1537,15 +1496,16 @@
       return `<div class="tt-data-node">
         <div style="font-size:0.9rem; font-weight:800; color:var(--brand); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:0.4rem; margin-bottom:0.4rem;">${title}</div>
         ${extras}
-        <div style="color:var(--text-muted); font-size:0.7rem; margin-top:0.4rem; text-transform:uppercase;">Bluebird Index · Composite Score</div>
+        <div style="color:var(--text-muted); font-size:0.7rem; margin-top:0.4rem; text-transform:uppercase;">Bluebird Score · higher = better ski day</div>
         <div class="tt-grid">
-          <span style="color:var(--text-muted)">☀️ Sun (40%)</span>        <span class="tt-val" style="color:${sC}">${(m.fSun*100).toFixed(0)}%</span>
-          <span style="color:var(--text-muted)">🏔️ Depth (25%)</span>      <span class="tt-val" style="color:${dC}">${(m.fDepth*100).toFixed(0)}%</span>
-          <span style="color:var(--text-muted)">🌡️ Temp (20%)</span>       <span class="tt-val" style="color:${tC}">${(m.fTemp*100).toFixed(0)}%</span>
-          <span style="color:var(--text-muted)">💨 Wind mult</span>         <span class="tt-val" style="color:${wC}">${(m.windMult*100).toFixed(0)}%</span>
+          <span style="color:var(--text-muted)">☀️ Sun (45%)</span>        <span class="tt-val" style="color:${sC}">${(m.fSun*100).toFixed(0)}%</span>
+          <span style="color:var(--text-muted)">🏔️ Depth (30%)</span>      <span class="tt-val" style="color:${dC}">${(m.fDepth*100).toFixed(0)}%</span>
+          <span style="color:var(--text-muted)">🌡️ Temp (25%)</span>       <span class="tt-val" style="color:${tC}">${(m.fTemp*100).toFixed(0)}%</span>
+          <span style="color:var(--text-muted)">💨 Wind ×</span>            <span class="tt-val" style="color:${wC}">${(m.windMult*100).toFixed(0)}%</span>
           ${powderRow}
-          <span style="color:var(--text-muted); font-weight:800;">⭐ Composite</span> <span class="tt-val" style="color:var(--brand);">${(finalSc*100).toFixed(0)}%</span>
+          <span style="color:var(--text-muted); font-weight:800;">⭐ Score</span> <span class="tt-val" style="color:var(--brand);">${(finalSc*100).toFixed(0)}%</span>
         </div>
+        <div style="font-size:0.65rem; color:var(--text-muted); margin-top:0.5rem; border-top:1px solid var(--border-color); padding-top:0.35rem;">Score = (sun·45 + depth·30 + temp·25) × wind${(m.powderBonus||0)>0?' + powder bonus':''} · 100% = perfect day</div>
       </div>`;
     };
 
@@ -1580,9 +1540,20 @@
         const fmt = (t) => t !== null && t !== undefined ? `${t.toFixed(1)}°C` : '—'; 
         const warn = (r.flags && r.flags.length) ? `<span title="Data Flag: ${r.flags.join(',')}" style="cursor:help;">⚠️</span> ` : '';
         
-        const bounds = window.getResortBounds(r.resort);
-        const dScore = computeDynamicScore(r, bounds);
-        const finalSc = dScore.score;
+        // Primary: use baked score + metrics from enriched_data.json.
+        // Fallback: recompute in-browser only when the record lacks a baked score
+        // (e.g. very recent delta records not yet through the pipeline).
+        // This prevents silent JS/Python formula drift from producing different
+        // numbers in the table vs. the stored JSON.
+        let finalSc, dScore;
+        if (r.score !== null && r.score !== undefined && r.metrics) {
+          finalSc = r.score;
+          dScore  = { score: r.score, metrics: r.metrics };
+        } else {
+          const bounds = window.getResortBounds(r.resort);
+          dScore  = computeDynamicScore(r, bounds);
+          finalSc = dScore.score;
+        }
 
         const extrasHtml = `
           <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:0.5rem; display:grid; grid-template-columns:1fr 1fr; gap:0.4rem;">
@@ -1843,8 +1814,8 @@
       }
       
       const elev = RESORT_ELEVATIONS[window.GLOBAL_RESORT] || { base: '—', summit: '—' };
-      let legendHtml = `<div class="legend-item"><span style="display:inline-block;width:16px;height:3px;background:var(--text-main);vertical-align:middle;margin-right:2px;"></span>Mountain (${elev.summit}m)</div>`;
-      legendHtml += `<div class="legend-item"><span style="display:inline-block;width:16px;height:0;border-top:3px dashed var(--text-muted);vertical-align:middle;margin-right:2px;"></span>Village (${elev.base}m)</div>`;
+      let legendHtml = `<div class="legend-item"><span style="display:inline-block;width:20px;height:3px;background:var(--snow-stroke);vertical-align:middle;margin-right:4px;border-radius:2px;"></span>⛰ Mountain (${elev.summit}m)</div>`;
+      legendHtml += `<div class="legend-item"><span style="display:inline-block;width:20px;height:0;border-top:3px dashed rgba(77,127,255,0.5);vertical-align:middle;margin-right:4px;"></span>🏘 Village (${elev.base}m)</div>`;
       legendHtml += seasonKeys.map((s, idx) => {
         const c = s === currentSeason ? getStyleVar('--snow-stroke') : seasonColors[idx % seasonColors.length];
         return `<div class="legend-item"><div class="legend-color" style="background:${c}"></div>${s}</div>`;
