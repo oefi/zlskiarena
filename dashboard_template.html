@@ -117,7 +117,7 @@
   input[type="date"]:focus { border-color: var(--brand); }
 
   /* ── FORECAST CARDS ── */
-  #forecast-wrapper { display: grid; grid-template-columns: 260px 1fr; gap: 1rem; align-items: stretch; }
+  #forecast-wrapper { display: grid; grid-template-columns: 260px 1fr; gap: 1rem; align-items: start; }
   #tactical-summary-board { display: flex; flex-direction: column; gap: 0.65rem; min-width: 0; }
   .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem 1rem; display: flex; flex-direction: column; justify-content: flex-start; min-width: 0; }
   .fc-card.fc-card-wide { /* same as fc-card in column layout */ }
@@ -283,7 +283,7 @@
         </div>
 
         <div style="position: relative; flex-grow: 1; min-height: 300px;">
-          <canvas id="forecast-canvas" width="2000" height="920"></canvas>
+          <canvas id="forecast-canvas" width="2000" height="960"></canvas>
         </div>
 
 
@@ -526,21 +526,26 @@
   };
 
   const STATIC_METADATA = {
-    'nauders':    { base: 1400, summit: 2750, label: 'Nauders',        region: 'Reschenpass / AUT',
-                    webcam: 'https://www.nauders.com/en/webcams',
-                    lifts:  'https://www.nauders.com/en/winter/piste-map-lifts' },
-    'schoeneben': { base: 1460, summit: 2390, label: 'Schöneben',      region: 'Reschenpass / ITA',
-                    webcam: 'https://www.schoeneben.it/en/webcam',
-                    lifts:  'https://www.schoeneben.it/en/winter/ski-area' },
-    'watles':     { base: 1500, summit: 2550, label: 'Watles',         region: 'Reschenpass / ITA',
-                    webcam: 'https://www.watles.it/en/webcam',
-                    lifts:  'https://www.watles.it/en/winter' },
+    'nauders':    { base: 1400, summit: 2750, label: 'Nauders',         region: 'Reschenpass / AUT',
+                    webcam:  'https://www.bergfex.com/nauders/webcams/',
+                    webcams2: [],
+                    lifts:   'https://www.bergfex.com/nauders/lifte/' },
+    'schoeneben': { base: 1460, summit: 2390, label: 'Schöneben',       region: 'Reschenpass / ITA',
+                    webcam:  'https://www.bergfex.com/schoeneben-haideralm/webcams/',
+                    webcams2: [{ label: 'Haideralm webcams (connected by lift)', url: 'https://www.bergfex.com/haideralm/webcams/' }],
+                    lifts:   'https://www.bergfex.com/schoeneben-haideralm/lifte/' },
+    'watles':     { base: 1500, summit: 2550, label: 'Watles',          region: 'Reschenpass / ITA',
+                    webcam:  'https://www.bergfex.com/watles/webcams/',
+                    webcams2: [],
+                    lifts:   'https://www.bergfex.com/watles/lifte/' },
     'sulden':     { base: 1900, summit: 3250, label: 'Sulden / Ortler', region: 'South Tyrol / ITA · Glacier',
-                    webcam: 'https://www.sulden.com/en/webcam',
-                    lifts:  'https://www.sulden.com/en/winter/piste-map' },
-    'trafoi':     { base: 1540, summit: 2800, label: 'Trafoi',         region: 'South Tyrol / ITA',
-                    webcam: 'https://www.trafoi.com/en/webcam',
-                    lifts:  'https://www.trafoi.com/en/winter' },
+                    webcam:  'https://www.bergfex.com/sulden/webcams/',
+                    webcams2: [],
+                    lifts:   'https://www.bergfex.com/sulden/lifte/' },
+    'trafoi':     { base: 1540, summit: 2800, label: 'Trafoi',          region: 'South Tyrol / ITA',
+                    webcam:  'https://www.bergfex.com/trafoi/webcams/',
+                    webcams2: [],
+                    lifts:   'https://www.bergfex.com/trafoi/lifte/' },
   };
 
   let SKI_DATA = null, FORECAST_DATA = null;
@@ -721,199 +726,42 @@
         fcSubtitle.innerHTML = `<strong style="color:var(--text-main);">📍 ${meta.label ?? resort} &nbsp;<span style="font-weight:400;color:var(--text-muted);font-size:0.8rem;">${meta.region ?? ''}</span></strong>&ensp;·&ensp;${(meta.base ?? '?')}m base &nbsp;→&nbsp; ${(meta.summit ?? '?')}m summit&ensp;·&ensp;16-day ECMWF/ICON/GFS blend`;
       }
       if (!FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[resort]) {
-          fcBoard.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">No forecast payload for ${resort}</div>`;
-          return;
+        fcBoard.innerHTML = `<div style="color:#ef4444;padding:1rem;border:1px dashed #ef4444;border-radius:6px;width:100%;">No forecast payload for ${resort}</div>`;
+        return;
       }
       const resortData = FORECAST_DATA.resorts[resort];
-      // Daily aggregates preferred; hourly fallback for older cached payloads.
       const daily  = resortData.daily  || null;
       const hourly = resortData.hourly || resortData;
       const limit  = Math.min(168, (hourly.temperature_2m?.length || 0));
       if (limit === 0 && !daily) return;
       const days7 = 7;
 
-      // Snow: prefer daily sum, fall back to hourly accumulation
       const snow = daily?.snowfall_sum
         ? daily.snowfall_sum.slice(0, days7).reduce((a,b)=>a+(b||0),0)
         : (hourly.snowfall ? hourly.snowfall.slice(0, days7*24).reduce((a,b)=>a+(b||0),0) : 0);
 
-      // 24h new snow — the number skiers actually care about first
-      const snow24h = daily?.snowfall_sum?.[0] ?? (hourly.snowfall
-        ? hourly.snowfall.slice(0, 24).reduce((a,b)=>a+(b||0), 0)
-        : null);
-
-      // Rain
-      const rain = daily?.rain_sum
-        ? daily.rain_sum.slice(0, days7).reduce((a,b)=>a+(b||0),0)
-        : (hourly.rain ? hourly.rain.slice(0, days7*24).reduce((a,b)=>a+(b||0),0) : 0);
-
-      // Peak gust — prefer daily max, fall back to hourly
-      let maxGust = 0, gustDayStr = '—';
-      if (daily?.wind_gusts_10m_max) {
-        const gustArr = daily.wind_gusts_10m_max.slice(0, days7).filter(v=>v!==null);
-        maxGust = gustArr.length ? Math.max(...gustArr) : 0;
-        const gustIdx = daily.wind_gusts_10m_max.slice(0, days7).indexOf(maxGust);
-        if (daily.time?.[gustIdx]) gustDayStr = new Date(daily.time[gustIdx]).toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
-      } else {
-        const gusts = hourly.wind_gusts_10m ? hourly.wind_gusts_10m.slice(0, limit).filter(v=>v!==null) : [];
-        maxGust = gusts.length ? Math.max(...gusts) : 0;
-        const gustIdx = hourly.wind_gusts_10m ? hourly.wind_gusts_10m.slice(0, limit).indexOf(maxGust) : 0;
-        const gustDate = hourly.time ? new Date(hourly.time[gustIdx]) : new Date(localNow.getTime() + gustIdx*3600000);
-        gustDayStr = gustDate.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
-      }
-
-      // Freezing level — from hourly (daily aggregates were removed as non-existent in API)
-      // CORRECT freeze-thaw logic: risk is when fz-line RISES ABOVE the base elevation.
-      // fz > base means it's warm enough to melt at base → daytime thaw, overnight refreeze = ICE.
-      // fz < base means it stays frozen all day = GOOD conditions.
-      let maxFz = 0, minFz = 0, fzDaysAboveBase = 0;
-      const meta = STATIC_METADATA[resort.toLowerCase()] || {base: 0, summit: 0};
-      const fzArr = hourly.freezing_level_height ? hourly.freezing_level_height.slice(0, limit).filter(v=>v!==null) : [];
-      maxFz = fzArr.length ? Math.max(...fzArr) : 0;
-      minFz = fzArr.length ? Math.min(...fzArr) : 0;
-      // Count days where fz line climbs ABOVE base at any point (thaw risk)
-      for (let i = 0; i < days7; i++) {
-        const dayFz = hourly.freezing_level_height ? hourly.freezing_level_height.slice(i*24, (i+1)*24).filter(v=>v!==null) : [];
-        if (dayFz.length && Math.max(...dayFz) > meta.base) fzDaysAboveBase++;
-      }
-
-      // Visibility — worst-case km over the 7-day window
-      const visArr = hourly.visibility ? hourly.visibility.slice(0, limit).filter(v=>v!==null) : [];
-      const minVis = visArr.length ? Math.min(...visArr) / 1000 : null; // m → km
-      const visibilityHtml = minVis !== null
-        ? `<div style="font-size:2rem; font-weight:800; color:${minVis < 0.2 ? '#ef4444' : minVis < 1 ? '#f59e0b' : 'var(--text-main)'}; line-height:1;">${minVis < 1 ? (minVis*1000).toFixed(0)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">m</span>' : minVis.toFixed(1)+'<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">km</span>'}</div><div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem;">7d minimum (hourly)</div>`
-        : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
-
-      // Month-aware rain threshold — use first forecast timestamp, not wall-clock.
-      // Wall-clock breaks for off-season visitors (e.g. Oct pre-season planning).
-      const fcStartDate = hourly.time && hourly.time[0] ? new Date(hourly.time[0]) : localNow;
-      const forecastMonth = fcStartDate.getMonth() + 1; // 1-12
-      const rainThreshold = forecastMonth <= 2 || forecastMonth >= 11 ? 2 : forecastMonth <= 3 ? 5 : 10;
-      const rainIsDangerous = rain > rainThreshold;
-      const rainNote = rainIsDangerous
-        ? `<div style="font-size:0.7rem;color:#ef4444;margin-top:0.3rem;font-weight:600;">&gt;${rainThreshold}mm threshold for ${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][forecastMonth]}</div>`
-        : `<div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">Threshold: ${rainThreshold}mm (${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][forecastMonth]})</div>`;
-
-      // Feels-like (apparent temperature) — integrates wind chill + humidity.
-      // Open-Meteo apparent_temperature is in HOURLY_VARS; worst wind-chill matters most on a ski hill.
-      const apArr = hourly.apparent_temperature ? hourly.apparent_temperature.slice(0, limit).filter(v=>v!==null) : [];
-      const minApparent = apArr.length ? Math.min(...apArr) : null;
-      const maxApparent = apArr.length ? Math.max(...apArr) : null;
-      const apparentHtml = minApparent !== null
-        ? `<div style="font-size:1.7rem; font-weight:800; color:${minApparent < -15 ? '#ef4444' : minApparent < -8 ? '#f59e0b' : 'var(--text-main)'}; line-height:1;">${minApparent.toFixed(0)}<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">°C</span></div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.25rem;">7d min. — wind chill + humidity</div><div style="font-size:0.7rem;color:var(--text-muted);">Peak: <b style="color:var(--text-main);">${maxApparent.toFixed(0)}°C</b></div>`
-        : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
-      // Avalanche slab signal: heavy snowfall + high wind on same day = wind slab loading
-      // Classic recipe: >15cm new snow AND gusts >40 km/h within same 24h window
-      let avlDays = 0, avlDayLabels = [];
-      for (let i = 0; i < days7; i++) {
-        const snArr = hourly.snowfall ? hourly.snowfall.slice(i*24,(i+1)*24).reduce((a,b)=>a+(b||0),0) : 0;
-        const gArr  = hourly.wind_gusts_10m ? Math.max(...hourly.wind_gusts_10m.slice(i*24,(i+1)*24).filter(v=>v!==null).concat([0])) : 0;
-        if (snArr > 15 && gArr > 40) {
-          avlDays++;
-          const d = hourly.time ? new Date(hourly.time[i*24]) : new Date(localNow.getTime()+i*86400000);
-          avlDayLabels.push(d.toLocaleDateString('en-US',{weekday:'short'}));
-        }
-      }
-      const avlHtml = avlDays > 0
-        ? `<div style="font-size:1.4rem; font-weight:800; color:#b45309; line-height:1;">${avlDays}d</div><div class="avl-warning" title="Wind slab forms when fresh snow (&gt;15 cm/24h) is transported by gusts &gt;40 km/h, creating dense unstable layers on leeward slopes.">⚠ Slab load: ${avlDayLabels.join(', ')}</div>`
-        : `<div style="font-size:1.1rem; font-weight:800; color:#15803d; line-height:1.4;">None</div><div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">No slab load days (&gt;15 cm + &gt;40 km/h)</div>`;
-
-      // UV at summit — peak daily UV index across the week
-      const uvArr = daily?.uv_index_max ? daily.uv_index_max.slice(0, days7).filter(v=>v!==null) : [];
-      const peakUV = uvArr.length ? Math.max(...uvArr) : null;
-      // At alpine altitudes UV increases ~10-12% per 1000m above sea level
-      // The forecast already has elevation factored in via the elevation param
-      const uvColor = peakUV === null ? 'var(--text-muted)' : peakUV >= 8 ? '#ef4444' : peakUV >= 6 ? '#f97316' : peakUV >= 4 ? '#f59e0b' : '#22c55e';
-      const uvLabel = peakUV === null ? '—' : peakUV >= 8 ? 'Very High' : peakUV >= 6 ? 'High' : peakUV >= 4 ? 'Moderate' : 'Low';
-      const uvHtml = peakUV !== null
-        ? `<div style="font-size:2rem; font-weight:800; color:${uvColor}; line-height:1;">${peakUV.toFixed(0)}<span style="font-size:0.85rem; color:var(--text-muted); margin-left:0.3rem;">UV</span></div><div style="font-size:0.7rem;color:${uvColor};margin-top:0.2rem;font-weight:600;" title="UV rises ~10% per 1000 m. At summit, sunscreen mandatory.">${uvLabel} · ${meta.summit} m</div>`
-        : `<div style="font-size:1rem; color:var(--text-muted);">No data</div>`;
-
-
-      // ── Card helpers ───────────────────────────────────────────────────
       const cardLabel = (text) =>
         `<div style="color:var(--text-muted);font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.35rem;">${text}</div>`;
-      const bigNum = (val, unit, color='var(--text-main)') =>
-        `<div style="font-size:2rem;font-weight:800;color:${color};line-height:1;">${val}<span style="font-size:0.95rem;color:var(--text-muted);margin-left:0.2rem;">${unit}</span></div>`;
-      const sub = (text, color='var(--text-muted)') =>
-        `<div style="font-size:0.72rem;color:${color};margin-top:0.3rem;line-height:1.4;">${text}</div>`;
 
-      // ── CARD 1: Fresh Snow Today ──────────────────────────────────────
-      const isPowderDay = snow24h !== null && snow24h >= 15;
-      const snow24Card = `
-        <div class="fc-card" style="${isPowderDay ? 'border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,0.18);' : ''}">
-          ${cardLabel('Fresh Snow ❄️')}
-          ${snow24h !== null
-            ? bigNum(snow24h.toFixed(0), 'cm', snow24h >= 20 ? '#1d4ed8' : snow24h >= 10 ? '#2563eb' : 'var(--text-main)')
-            : `<div style="font-size:1rem;color:var(--text-muted);">No data</div>`}
-          ${snow24h !== null ? sub(
-              snow24h >= 15 ? '🎿 Powder day — fresh ungroomed snow' :
-              snow24h >= 5  ? 'Light snowfall since yesterday' :
-              snow24h > 0   ? 'Trace snowfall' : 'No new snow in the last 24h'
-            ) : ''}
-          ${isPowderDay ? `<div style="font-size:0.68rem;margin-top:0.4rem;padding:0.2rem 0.4rem;background:rgba(180,83,9,0.08);border:1px solid rgba(180,83,9,0.2);border-radius:3px;color:#b45309;font-weight:600;">⚠ Check <a href="https://lawinen.report" target="_blank" style="color:#b45309;">avalanche bulletin</a> before skiing off-piste</div>` : ''}
-        </div>`;
-
-      // ── CARD 2: Snow This Week ────────────────────────────────────────
-      const snowWeekCard = `
-        <div class="fc-card">
-          ${cardLabel('Snow This Week ❄️')}
-          ${bigNum(snow.toFixed(0), 'cm', '#2563eb')}
-          ${sub('Total snowfall forecast over the next 7 days')}
-        </div>`;
-
-      // ── CARD 3: Rain This Week ────────────────────────────────────────
-      const rainWeekCard = `
-        <div class="fc-card"${rainIsDangerous ? ' style="border-color:#ef4444;"' : ''}>
-          ${cardLabel('Rain This Week 🌧️')}
-          ${bigNum(rain.toFixed(1), 'mm', rainIsDangerous ? '#ef4444' : 'var(--text-main)')}
-          ${rainIsDangerous
-            ? sub('Rain can refreeze overnight — icy pistes likely', '#ef4444')
-            : sub(rain < 1 ? 'No significant rain expected — good news' : 'Low amounts, minimal impact on piste quality')}
-        </div>`;
-
-      // ── CARD 4: Temperatures Today ───────────────────────────────────
-      const tColor = t => t === null ? 'var(--text-muted)' : t > 2 ? '#ef4444' : t > -5 ? '#f97316' : t > -12 ? 'var(--text-main)' : '#3b82f6';
-      const tStr   = (mx, mn) => mx !== null ? `${mx > 0 ? '+' : ''}${mx.toFixed(0)} / ${mn !== null ? (mn > 0 ? '+' : '') + mn.toFixed(0) : '—'}°C` : '—';
-      const LAPSE_RATE = 6.5;
-      const altDelta   = (meta.summit || 0) - (meta.base || 0);
-      const lapseOffset = +(altDelta / 1000 * LAPSE_RATE).toFixed(1);
-      const mtnTMax = daily?.temperature_2m_max?.[0] ?? null;
-      const mtnTMin = daily?.temperature_2m_min?.[0] ?? null;
-      const villTMax = mtnTMax !== null ? +(mtnTMax + lapseOffset).toFixed(1) : null;
-      const villTMin = mtnTMin !== null ? +(mtnTMin + lapseOffset).toFixed(1) : null;
-      const fcSnowDepthCm = hourly?.snow_depth?.[0] != null ? (hourly.snow_depth[0] * 100).toFixed(0) : null;
-      const fcDay0Date = hourly?.time?.[0] ? new Date(hourly.time[0]).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) : null;
-      const tempTodayCard = `
-        <div class="fc-card fc-card-wide">
-          ${cardLabel('Temperatures Today 🌡️' + (fcDay0Date ? `<span style="font-weight:400;font-size:0.7rem;margin-left:0.4rem;text-transform:none;">${fcDay0Date}</span>` : ''))}
-          <div style="display:flex;gap:0.6rem;align-items:stretch;">
-            <div style="width:8px;background:linear-gradient(to bottom,#3b82f6,#94a3b8,#ef4444);border-radius:4px;flex-shrink:0;"></div>
-            <div style="flex:1;display:flex;flex-direction:column;gap:0.4rem;">
-              <div style="display:flex;justify-content:space-between;align-items:baseline;padding-bottom:0.35rem;border-bottom:1px dashed var(--border-color);">
-                <span style="font-size:0.78rem;color:var(--text-muted);">⛰ On the slopes <span style="font-size:0.68rem;opacity:0.7;">(${meta.summit ?? '?'}m summit)</span></span>
-                <span style="font-size:1rem;font-weight:800;color:${tColor(mtnTMax)};">${tStr(mtnTMax, mtnTMin)}</span>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:0.1rem;">
-                <span style="font-size:0.78rem;color:var(--text-muted);">🏘 In the village <span style="font-size:0.68rem;opacity:0.7;">(${meta.base ?? '?'}m, est.)</span></span>
-                <span style="font-size:1rem;font-weight:800;color:${tColor(villTMax)};">${tStr(villTMax, villTMin)}</span>
-              </div>
-            </div>
-          </div>
-          ${fcSnowDepthCm !== null ? `<div style="margin-top:0.5rem;padding-top:0.4rem;border-top:1px solid var(--border-color);font-size:0.72rem;color:var(--text-muted);">Current snow depth on the mountain: <b style="color:var(--text-main);">${fcSnowDepthCm} cm</b></div>` : ''}
-        </div>`;
-
-      // ── CARD 5: Live Conditions ───────────────────────────────────────
       const metaLinks = STATIC_METADATA[resort.toLowerCase()] || {};
+
       const liveCard = `
         <div class="fc-card fc-card-full">
           ${cardLabel('Check Live Conditions 📷')}
-          <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;">
-            ${metaLinks.webcam ? `<a href="${metaLinks.webcam}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:600;color:var(--brand);text-decoration:none;background:var(--brand-light);border-radius:5px;padding:0.3rem 0.65rem;">📷 Mountain webcam</a>` : ''}
-            ${metaLinks.lifts  ? `<a href="${metaLinks.lifts}"  target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:600;color:#15803d;text-decoration:none;background:rgba(21,128,61,0.08);border:1px solid rgba(21,128,61,0.2);border-radius:5px;padding:0.3rem 0.65rem;">🟢 Lift &amp; piste status</a>` : ''}
-            <a href="https://lawinen.report" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:600;color:#b45309;text-decoration:none;background:rgba(180,83,9,0.08);border:1px solid rgba(180,83,9,0.2);border-radius:5px;padding:0.3rem 0.65rem;">⚠️ Avalanche bulletin (Tirol / South Tyrol)</a>
-            <span style="font-size:0.68rem;color:var(--text-muted);margin-left:auto;">Forecasts can't see valley fog or whether the road is open</span>
+          <div style="display:flex;flex-direction:column;gap:0.4rem;">
+            ${metaLinks.webcam ? `<a href="${metaLinks.webcam}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;color:var(--brand);text-decoration:none;background:var(--brand-light);border-radius:5px;padding:0.35rem 0.65rem;">📷 Mountain webcam</a>` : ''}
+            ${(metaLinks.webcams2||[]).map(w => `<a href="${w.url}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;color:var(--brand);text-decoration:none;background:var(--brand-light);border-radius:5px;padding:0.35rem 0.65rem;">📷 ${w.label}</a>`).join('')}
+            ${metaLinks.lifts  ? `<a href="${metaLinks.lifts}"  target="_blank" rel="noopener" style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;color:#15803d;text-decoration:none;background:rgba(21,128,61,0.08);border:1px solid rgba(21,128,61,0.2);border-radius:5px;padding:0.35rem 0.65rem;">🟢 Lift &amp; piste status</a>` : ''}
+            <a href="https://lawinen.report" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;color:#b45309;text-decoration:none;background:rgba(180,83,9,0.08);border:1px solid rgba(180,83,9,0.2);border-radius:5px;padding:0.35rem 0.65rem;">⚠️ Avalanche bulletin</a>
+            <div style="font-size:0.65rem;color:var(--text-muted);margin-top:0.1rem;">Models can't see valley fog or road closures</div>
           </div>
+        </div>`;
+
+      const snowWeekCard = `
+        <div class="fc-card">
+          ${cardLabel('Snow This Week ❄️')}
+          <div style="font-size:2.2rem;font-weight:800;color:#2563eb;line-height:1;">${snow.toFixed(0)}<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">cm</span></div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.3rem;">Total snowfall forecast — next 7 days</div>
         </div>`;
 
       fcBoard.innerHTML = liveCard + snowWeekCard;
@@ -996,81 +844,6 @@
       return { score: Math.round(score*1000)/1000, fSun, fDepth, fTemp, wMult, pBonus, probFactor };
     };
 
-    window.renderBestDaysStrip = () => {
-      const strip = document.getElementById('best-days-strip');
-      if (!strip) return;
-      if (!FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) {
-        strip.innerHTML = `<div style="color:var(--text-muted);font-style:italic;font-size:0.85rem;">No forecast data.</div>`;
-        return;
-      }
-      const resortData = FORECAST_DATA.resorts[window.GLOBAL_RESORT];
-      const hourly = resortData.hourly || resortData;
-      if (!hourly.temperature_2m) { strip.innerHTML = ''; return; }
-      const numDays = Math.min(16, Math.floor(hourly.temperature_2m.length / 24));
-      if (numDays === 0) { strip.innerHTML = ''; return; }
-
-      // Historical max sun for normalisation — depth now uses OPTIMAL_DEPTH_M cap internally
-      const histBounds = typeof window.getResortBounds === 'function' ? window.getResortBounds(window.GLOBAL_RESORT) : { maxSun: 10 };
-      const maxSun   = histBounds.maxSun   || 10;
-
-      const days = [];
-      for (let i = 0; i < numDays; i++) {
-        const s = i * 24, e = s + 24;
-        const slice = k => hourly[k] ? hourly[k].slice(s, e).filter(v => v !== null) : [];
-        const temps  = slice('temperature_2m');
-        const tMax   = temps.length ? Math.max(...temps) : null;
-        const tMin   = temps.length ? Math.min(...temps) : null;
-        const sunSec = hourly.sunshine_duration ? hourly.sunshine_duration.slice(s,e).reduce((a,b)=>a+(b||0),0) : 0;
-        const sunH   = Math.min(sunSec / 3600, 16);
-        const depthArr = slice('snow_depth');
-        const depthM = depthArr.length ? depthArr.reduce((a,b)=>a+b,0)/depthArr.length : null;
-        const gusts  = slice('wind_gusts_10m');
-        const gustMax= gusts.length ? Math.max(...gusts) : null;
-        const freshCm= hourly.snowfall ? hourly.snowfall.slice(s,e).reduce((a,b)=>a+(b||0),0) : 0;
-        const probArr= slice('precipitation_probability');
-        const probMax= probArr.length ? Math.max(...probArr) : null;
-        const dt     = hourly.time ? new Date(hourly.time[s]) : new Date(localNow.getTime()+i*86400000);
-        const scored = computeForecastDayScore(tMax, tMin, sunH, depthM, gustMax, freshCm, probMax, maxSun, dt.toISOString().slice(0,10));
-        const dayWmo = hourly.weather_code ? (hourly.weather_code.slice(s,e).filter(v=>v!==null)[12] || null) : null;
-        const wmoEmoji = dayWmo === null ? '🌤️' : dayWmo === 0 ? '☀️' : dayWmo <= 2 ? '🌤️' : dayWmo === 3 ? '☁️' :
-                         dayWmo <= 48 ? '🌫️' : dayWmo <= 57 ? '🌧️' : dayWmo <= 67 ? '🌨️' :
-                         dayWmo <= 77 ? '❄️' : dayWmo <= 82 ? '🌦️' : dayWmo <= 86 ? '🌨️' : '⛈️';
-        days.push({ dt, tMax, freshCm, sunH, depthM, gustMax, probMax, score: scored.score, fSun: scored.fSun, wmoEmoji });
-      }
-
-      // Rank by score to find top 3
-      const ranked = [...days].map((d,i)=>({i, score:d.score})).sort((a,b)=>b.score-a.score);
-      const topIdx = new Set(ranked.slice(0,3).map(r=>r.i));
-      const bestIdx = ranked[0].i;
-
-      strip.innerHTML = days.map((d, i) => {
-        const isTop = topIdx.has(i);
-        const isBest = i === bestIdx;
-        const isPowder  = d.freshCm >= 15 && (d.gustMax === null || d.gustMax < 60);
-        const chipClass = isBest ? 'fc-day-chip fc-day-chip--top' : isTop ? 'fc-day-chip fc-day-chip--top3-1' : 'fc-day-chip';
-        const scoreColor = d.score >= 0.75 ? '#16a34a' : d.score >= 0.55 ? '#84cc16' : d.score >= 0.40 ? '#f59e0b' : '#ef4444';
-        const dayLabel  = d.dt.toLocaleDateString('en-US', {weekday:'short'});
-        const dateLabel = d.dt.toLocaleDateString('en-US', {month:'short', day:'numeric'});
-        const snowStr   = d.freshCm > 0.5 ? `❄️${d.freshCm.toFixed(0)}cm` : '';
-        const probStr   = d.probMax !== null && d.probMax > 20 ? `☔ ${Math.round(d.probMax)}%` : '';
-        const bestMark  = isBest ? '⭐' : isTop ? '✓' : '';
-        const titleStr  = `Projected score ${(d.score*100).toFixed(0)}% · ${dayLabel} ${dateLabel}${isPowder ? ' · 🌨 Powder override' : ''} · ${d.tMax !== null ? 'T max '+d.tMax.toFixed(0)+'°C' : ''} · ${d.freshCm > 0 ? d.freshCm.toFixed(0)+' cm snow' : 'no new snow'} · gust ${d.gustMax !== null ? d.gustMax.toFixed(0)+' km/h' : '—'}`;
-        return `<div class="${chipClass}" title="${titleStr}"${isPowder ? ' style="border-color:#2563eb;box-shadow:0 0 0 1px rgba(37,99,235,0.25);"' : ''}>
-          <div style="font-size:0.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;display:flex;justify-content:space-between;">
-            <span>${dayLabel}</span><span style="color:${isTop?'#d97706':'var(--text-muted)'};">${bestMark}</span>
-          </div>
-          <div style="font-size:0.65rem;color:var(--text-muted);">${dateLabel}</div>
-          <div style="font-size:1.3rem;line-height:1.1;text-align:center;">${isPowder ? '🌨️' : d.wmoEmoji}</div>
-          <div style="font-size:0.85rem;font-weight:800;color:${scoreColor};text-align:center;">${(d.score*100).toFixed(0)}%</div>
-          ${d.tMax !== null ? `<div style="font-size:0.6rem;color:var(--text-muted);text-align:center;">${d.tMax.toFixed(0)}°C</div>` : ''}
-          ${snowStr ? `<div style="font-size:0.6rem;color:#2563eb;">${snowStr}</div>` : ''}
-          ${probStr ? `<div style="font-size:0.6rem;color:#60a5fa;">${probStr}</div>` : ''}
-        </div>`;
-      }).join('');
-    };
-
-    if (FORECAST_DATA && FORECAST_DATA.resorts && Object.keys(FORECAST_DATA.resorts).length > 0) {
-      window.renderBestDaysStrip();
     }
 
     const cvsFc = document.getElementById('forecast-canvas');
@@ -1184,7 +957,7 @@
       const pX = isMobile ? 48 : 72;
       const pY = 24;
       const pRight = isMobile ? 48 : 72;
-      const pBot = 165;  // includes chip row (115px) + axis title pad (50px)
+      const pBot = 185;  // includes chip row (135px) + axis title pad (50px)
 
       const w = cvsFc.width - pX - pRight;
       const h = cvsFc.height - pY - pBot; 
@@ -1227,14 +1000,17 @@
       const smallFont = `bold ${Math.max(10, Math.floor(11 * (cvsFc.width / (cvsFc.clientWidth || 1000))))}px system-ui`;
       ctxFc.font = smallFont; ctxFc.textBaseline = 'top';
       // Left panel corners
-      ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.textAlign = 'left';
-      ctxFc.fillText('°C', pX + 4, yP1 + 2);
-      ctxFc.fillStyle = '#3b82f6';
-      ctxFc.fillText('mm', pX + 4, zeroY - 22);
+      // Unit labels outside the axis — right-aligned flush to the left margin
+      ctxFc.textBaseline = 'middle'; ctxFc.textAlign = 'right';
       ctxFc.fillStyle = getStyleVar('--text-muted');
-      ctxFc.fillText(hasDirectRad ? 'W/m²' : 'h', pX + 4, yP2 + 2);
-      ctxFc.fillStyle = '#ef4444';
-      ctxFc.fillText('km/h', pX + w - 32, yP2 + 2);
+      ctxFc.fillText('°C', pX - (isMobile?6:14), yP1 + 10);
+      ctxFc.fillStyle = '#3b82f6';
+      ctxFc.fillText('mm', pX - (isMobile?6:14), zeroY - 14);
+      ctxFc.fillStyle = getStyleVar('--text-muted');
+      ctxFc.fillText(hasDirectRad ? 'W/m²' : 'h', pX - (isMobile?6:14), yP2 + 10);
+      // km/h: right margin, top of gust panel, left-aligned
+      ctxFc.fillStyle = '#ef4444'; ctxFc.textAlign = 'left';
+      ctxFc.fillText('km/h', pX + w + (isMobile?3:7), yP2 + 10);
       ctxFc.font = fonts.axis;
 
       ctxFc.textAlign = 'right'; ctxFc.textBaseline = 'middle';
@@ -1341,7 +1117,25 @@
         else exactDate = new Date(localNow.getTime() + i*86400000);
         const ds = exactDate.toISOString().slice(0,10);
         const wmo = hourly.weather_code ? (hourly.weather_code.slice(s,e).filter(v=>v!==null)[12]||null) : null;
-        const emoji = wmo===null?'🌤':wmo===0?'☀️':wmo<=2?'🌤':wmo===3?'☁️':wmo<=48?'🌫️':wmo<=57?'🌧️':wmo<=67?'🌨️':wmo<=77?'❄️':wmo<=82?'🌦️':wmo<=86?'🌨️':'⛈️';
+        // WMO weather interpretation codes — full mapping
+        // 0=clear, 1=mainly clear, 2=partly cloudy, 3=overcast
+        // 45/48=fog, 51/53/55=drizzle, 56/57=freezing drizzle
+        // 61/63/65=rain, 66/67=freezing rain, 71/73/75=snow, 77=snow grains
+        // 80/81/82=rain showers, 85/86=snow showers, 95=thunderstorm, 96/99=thunderstorm+hail
+        const emoji = wmo === null  ? '🌤️'
+          : wmo === 0               ? '☀️'
+          : wmo === 1               ? '🌤️'
+          : wmo === 2               ? '⛅'
+          : wmo === 3               ? '☁️'
+          : wmo <= 48               ? '🌫️'   // fog
+          : wmo <= 55               ? '🌦️'   // drizzle
+          : wmo <= 57               ? '🌧️'   // freezing drizzle
+          : wmo <= 65               ? '🌧️'   // rain
+          : wmo <= 67               ? '🌨️'   // freezing rain
+          : wmo <= 77               ? '❄️'   // snow / snow grains
+          : wmo <= 82               ? '🌦️'   // rain showers
+          : wmo <= 86               ? '🌨️'   // snow showers
+          :                          '⛈️';   // thunderstorm
         const scored = computeForecastDayScore(d.tMax, d.tMin, d.sun, depthM, d.gust, d.snow, probMax, maxSunForScore, ds);
         const isPowder = d.snow >= 15 && d.gust < 60;
         return { score: scored.score, emoji: isPowder ? '🌨️' : emoji, probMax, dateObj: exactDate, ds };
@@ -1389,8 +1183,8 @@
 
         const cx2 = chipLeft + chipW / 2;
         const fScale = Math.min(1, chipW / (72 * sc2)); // scale font if chips narrow
-        const fBase  = Math.max(8, Math.floor(10 * sc2 * fScale));
-        const fSm    = Math.max(7, Math.floor(9  * sc2 * fScale));
+        const fBase  = Math.max(10, Math.floor(13 * sc2 * fScale));
+        const fSm    = Math.max(9, Math.floor(11 * sc2 * fScale));
 
         ctxFc.textAlign = 'center'; ctxFc.textBaseline = 'top';
 
@@ -1409,12 +1203,12 @@
 
         // Row 3: emoji
         const emojiY = chipTop + chipPad + fBase*2 + 6;
-        ctxFc.font = `${Math.max(12, Math.floor(14 * sc2 * fScale))}px system-ui`;
+        ctxFc.font = `${Math.max(15, Math.floor(18 * sc2 * fScale))}px system-ui`;
         ctxFc.fillText(chipScores[i].emoji, cx2, emojiY);
 
         // Row 4: score %  bold coloured
         const scoreY = emojiY + Math.floor(16 * sc2 * fScale) + 2;
-        ctxFc.font = `800 ${Math.max(9, Math.floor(11 * sc2 * fScale))}px system-ui`;
+        ctxFc.font = `800 ${Math.max(11, Math.floor(14 * sc2 * fScale))}px system-ui`;
         ctxFc.fillStyle = scoreColor;
         ctxFc.fillText(`${Math.round(sc_val*100)}%`, cx2, scoreY);
 
@@ -1611,7 +1405,7 @@
         }
       }, {passive: false});
       
-      window.addEventListener('resize', () => { if (cvsFc) setupHiDPI(cvsFc, 2000, 920); window.repaintForecastCanvas(); });
+      window.addEventListener('resize', () => { if (cvsFc) setupHiDPI(cvsFc, 2000, 960); window.repaintForecastCanvas(); });
       setTimeout(window.repaintForecastCanvas, 100);
     }
 
