@@ -97,6 +97,11 @@ SEASONS, HM = _load_real_heatmap()
 if SEASONS is None:
     SEASONS, HM = _synthetic_heatmap()
 
+# Expected full-dataset record count: 5 resorts × ski-season days 2019/20–2025/26.
+# Used as a fallback label on the OG image when enriched_data.json is absent or
+# the real fetch failed and the file contains synthetic data with 0 real records.
+EXPECTED_RECORDS = 6345  # 5 resorts × 1269 ski-season days
+
 # Dynamic record count + date range from meta
 _total_records = 0
 _date_range    = "Nov–Apr · 2019/20–2024/25"
@@ -194,7 +199,7 @@ e.append(ln(LX, 193, 608, 193))
 
 # Season + record chips
 _seasons_str = f"Nov–Apr · {SEASONS[0]}–{SEASONS[-1]}" if SEASONS else "Nov–Apr · 2019/20–2024/25"
-_rec_str     = f"{_total_records:,} records" if _total_records else "Live scores"
+_rec_str     = f"{_total_records:,} records" if _total_records else f"~{EXPECTED_RECORDS:,} records"
 e.append(r(LX, 206, 216, 30, S2_COL, rx=6))
 e.append(t(LX+11, 226, _seasons_str, 12, ACCENT2, w="600", f=MONO))
 e.append(r(LX+228, 206, 122, 30, S2_COL, rx=6))

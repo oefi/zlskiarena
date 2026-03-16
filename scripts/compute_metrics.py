@@ -1,19 +1,32 @@
 #!/usr/bin/env python3
 """
-Step 3 — Compute Ski Quality Metrics
+Step 3 — Compute Ski Quality Metrics (Piste-Optimised)
 Reads master_data.json, computes per-record composite ski scores,
 writes enriched_data.json consumed by build_dashboard.py.
 
-Composite Bluebird Score (0.0–1.0):
-  40%  Sunshine duration (normalized against resort 6-year peak)
-  25%  Summit snow depth  (normalized against resort 6-year max)
-  20%  Base temperature   (optimal range -12°C to -2°C)
-  15%  Wind component     (gusts above 50 km/h degrade score)
-  wind_penalty acts as a global multiplier on the whole composite.
-  +≤15% Powder day bonus  (summit snowfall > 10 cm + gusts < 50 km/h)
+Composite Bluebird Score (0.0–1.0) — optimised for piste skiers:
+
+Normal conditions:
+  45%  Sunshine duration (normalised vs resort historical peak)
+  30%  Snow depth        (sigmoid curve: 50cm → 0.80, not 0.40)
+  25%  Temperature       (date-aware seasonal bands — see below)
+  Wind: global multiplier (0.3–1.0)
+  +≤15% Powder bonus (additive, moderate fresh snow days)
+
+Powder override  (fresh ≥ 15cm AND gust < 60 km/h):
+  Sunshine weight → 0.0  (irrelevant during a storm)
+  Depth weight    → 0.60  (powder coverage matters)
+  Powder intensity→ 0.15  (scales with snowfall amount)
+  Temperature     → 0.25  (unchanged)
+
+Temperature bands (date-aware):
+  Nov 1  – Feb 28:  optimal -12°C to -2°C  (deep winter)
+  Mar 1  – Mar 20:  optimal  -6°C to +2°C  (transition)
+  Mar 21 – May 1:   optimal  -2°C to +8°C  (Firn / spring skiing)
 """
 
 import json
+import math
 from pathlib import Path
 
 IN_FILE  = Path(__file__).parent.parent / "data" / "processed" / "master_data.json"
