@@ -117,9 +117,11 @@
   input[type="date"]:focus { border-color: var(--brand); }
 
   /* ── FORECAST CARDS ── */
-  #forecast-wrapper { display: grid; grid-template-columns: 1fr; gap: 1.5rem; align-items: stretch; }
-  @media (min-width: 1024px) { #forecast-wrapper { grid-template-columns: 320px 1fr; } }
-  .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; padding: 1rem; display: flex; flex-direction: column; justify-content: center; }
+  #forecast-wrapper { display: flex; flex-direction: column; gap: 1rem; }
+  #tactical-summary-board { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+  .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.9rem 1rem; display: flex; flex-direction: column; justify-content: flex-start; flex: 1 1 160px; min-width: 0; }
+  .fc-card.fc-card-wide { flex: 2 1 320px; }
+  .fc-card.fc-card-full { flex: 1 1 100%; }
 
   /* ── BEST-DAYS STRIP ── */
   #best-days-strip { display: flex; gap: 0.4rem; flex-wrap: nowrap; overflow-x: auto; padding: 0.75rem 0 0.5rem; scrollbar-width: thin; }
@@ -267,23 +269,23 @@
     </div>
 
     <div id="forecast-wrapper">
-      
-      <!-- The 7-Day Tactical Overview (Left Panel) -->
-      <div id="tactical-summary-board" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); gap: 0.75rem; align-items: stretch;">
+
+      <!-- Row 1: Condition cards -->
+      <div id="tactical-summary-board">
         <div style="color: var(--text-muted); font-style: italic;">Awaiting payload...</div>
       </div>
 
-      <!-- The Extended Visual Outlook (Right Panel) -->
-      <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; padding: 1rem; display: flex; flex-direction: column;">
+      <!-- Row 2: 16-day forecast chart -->
+      <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column;">
         
         <div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); flex-wrap: nowrap; overflow-x: auto; align-items: center; padding-bottom: 0.25rem; scrollbar-width: thin;">
-          <span title="Daily air temperature range at base elevation. Red line = daily max, blue line = daily min." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:12px;height:10px;background:linear-gradient(to bottom,rgba(239,68,68,0.5),rgba(59,130,246,0.5));border-radius:2px;"></span>T max/min</span>
-          <span title="Soil surface temperature (0 cm depth). Stays negative = snowpack stable. Above 0°C = melt from below." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #a16207;"></span>Soil 0 cm</span>
+          <span title="Daily air temperature range at base elevation. Red line = daily max, blue line = daily min." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:12px;height:10px;background:linear-gradient(to bottom,rgba(239,68,68,0.5),rgba(59,130,246,0.5));border-radius:2px;"></span>Temperature (max/min)</span>
+          <span title="Soil surface temperature (0 cm depth). Stays negative = snowpack stable. Above 0°C = melt from below." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #a16207;"></span>Soil temp (ground freeze indicator)</span>
           <span title="24h snowfall accumulation (cm). Plotted as water-equivalent mm on precip axis." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:var(--snow-yield);border-radius:2px;"></span>Snowfall</span>
           <span title="24h liquid rainfall (mm)." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:var(--rain-yield);border-radius:2px;"></span>Rainfall</span>
           <span title="Cloud cover by altitude layer, shown at bottom of temp chart. High (Ci): pale blue — no impact. Mid (As): grey — flat light. Low (St/Fog): dark — whiteout, lift closure risk." style="display:flex;align-items:center;gap:0.2rem;cursor:help;"><span style="display:inline-block;width:8px;height:5px;background:rgba(185,210,240,0.9);border-radius:1px;"></span><span style="display:inline-block;width:8px;height:5px;background:rgba(105,130,160,0.9);border-radius:1px;"></span><span style="display:inline-block;width:8px;height:5px;background:rgba(50,70,95,0.9);border-radius:1px;"></span> Cloud Hi/Mid/Low</span>
-          <span title="Mean direct solar beam (W/m²) over daylight hours. Intensity = amber depth. Zero under full cloud. High = bluebird, UV exposure, snow softening." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:rgba(255,145,10,0.85);border-radius:2px;"></span>Direct beam W/m²</span>
-          <span title="Peak wind gust speed (km/h) at 10 m. Dashed red line. Above ~65 km/h = lift holds likely." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #ef4444;"></span>Peak gust</span>
+          <span title="Mean direct solar beam (W/m²) over daylight hours. Intensity = amber depth. Zero under full cloud. High = bluebird, UV exposure, snow softening." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:rgba(255,145,10,0.85);border-radius:2px;"></span>Solar radiation</span>
+          <span title="Peak wind gust speed (km/h) at 10 m. Dashed red line. Above ~65 km/h = lift holds likely." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #ef4444;"></span>Peak wind gust</span>
         </div>
 
         <div style="position: relative; flex-grow: 1; min-height: 300px;">
@@ -294,9 +296,9 @@
     </div>
 
     <!-- ── BEST FORECAST DAYS STRIP ── -->
-    <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+    <div style="margin-top: 0.25rem;">
       <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">
-        16-Day Projected Score <span style="font-weight:500; text-transform:none; letter-spacing:0; font-size:0.72rem; color:var(--text-muted);" title="Projected Score: same formula as Bluebird Score applied to forecast data. Includes a confidence multiplier based on precipitation probability — scores are typically lower than historical Bluebird Scores on uncertain forecast days.">⭐ best day · ✓ top 3 · includes forecast confidence weighting</span>
+        Best Ski Days — Next 16 Days <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:0.72rem;color:var(--text-muted);" title="Projected ski quality score based on forecast snow, sunshine, temperature and wind. Scores are weighted by precipitation probability — less certain forecasts score lower.">⭐ best day &nbsp;·&nbsp; ✓ top 3 picks</span>
       </div>
       <div id="best-days-strip"><div style="color:var(--text-muted); font-style:italic; font-size:0.85rem;">Awaiting forecast…</div></div>
     </div>
@@ -896,7 +898,7 @@
       const fcSnowDepthCm = hourly?.snow_depth?.[0] != null ? (hourly.snow_depth[0] * 100).toFixed(0) : null;
       const fcDay0Date = hourly?.time?.[0] ? new Date(hourly.time[0]).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) : null;
       const tempTodayCard = `
-        <div class="fc-card" style="grid-column:span 2;min-width:0;">
+        <div class="fc-card fc-card-wide">
           ${cardLabel('Temperatures Today 🌡️' + (fcDay0Date ? `<span style="font-weight:400;font-size:0.7rem;margin-left:0.4rem;text-transform:none;">${fcDay0Date}</span>` : ''))}
           <div style="display:flex;gap:0.6rem;align-items:stretch;">
             <div style="width:8px;background:linear-gradient(to bottom,#3b82f6,#94a3b8,#ef4444);border-radius:4px;flex-shrink:0;"></div>
@@ -917,7 +919,7 @@
       // ── CARD 5: Live Conditions ───────────────────────────────────────
       const metaLinks = STATIC_METADATA[resort.toLowerCase()] || {};
       const liveCard = `
-        <div class="fc-card" style="grid-column:1/-1;">
+        <div class="fc-card fc-card-full">
           ${cardLabel('Check Live Conditions 📷')}
           <div style="display:flex;flex-wrap:wrap;gap:0.5rem;align-items:center;">
             ${metaLinks.webcam ? `<a href="${metaLinks.webcam}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.78rem;font-weight:600;color:var(--brand);text-decoration:none;background:var(--brand-light);border-radius:5px;padding:0.3rem 0.65rem;">📷 Mountain webcam</a>` : ''}
