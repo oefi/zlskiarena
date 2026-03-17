@@ -527,23 +527,23 @@
 
   const STATIC_METADATA = {
     'nauders':    { base: 1400, summit: 2750, label: 'Nauders',         region: 'Reschenpass / AUT',
-                    webcam:  'https://www.bergfex.com/nauders/webcams/',
+                    webcam:  'https://www.bergfex.com/sommer/nauders/webcams/',
                     webcams2: [],
                     lifts:   'https://www.bergfex.com/nauders/lifte/' },
     'schoeneben': { base: 1460, summit: 2390, label: 'Schöneben',       region: 'Reschenpass / ITA',
-                    webcam:  'https://www.bergfex.com/schoeneben-haideralm/webcams/',
-                    webcams2: [{ label: 'Haideralm webcams (connected by lift)', url: 'https://www.bergfex.com/haideralm/webcams/' }],
+                    webcam:  'https://www.bergfex.com/schoeneben-haideralm-reschenpass/webcams/',
+                    webcams2: [],
                     lifts:   'https://www.bergfex.com/schoeneben-haideralm/lifte/' },
     'watles':     { base: 1500, summit: 2550, label: 'Watles',          region: 'Reschenpass / ITA',
                     webcam:  'https://www.bergfex.com/watles/webcams/',
                     webcams2: [],
                     lifts:   'https://www.bergfex.com/watles/lifte/' },
     'sulden':     { base: 1900, summit: 3250, label: 'Sulden / Ortler', region: 'South Tyrol / ITA · Glacier',
-                    webcam:  'https://www.bergfex.com/sulden/webcams/',
+                    webcam:  'https://www.bergfex.com/sulden-ortler/webcams/',
                     webcams2: [],
                     lifts:   'https://www.bergfex.com/sulden/lifte/' },
     'trafoi':     { base: 1540, summit: 2800, label: 'Trafoi',          region: 'South Tyrol / ITA',
-                    webcam:  'https://www.bergfex.com/trafoi/webcams/',
+                    webcam:  'https://www.bergfex.com/trafoi-ortler/webcams/',
                     webcams2: [],
                     lifts:   'https://www.bergfex.com/trafoi/lifte/' },
   };
@@ -828,7 +828,11 @@
         pBonus = 0.15 * sf * wf;
       }
 
-      const probFactor = probPct !== null ? Math.min(1, 0.3 + (probPct/100)*0.7) : 1.0;
+      // probFactor: only reduce confidence when precipitation (snow/rain) is actually forecast.
+      // Applying it to sunny days with model uncertainty inflates the penalty unfairly.
+      const probFactor = (probPct !== null && freshCm > 5)
+        ? Math.min(1, 0.3 + (probPct/100)*0.7)
+        : 1.0;
 
       // Powder override
       let raw;
@@ -1103,7 +1107,10 @@
       const sc2 = cvsFc.width / (cvsFc.clientWidth || 800); // buffer scale
 
       // Pre-compute scores for all days
-      const maxSunForScore = Math.max(8, ...daily.map(d => d.sun));
+      // Normalise against historical peak sunshine, not the window's own maximum.
+      // Using window-max inflates scores in uniformly bad-weather windows.
+      const bounds = window.getResortBounds(window.GLOBAL_RESORT);
+      const maxSunForScore = Math.max(8, bounds && bounds.maxSun > 0 ? bounds.maxSun : 10);
       const chipScores = daily.map((d, i) => {
         const s  = i * 24, e = s + 24;
         const depthArr = hourly.snow_depth ? hourly.snow_depth.slice(s,e).filter(v=>v!==null) : [];
@@ -1210,11 +1217,12 @@
         ctxFc.fillStyle = scoreColor;
         ctxFc.fillText(`${Math.round(sc_val*100)}%`, cx2, scoreY);
 
-        // Row 5: T max
+        // Row 5: T range — min at ski-start / max at warmest (more useful than max alone)
         const tempY = scoreY + Math.floor(13 * sc2 * fScale) + 1;
         ctxFc.font = `${fSm}px system-ui`;
-        ctxFc.fillStyle = d.tMax > 2 ? '#ef4444' : d.tMax > -5 ? '#f97316' : getStyleVar('--text-main');
-        ctxFc.fillText(`${d.tMax > 0 ? '+' : ''}${d.tMax.toFixed(0)}°C`, cx2, tempY);
+        const tMinColor = d.tMin < -15 ? '#3b82f6' : d.tMin < -5 ? getStyleVar('--text-main') : '#f97316';
+        ctxFc.fillStyle = tMinColor;
+        ctxFc.fillText(`${d.tMin > 0?'+':''}${d.tMin.toFixed(0)} / ${d.tMax > 0?'+':''}${d.tMax.toFixed(0)}°`, cx2, tempY);
 
         // Row 6: precip prob if notable
         const prob = chipScores[i].probMax;
