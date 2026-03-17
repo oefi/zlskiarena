@@ -78,7 +78,7 @@
   @media (max-width: 640px) { .toc-label { display: none; } }
 
   .control-btn { 
-    padding: 0.4rem 0.8rem; height: 36px;
+    padding: 0.4rem 0.8rem; height: 36px; min-height: 36px;
     background: var(--bg-card); color: var(--text-main); 
     border: 1px solid var(--border-color); border-radius: 6px; 
     cursor: pointer; font-size: 0.85rem; font-weight: 600; font-family: inherit; 
@@ -107,7 +107,7 @@
 
   /* Forms & Sliders */
   input[type="date"] {
-    height: 36px; padding: 0 0.5rem;
+    height: 36px; min-height: 36px; padding: 0 0.5rem; min-width: 130px;
     background: var(--bg-card); color: var(--text-main); 
     border: 1px solid var(--border-color); border-radius: 6px; 
     font-family: inherit; font-size: 0.85rem; font-weight: 600;
@@ -122,6 +122,7 @@
   .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem 1rem; display: flex; flex-direction: column; justify-content: flex-start; min-width: 0; }
   .fc-card.fc-card-wide { /* same as fc-card in column layout */ }
   .fc-card.fc-card-full { margin-top: auto; }
+  @media (max-width: 900px) { .fc-card.fc-card-full { margin-top: 0; } }
   @media (max-width: 900px) { #forecast-wrapper { grid-template-columns: 1fr; } }
 
   /* ── BEST-DAYS STRIP ── */
@@ -130,7 +131,7 @@
   .avl-warning { font-size: 0.75rem; font-weight: 700; color: #b45309; background: rgba(180,83,9,0.08); border: 1px solid rgba(180,83,9,0.25); border-radius: 3px; padding: 0.2rem 0.4rem; margin-top: 0.3rem; display: inline-block; }
 
   /* ── ATMOS SEASON NAV ── */
-  .atmos-nav-btn { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-muted); cursor: pointer; padding: 0.2rem 0.6rem; font-size: 0.85rem; transition: all 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .atmos-nav-btn { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-muted); cursor: pointer; padding: 0.2rem 0.75rem; font-size: 0.85rem; transition: all 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.04); min-height: 44px; min-width: 44px; }
   .atmos-nav-btn:hover { background: var(--brand-light); border-color: #bfdbfe; color: var(--brand); }
   .atmos-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
@@ -173,7 +174,7 @@
 
   /* ── GLOBAL ADVANCED TOOLTIP ── */
   #global-tooltip {
-    display: none; position: absolute; pointer-events: none; z-index: 9999;
+    display: none; position: fixed; pointer-events: none; z-index: 9999;
     background: var(--bg-card); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
     color: var(--text-main); padding: 1rem; border-radius: 10px; font-size: 0.8rem;
     box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px var(--border-color);
@@ -194,6 +195,11 @@
     header.main-header > div { width: 100%; justify-content: center !important; text-align: center; }
     #toc { justify-content: center; width: 100%; flex-wrap: wrap; }
   }
+  @media (max-width: 640px) {
+    header.main-header { padding: 0.6rem 0.75rem !important; gap: 0.4rem; }
+    header.main-header > div:last-child { display: none; } /* hide status/timer on small screens */
+    h1 { font-size: 1rem !important; }
+  }
   @media (max-width: 768px) {
     .hm-months-container { flex-direction: column; gap: 1rem; }
     .hm-month-label { text-align: left; border-bottom: 1px solid var(--grid-line); padding-bottom: 2px; }
@@ -205,7 +211,11 @@
   @media (max-width: 500px) {
     .resort-name-full { display: none; }
     .resort-name-short { display: inline; }
-    .resort-tab-btn { padding: 0.4rem 0.6rem; font-size: 0.8rem; }
+    .resort-tab-btn { padding: 0.5rem 0.6rem; font-size: 0.8rem; min-height: 44px; }
+    .control-btn { min-height: 44px; }
+    .atmos-nav-btn { min-height: 44px; min-width: 44px; }
+    table { font-size: 0.75rem; min-width: 540px; }
+    th, td { padding: 0.55rem 0.3rem; }
   }
   @media print { 
     body { background: white !important; color: black !important; } 
@@ -251,7 +261,8 @@
 </header>
 
 <!-- ── GLOBAL RESORT SELECTOR (PINNED) ── -->
-<div id="global-resort-header" style="position: sticky; top: 0; z-index: 998; background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.5rem 1rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: nowrap; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.07);">
+<div id="global-resort-header" style="position: sticky; top: 0; z-index: 998; background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.5rem 1rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; box-shadow: 0 2px 8px rgba(0,0,0,0.07);">
+  <style>#global-resort-header::-webkit-scrollbar{display:none}</style>
   <!-- Buttons injected via JS -->
 </div>
 
@@ -261,7 +272,7 @@
   <section id="powder-alarm">
     <div style="margin-bottom: 1rem;">
       <h2 style="margin:0; border:none; padding:0; border-bottom: none;">Snow Report &amp; Forecast 📡</h2>
-      <p id="forecast-subtitle" style="font-size: 0.82rem; color: var(--text-muted); margin: 0.25rem 0 0 0;"></p>
+      <p id="forecast-subtitle" style="font-size: 0.82rem; color: var(--text-muted); margin: 0.25rem 0 0 0; overflow-wrap: break-word; word-break: break-word;"></p>
     </div>
 
     <div id="forecast-wrapper">
@@ -272,7 +283,7 @@
 
       <div style="background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; min-height: 0;">
         
-        <div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); flex-wrap: nowrap; overflow-x: auto; align-items: center; padding-bottom: 0.25rem; scrollbar-width: thin;">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); flex-wrap: wrap; align-items: center; padding-bottom: 0.25rem;">
           <span title="Daily air temperature range at base elevation. Red line = daily max, blue line = daily min." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:12px;height:10px;background:linear-gradient(to bottom,rgba(239,68,68,0.5),rgba(59,130,246,0.5));border-radius:2px;"></span>Temperature (max/min)</span>
           <span title="Soil surface temperature (0 cm depth). Stays negative = snowpack stable. Above 0°C = melt from below." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #a16207;"></span>Soil temp (ground freeze indicator)</span>
           <span title="24h snowfall accumulation (cm). Plotted as water-equivalent mm on precip axis." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:var(--snow-yield);border-radius:2px;"></span>Snowfall</span>
@@ -282,7 +293,7 @@
           <span title="Peak wind gust speed (km/h) at 10 m. Dashed red line. Above ~65 km/h = lift holds likely." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #ef4444;"></span>Peak wind gust</span>
         </div>
 
-        <div style="position: relative; flex-grow: 1; min-height: 300px;">
+        <div style="position: relative; flex-grow: 1; min-height: 380px;">
           <canvas id="forecast-canvas" width="2000" height="960" role="img" aria-label="16-day ski conditions forecast: temperature, snowfall, solar radiation and wind for the selected resort"></canvas>
         </div>
 
@@ -306,7 +317,6 @@
       </p>
     </div>
     <div id="heatmap-container" style="display:flex;flex-direction:column;gap:0;margin-top:0.5rem;"></div>
-    <div id="hm-detail-panel" style="display:none; margin-top:0.75rem; background:var(--bg-card); border:1px solid var(--border-color); border-radius:8px; padding:1rem; font-size:0.85rem;"></div>
   </section>
 
   <!-- ── DAILY CONDITIONS TABLE ── -->
@@ -412,9 +422,9 @@
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:0.5rem; margin-bottom:1rem;">
       <h2 style="margin:0; color:var(--brand); letter-spacing:-0.02em; font-size:1rem;">📋 What this dashboard actually is</h2>
       <div style="display:flex; align-items:center; gap:0.5rem;">
-        <button id="info-prev" style="background:none; border:1px solid var(--border-color); border-radius:4px; padding:0.1rem 0.4rem; cursor:pointer; color:var(--text-muted); font-size:0.8rem; line-height:1.4;">◀</button>
+        <button id="info-prev" style="background:none; border:1px solid var(--border-color); border-radius:4px; padding:0.1rem 0.6rem; min-height:44px; min-width:44px; cursor:pointer; color:var(--text-muted); font-size:0.9rem; line-height:1.4;" aria-label="Previous">◀</button>
         <span id="info-dots" style="display:flex; gap:4px;"></span>
-        <button id="info-next" style="background:none; border:1px solid var(--border-color); border-radius:4px; padding:0.1rem 0.4rem; cursor:pointer; color:var(--text-muted); font-size:0.8rem; line-height:1.4;">▶</button>
+        <button id="info-next" style="background:none; border:1px solid var(--border-color); border-radius:4px; padding:0.1rem 0.6rem; min-height:44px; min-width:44px; cursor:pointer; color:var(--text-muted); font-size:0.9rem; line-height:1.4;" aria-label="Next">▶</button>
       </div>
     </div>
     <div style="overflow:hidden; position:relative;">
@@ -1509,6 +1519,9 @@
         }
       }, {passive: false});
       
+      cvsFc.addEventListener('touchend', () => {
+        setTimeout(() => { fcHoverIdx = null; window.repaintForecastCanvas(); }, 1800);
+      }, { passive: true });
       window.addEventListener('resize', () => { if (cvsFc) setupHiDPI(cvsFc, 2000, 960); window.repaintForecastCanvas(); });
       setTimeout(window.repaintForecastCanvas, 100);
     }
@@ -2075,6 +2088,20 @@
           tip.style.left = tx + 'px'; tip.style.top = ty + 'px';
         });
         cvs.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+        // Touch support for heatmap bars
+        const hmTouchMove = (e) => {
+          if (e.touches.length > 0) {
+            e.preventDefault();
+            const rect = cvs.getBoundingClientRect();
+            const pct = (e.touches[0].clientX - rect.left) / rect.width;
+            const dayOff = Math.max(0, Math.min(SEASON_DAYS, Math.floor(pct * SEASON_DAYS)));
+            const fakeMouse = { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
+            cvs.dispatchEvent(Object.assign(new MouseEvent('mousemove'), fakeMouse));
+          }
+        };
+        cvs.addEventListener('touchstart', hmTouchMove, { passive: false });
+        cvs.addEventListener('touchmove',  hmTouchMove, { passive: false });
+        cvs.addEventListener('touchend', () => { setTimeout(() => tip.style.display = 'none', 1800); }, { passive: true });
 
         drawBar._cvs = cvs;
         cvs._draw = drawBar;
@@ -2297,7 +2324,9 @@
     
     cvs.addEventListener('mousemove', (e) => { isSnowTouch = false; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS); window.repaintCanvas(); });
     cvs.addEventListener('mouseleave', () => { hoverDayOffset = null; window.repaintCanvas(); });
-    cvs.addEventListener('touchmove', (e) => { if (e.touches.length > 0) { e.preventDefault(); isSnowTouch = true; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.touches[0].clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS); window.repaintCanvas(); } }, {passive: false});
+    cvs.addEventListener('touchstart', (e) => { if (e.touches.length > 0) { e.preventDefault(); isSnowTouch = true; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.max(0, Math.min(SNOW_DAYS, Math.round((((e.touches[0].clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS))); window.repaintCanvas(); } }, {passive: false});
+    cvs.addEventListener('touchmove', (e) => { if (e.touches.length > 0) { e.preventDefault(); isSnowTouch = true; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.max(0, Math.min(SNOW_DAYS, Math.round((((e.touches[0].clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS))); window.repaintCanvas(); } }, {passive: false});
+    cvs.addEventListener('touchend', () => { setTimeout(() => { hoverDayOffset = null; window.repaintCanvas(); }, 1800); }, {passive: true});
     window.addEventListener('resize', () => { setupHiDPI(cvs, 2000, 800); window.repaintCanvas(); });
     setTimeout(window.repaintCanvas, 50);
 
@@ -2748,14 +2777,19 @@
       window.repaintAtmosCanvas();
     });
     cvsA.addEventListener('mouseleave', () => { atmosHoverDay = null; window.repaintAtmosCanvas(); });
-    cvsA.addEventListener('touchmove', (e) => {
+    const _atmosTouchHandle = (e) => {
       if (e.touches.length > 0) {
         e.preventDefault(); isAtmosTouch = true;
         atmosHoverDay = _atmosHitX(e.touches[0].clientX);
         if (atmosHoverDay < 0 || atmosHoverDay > ATMOS_DAYS) atmosHoverDay = null;
         window.repaintAtmosCanvas();
       }
-    }, {passive: false});
+    };
+    cvsA.addEventListener('touchstart', _atmosTouchHandle, {passive: false});
+    cvsA.addEventListener('touchmove',  _atmosTouchHandle, {passive: false});
+    cvsA.addEventListener('touchend', () => {
+      setTimeout(() => { atmosHoverDay = null; window.repaintAtmosCanvas(); }, 1800);
+    }, {passive: true});
     window.addEventListener('resize', () => { setupHiDPI(cvsA, 2000, 600); window.repaintAtmosCanvas(); });
     setTimeout(window.repaintAtmosCanvas, 100);
   });
