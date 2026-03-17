@@ -41,7 +41,6 @@
     --rain-yield:   rgba(37, 99, 235, 0.72);
     --cloud-base:   rgba(100, 116, 139, 0.20);
     color-scheme:   light;
-    scroll-padding-top: 6.5rem;
     scroll-behavior: smooth;
   }
 
@@ -54,7 +53,6 @@
     background: var(--bg-main); color: var(--text-main); 
     line-height: 1.5; transition: background-color 0.2s, color 0.2s; 
     -webkit-font-smoothing: antialiased;
-    -webkit-tap-highlight-color: transparent;
   }
   
   .container { max-width: 1440px; margin: 0 auto; padding: 1.5rem 1rem; display: flex; flex-direction: column; gap: 2rem; }
@@ -72,13 +70,12 @@
   .flash-update { animation: updatePulse 0.6s ease-out forwards; border-radius: 4px; }
 
   /* ── CONTROLS & HEADER ── */
-  #toc a { padding: 0.6rem 0.5rem; min-height: 44px; border-radius: 4px; transition: background 0.2s, color 0.2s; text-decoration: none; color: inherit; opacity: 0.7; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 0.2rem; }
+  #toc a { padding: 0.2rem 0.5rem; border-radius: 4px; transition: background 0.2s, color 0.2s; text-decoration: none; color: inherit; opacity: 0.7; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 0.2rem; }
   #toc a:hover { background: var(--brand-light); color: var(--brand); opacity: 1; }
   .toc-label { font-size: 0.7rem; }
-  @media (max-width: 640px) { .toc-label { display: none; } }
 
   .control-btn { 
-    padding: 0.4rem 0.8rem; height: 36px; min-height: 36px;
+    padding: 0.4rem 0.8rem; height: 36px;
     background: var(--bg-card); color: var(--text-main); 
     border: 1px solid var(--border-color); border-radius: 6px; 
     cursor: pointer; font-size: 0.85rem; font-weight: 600; font-family: inherit; 
@@ -102,12 +99,10 @@
   .resort-tab-btn:hover { color: var(--brand); background: var(--brand-light); border-color: #bfdbfe; }
   .resort-tab-btn.active { color: #fff; background: var(--brand); border-color: var(--brand); box-shadow: 0 2px 4px rgba(30,64,175,0.2); }
   
-  .resort-name-full { display: inline; }
-  .resort-name-short { display: none; }
 
   /* Forms & Sliders */
   input[type="date"] {
-    height: 36px; min-height: 36px; padding: 0 0.5rem; min-width: 130px;
+    height: 36px; padding: 0 0.5rem;
     background: var(--bg-card); color: var(--text-main); 
     border: 1px solid var(--border-color); border-radius: 6px; 
     font-family: inherit; font-size: 0.85rem; font-weight: 600;
@@ -122,8 +117,6 @@
   .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem 1rem; display: flex; flex-direction: column; justify-content: flex-start; min-width: 0; }
   .fc-card.fc-card-wide { /* same as fc-card in column layout */ }
   .fc-card.fc-card-full { margin-top: auto; }
-  @media (max-width: 900px) { .fc-card.fc-card-full { margin-top: 0; } }
-  @media (max-width: 900px) { #forecast-wrapper { grid-template-columns: 1fr; } }
 
   /* ── BEST-DAYS STRIP ── */
 
@@ -131,7 +124,7 @@
   .avl-warning { font-size: 0.75rem; font-weight: 700; color: #b45309; background: rgba(180,83,9,0.08); border: 1px solid rgba(180,83,9,0.25); border-radius: 3px; padding: 0.2rem 0.4rem; margin-top: 0.3rem; display: inline-block; }
 
   /* ── ATMOS SEASON NAV ── */
-  .atmos-nav-btn { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-muted); cursor: pointer; padding: 0.2rem 0.75rem; font-size: 0.85rem; transition: all 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.04); min-height: 44px; min-width: 44px; }
+  .atmos-nav-btn { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-muted); cursor: pointer; padding: 0.2rem 0.6rem; font-size: 0.85rem; transition: all 0.15s; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
   .atmos-nav-btn:hover { background: var(--brand-light); border-color: #bfdbfe; color: var(--brand); }
   .atmos-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
@@ -144,7 +137,7 @@
   .hm-month-block { display: flex; flex-direction: column; flex-grow: 1; min-width: 0; }
   .hm-month-label { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; margin-bottom: 2px; text-align: center; letter-spacing: 0.05em; height: 14px; overflow: hidden; }
   .hm-grid { display: flex; gap: 1px; height: 26px; width: 100%; }
-  .hm-cell { flex-grow: 1; height: 100%; border-radius: 2px; position: relative; cursor: crosshair; transition: background 0.3s ease; overflow: hidden; min-width: 8px; touch-action: manipulation; }
+  .hm-cell { flex-grow: 1; height: 100%; border-radius: 2px; position: relative; cursor: crosshair; transition: background 0.3s ease; overflow: hidden; min-width: 8px; }
   .hm-cell:hover { opacity: 0.7; }
   .hm-cell-future {
     background: repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.04) 4px, rgba(0,0,0,0.04) 8px) !important;
@@ -185,48 +178,16 @@
   .tt-data-node { display: none; }
 
   /* ── CANVAS ── */
-  canvas { height: auto; display: block; border: 1px solid var(--border-color); border-radius: 6px; cursor: crosshair; touch-action: none; background: var(--bg-main); }
-  .canvas-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; width: 100%; }
-  .canvas-scroll-wrap::-webkit-scrollbar { height: 4px; }
-  .canvas-scroll-wrap::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+  canvas { width: 100%; height: auto; display: block; border: 1px solid var(--border-color); border-radius: 6px; cursor: crosshair; background: var(--bg-main); }
   .legend-item { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-muted); margin-right: 1rem; font-weight: 600; }
   .legend-color { width: 16px; height: 4px; border-radius: 2px; }
   .legend-dotted { border-bottom: 3px dotted var(--text-main); background: transparent !important; height: 0; width: 16px; }
 
-  @media (max-width: 1024px) { 
-    header.main-header { display: flex !important; flex-direction: column; gap: 0.8rem; padding: 1rem !important; } 
-    header.main-header > div { width: 100%; justify-content: center !important; text-align: center; }
-    #toc { justify-content: center; width: 100%; flex-wrap: wrap; }
-  }
-  @media (max-width: 900px) {
-    header.main-header { display: flex !important; flex-direction: row; flex-wrap: wrap; gap: 0.4rem; padding: 0.6rem 1rem !important; justify-content: space-between; align-items: center; }
-    header.main-header > div { width: auto; justify-content: flex-start !important; text-align: left; }
-    header.main-header > div:last-child { font-size: 0.7rem; }
-  }
-  @media (max-width: 640px) {
-    header.main-header { padding: 0.6rem 0.75rem !important; gap: 0.4rem; }
-    header.main-header > div:last-child { display: none; } /* hide status/timer on small screens */
-    h1 { font-size: 1rem !important; }
-  }
-  @media (max-width: 768px) {
-    .hm-months-container { flex-direction: column; gap: 1rem; }
-    .hm-month-label { text-align: left; border-bottom: 1px solid var(--grid-line); padding-bottom: 2px; }
-    .hm-season-row { grid-template-columns: 1fr; gap: 0.2rem; align-items: start; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; }
-    .hm-season-row > div:first-child { text-align: left !important; font-size: 1rem; color: var(--text-main) !important; }
-    section { padding: 1rem; }
-    /* toc stays visible on tablet — hidden only at phone width */
-  }
-  @media (max-width: 500px) {
-    .resort-name-full { display: none; }
-    .resort-name-short { display: inline; }
-    #toc { display: none !important; }
-    .resort-tab-btn { padding: 0.5rem 0.6rem; font-size: 0.8rem; min-height: 44px; }
-    .control-btn { min-height: 44px; }
-    .atmos-nav-btn { min-height: 44px; min-width: 44px; }
-    table { font-size: 0.75rem; min-width: 540px; }
-    th, td { padding: 0.55rem 0.3rem; }
-    .container { gap: 1rem; padding: 0.75rem; }
-  }
+
+
+
+
+
   @media print { 
     body { background: white !important; color: black !important; } 
     section { border: 1px solid #ccc; break-inside: avoid; margin-bottom: 1rem; padding: 1rem; } 
@@ -246,7 +207,7 @@
   <!-- Left: TOC -->
   <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
     <nav id="toc" style="display: flex; gap: 0.25rem;">
-      <a href="#powder-alarm" title="Forecast">📡 <span class="toc-label">Forecast</span></a>
+      <a href="#powder-alarm" title="Forecast">📡 <span class="toc-label">Forecast</a>
       <a href="#heatmap" title="Heatmap">🔥 <span class="toc-label">Heatmap</span></a>
       <a href="#drilldown" title="Daily Conditions">📅 <span class="toc-label">Daily</span></a>
       <a href="#snowpack" title="Snowpack">🏔️ <span class="toc-label">Snowpack</span></a>
@@ -271,8 +232,7 @@
 </header>
 
 <!-- ── GLOBAL RESORT SELECTOR (PINNED) ── -->
-<div id="global-resort-header" style="position: sticky; top: 0; z-index: 998; background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.5rem 1rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; box-shadow: 0 2px 8px rgba(0,0,0,0.07);">
-  <style>#global-resort-header::-webkit-scrollbar{display:none}</style>
+<div id="global-resort-header" style="position: sticky; top: 0; z-index: 998; background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 0.5rem 1rem; display: flex; justify-content: center; gap: 0.5rem; flex-wrap: nowrap; overflow-x: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.07);">
   <!-- Buttons injected via JS -->
 </div>
 
@@ -302,12 +262,8 @@
           <span title="Mean direct solar beam (W/m²) over daylight hours. Intensity = amber depth. Zero under full cloud. High = bluebird, UV exposure, snow softening." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:rgba(255,145,10,0.85);border-radius:2px;"></span>Solar radiation</span>
           <span title="Peak wind gust speed (km/h) at 10 m. Dashed red line. Above ~65 km/h = lift holds likely." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #ef4444;"></span>Peak wind gust</span>
         </div>
-        <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:0.25rem;display:none;" id="fc-legend-tap-hint">Tap a legend item to see its description</div>
-
-        <div class="canvas-scroll-wrap" id="forecast-scroll-wrap">
-          <div style="position: relative;">
-            <canvas id="forecast-canvas" width="2000" height="960" role="img" aria-label="16-day ski conditions forecast: temperature, snowfall, solar radiation and wind for the selected resort"></canvas>
-          </div>
+        <div style="position: relative;">
+          <canvas id="forecast-canvas" width="2000" height="960" role="img" aria-label="16-day ski conditions forecast: temperature, snowfall, solar radiation and wind for the selected resort"></canvas>
         </div>
 
 
@@ -337,10 +293,10 @@
     <div class="flex-between" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
       <h2 style="margin:0; border:none; padding:0;">Daily Conditions 📅</h2>
       <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-        <button id="btn-prev-day" class="control-btn" title="Previous Day" aria-label="Previous day">◀</button>
+        <button id="btn-prev-day" class="control-btn" title="Previous Day" aria-label="Previous day">◀ Prev</button>
         <input type="date" id="date-picker">
-        <button id="btn-next-day" class="control-btn" title="Next Day" aria-label="Next day">▶</button>
-        <button id="btn-latest-day" class="control-btn toggle-btn" title="Jump to the most recent data">Latest</button>
+        <button id="btn-next-day" class="control-btn" title="Next Day" aria-label="Next day">Next ▶</button>
+        <button id="btn-latest-day" class="control-btn toggle-btn" title="Jump to the most recent data">Jump to Latest</button>
       </div>
     </div>
     <div style="overflow-x: auto; padding-bottom: 1rem;">
@@ -355,7 +311,7 @@
             <th>Gusts</th>
             <th>Sun</th>
             <th style="text-align: right;">Bluebird Score
-              <div style="font-weight:400; font-size:0.65rem; opacity:0.65; text-transform:none; letter-spacing:0; margin-top:0.15rem;">0–100% · tap for breakdown</div>
+              <div style="font-weight:400; font-size:0.65rem; opacity:0.65; text-transform:none; letter-spacing:0; margin-top:0.15rem;">0–100% · hover for breakdown</div>
             </th>
           </tr>
         </thead>
@@ -389,10 +345,8 @@
       </div>
     </div>
     
-    <div class="canvas-scroll-wrap" id="snow-scroll-wrap">
-      <div style="position: relative;">
-        <canvas id="snow-canvas" width="2000" height="800"></canvas>
-      </div>
+    <div style="position: relative;">
+      <canvas id="snow-canvas" width="2000" height="800"></canvas>
     </div>
   </section>
 
@@ -419,16 +373,14 @@
         </div>
         <div style="display: flex; align-items: center; gap: 0.5rem;">
           <button class="atmos-nav-btn" id="atmos-prev-season" title="Previous season">◀</button>
-          <div style="font-size: 0.85rem; font-weight: bold; color: var(--brand); min-width: 80px; max-width: 160px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="atmos-season-label">Season: Loading...</div>
+          <div style="font-size: 0.85rem; font-weight: bold; color: var(--brand); min-width: 100px; text-align: center;" id="atmos-season-label">Season: Loading...</div>
           <button class="atmos-nav-btn" id="atmos-next-season" title="Next (more recent) season">▶</button>
         </div>
       </div>
     </div>
 
-    <div class="canvas-scroll-wrap" id="atmos-scroll-wrap">
-      <div style="position: relative;">
-        <canvas id="atmos-canvas" width="2000" height="600"></canvas>
-      </div>
+    <div style="position: relative;">
+      <canvas id="atmos-canvas" width="2000" height="600"></canvas>
     </div>
   </section>
 
@@ -439,14 +391,13 @@
     <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-color); padding-bottom:0.5rem; margin-bottom:1rem;">
       <h2 style="margin:0; color:var(--brand); letter-spacing:-0.02em; font-size:1rem;">📋 What this dashboard actually is</h2>
       <div style="display:flex; align-items:center; gap:0.5rem;">
-        <button id="info-prev" style="background:none; border:1px solid var(--border-color); border-radius:4px; padding:0.1rem 0.6rem; min-height:44px; min-width:44px; cursor:pointer; color:var(--text-muted); font-size:0.9rem; line-height:1.4;" aria-label="Previous">◀</button>
+        <button id="info-prev" style="background:none; border:1px solid var(--border-color); border-radius:4px; padding:0.25rem 0.6rem; cursor:pointer; color:var(--text-muted); font-size:0.85rem; line-height:1.4;" aria-label="Previous">◀</button>
         <span id="info-dots" style="display:flex; gap:4px;"></span>
-        <button id="info-next" style="background:none; border:1px solid var(--border-color); border-radius:4px; padding:0.1rem 0.6rem; min-height:44px; min-width:44px; cursor:pointer; color:var(--text-muted); font-size:0.9rem; line-height:1.4;" aria-label="Next">▶</button>
+        <button id="info-next" style="background:none; border:1px solid var(--border-color); border-radius:4px; padding:0.25rem 0.6rem; cursor:pointer; color:var(--text-muted); font-size:0.85rem; line-height:1.4;" aria-label="Next">▶</button>
       </div>
     </div>
-    <div id="info-scroll" style="overflow-x:auto; -webkit-overflow-scrolling:touch; scroll-snap-type:x mandatory; scrollbar-width:none; position:relative;">
-    <style>#info-scroll::-webkit-scrollbar{display:none}</style>
-      <div id="info-track" style="display:flex; gap:0.75rem; min-height:180px;"></div>
+    <div id="info-scroll" style="overflow:hidden; position:relative;">
+      <div id="info-track" style="display:flex; gap:0.75rem; transition:transform 0.35s cubic-bezier(0.4,0,0.2,1); will-change:transform;"></div>
     </div>
     <p style="font-size:0.72rem; color:var(--text-muted); margin:1rem 0 0; font-style:italic; line-height:1.6;">ERA5 is the dataset used to study 100-year climate trends. It is also what drives the bar chart above. This is fine.</p>
   </div>
@@ -484,7 +435,7 @@
   // Build cards
   CARDS.forEach(c => {
     const el = document.createElement('div');
-    el.style.cssText = 'flex:0 0 clamp(220px, calc(100% - 1rem), calc(25% - 0.57rem));font-size:0.78rem;color:var(--text-muted);line-height:1.65;padding:0.75rem;background:var(--bg-main);border-radius:6px;border:1px solid var(--border-color);box-sizing:border-box;scroll-snap-align:start;';
+    el.style.cssText = 'flex:0 0 calc(25% - 0.57rem);min-width:220px;font-size:0.78rem;color:var(--text-muted);line-height:1.65;padding:0.75rem;background:var(--bg-main);border-radius:6px;border:1px solid var(--border-color);box-sizing:border-box;';
     el.innerHTML = `<div style="font-weight:700;color:var(--text-main);margin-bottom:0.3rem;">${c.title}</div>${c.body}`;
     track.appendChild(el);
   });
@@ -493,7 +444,7 @@
   const pages = CARDS.length - VISIBLE + 1; // 5 stops: 0,1,2,3,4
   for (let i = 0; i < pages; i++) {
     const d = document.createElement('span');
-    d.style.cssText = 'display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--border-color);transition:background 0.3s;cursor:pointer;padding:10px;margin:-10px;box-sizing:content-box;';
+    d.style.cssText = 'display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--border-color);transition:background 0.3s;cursor:pointer;';
     d.addEventListener('click', () => { stopAuto(); go(i); });
     dots.appendChild(d);
   }
@@ -510,24 +461,10 @@
 
   function go(n) {
     offset = Math.max(0, Math.min(pages - 1, n));
-    const scroller = document.getElementById('info-scroll');
-    const card = track.children[offset];
-    if (scroller && card) scroller.scrollTo({ left: card.offsetLeft, behavior: 'smooth' });
+    const cardW = track.parentElement.offsetWidth;
+    const step  = (cardW - 0.75 * 16 * (VISIBLE - 1)) / VISIBLE + 0.75 * 16;
+    track.style.transform = `translateX(-${offset * step}px)`;
     updateDots();
-  }
-
-  // Swipe support — update dot indicator when user scrolls manually
-  const scroller = document.getElementById('info-scroll');
-  if (scroller) {
-    let _scrollTimer;
-    scroller.addEventListener('scroll', () => {
-      clearTimeout(_scrollTimer);
-      _scrollTimer = setTimeout(() => {
-        const cardWidth = track.children[0] ? track.children[0].offsetWidth + 12 : 1;
-        offset = Math.max(0, Math.min(pages - 1, Math.round(scroller.scrollLeft / cardWidth)));
-        updateDots();
-      }, 80);
-    }, { passive: true });
   }
 
   function startAuto() {
@@ -751,48 +688,6 @@
     canvas.height = Math.round(logH * dpr);
   };
 
-  // Scrollable canvas: fixed CSS width >= viewport, user pans to see all content.
-  // minCssW: minimum canvas width in CSS pixels (determines scroll extent on small screens).
-  const setupScrollCanvas = (canvas, bufW, bufH, minCssW) => {
-    const dpr  = window.devicePixelRatio || 1;
-    const cssW = Math.max(window.innerWidth, minCssW);
-    const cssH = Math.round(bufH * cssW / bufW);
-    canvas.style.width  = cssW + 'px';
-    canvas.style.height = cssH + 'px';
-    canvas.width  = Math.round(cssW * dpr);
-    canvas.height = Math.round(cssH * dpr);
-  };
-
-  // Pan/hover dual-mode touch handler factory for scrollable canvases.
-  // dx > PAN_THRESHOLD = pan the scroll wrapper; smaller = hover tooltip.
-  const PAN_THRESHOLD = 12; // CSS px
-  const makeCanvasTouchPan = (canvas, onHover, onEnd) => {
-    let _sx, _sy, _lx, _panning = false;
-    const wrap = () => canvas.closest('.canvas-scroll-wrap');
-    canvas.addEventListener('touchstart', (e) => {
-      if (e.touches.length !== 1) return;
-      _sx = _lx = e.touches[0].clientX;
-      _sy = e.touches[0].clientY;
-      _panning = false;
-    }, { passive: true });
-    canvas.addEventListener('touchmove', (e) => {
-      if (e.touches.length !== 1) return;
-      e.preventDefault();
-      const cx = e.touches[0].clientX, cy = e.touches[0].clientY;
-      const dx = cx - _sx, dy = cy - _sy;
-      if (!_panning && Math.abs(dx) > PAN_THRESHOLD && Math.abs(dx) > Math.abs(dy)) _panning = true;
-      if (_panning) {
-        const w = wrap(); if (w) w.scrollLeft -= (cx - _lx);
-      } else {
-        onHover(cx, cy);
-      }
-      _lx = cx;
-    }, { passive: false });
-    canvas.addEventListener('touchend', () => {
-      if (!_panning && onEnd) onEnd();
-      _panning = false;
-    }, { passive: true });
-  };
 
   document.addEventListener('DOMContentLoaded', () => {
 
@@ -807,7 +702,7 @@
       const b = document.createElement('button');
       b.className = 'resort-tab-btn' + (r === window.GLOBAL_RESORT ? ' active' : '');
       const shortName = RESORT_ABBREVIATIONS[r] ? RESORT_ABBREVIATIONS[r].toUpperCase() : r.toUpperCase();
-      b.innerHTML = `<span class="resort-name-full">${r.toUpperCase()}</span><span class="resort-name-short">${shortName}</span>`;
+      b.innerHTML = `${r.toUpperCase()}</span>`;
       
       b.onclick = () => { 
         document.querySelectorAll('.resort-tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -957,9 +852,9 @@
     };
 
     const cvsFc = document.getElementById('forecast-canvas');
-    if (cvsFc) setupScrollCanvas(cvsFc, 2000, 960, 960);
+    if (cvsFc) setupHiDPI(cvsFc, 2000, 960);
     const ctxFc = cvsFc ? cvsFc.getContext('2d') : null;
-    let fcHoverIdx = null; let fcTouch = false;
+    let fcHoverIdx = null;
 
     // Parse Open-Meteo ISO strings as CET/CEST regardless of viewer's local timezone.
     // Open-Meteo returns "YYYY-MM-DDTHH:MM" with no suffix — JS treats this as LOCAL,
@@ -1077,11 +972,9 @@
       }
 
       const actualWidth = cvsFc.clientWidth || cvsFc.width;
-      const isMobile = actualWidth < 500;
-
-      const pX = isMobile ? 48 : 72;
+      const pX = 72;
       const pY = 24;
-      const pRight = isMobile ? 48 : 72;
+      const pRight = 72;
       const pBot = 185;  // includes chip row (135px) + axis title pad (50px)
 
       const w = cvsFc.width - pX - pRight;
@@ -1134,8 +1027,8 @@
 
       ctxFc.strokeStyle = getStyleVar('--grid-line'); ctxFc.fillStyle = getStyleVar('--text-muted'); ctxFc.font = fonts.axis;
 
-      const labelOffset = isMobile ? 5 : 12;
-      const rOff = isMobile ? 3 : 6;   // right-side label x offset from pX+w
+      const labelOffset = 12;
+      const rOff = 6;   // right-side label x offset from pX+w
       const minTickGap = 14 * sc2;      // 14 CSS px regardless of DPR — buffer-pixel space
 
       // ── Unit headers — outside axis, never overlapping tick labels ─────
@@ -1513,7 +1406,6 @@
         const boxW = 230 * scale, boxH = (35 + (rows * 20)) * scale, padding = 14 * scale; // 35=10top+5date-extra+20last-row
         
         let boxX = hx + padding, boxY = pY;
-        if (fcTouch) { boxY = pY - (50*scale); if (boxY < 0) boxY = 0; }
         if (boxX + boxW > pX + w) boxX = hx - boxW - padding;
         if (boxX < pX) boxX = pX; // left edge clamp
         
@@ -1562,40 +1454,15 @@
       }
     };
 
-    // Show legend tap hint on touch devices
-    if ('ontouchstart' in window) {
-      const hint = document.getElementById('fc-legend-tap-hint');
-      if (hint) hint.style.display = 'block';
-    }
-    // Make forecast legend items tappable — show title as alert-style tooltip
-    document.querySelectorAll('#powder-alarm span[title]').forEach(span => {
-      span.style.cursor = 'pointer';
-      span.addEventListener('click', (e) => {
-        const msg = span.getAttribute('title');
-        if (!msg) return;
-        const tip = document.getElementById('global-tooltip');
-        tip.innerHTML = `<div style="font-weight:700;margin-bottom:0.3rem;">${span.textContent.trim()}</div><div style="font-size:0.78rem;color:var(--text-muted);line-height:1.5;">${msg}</div>`;
-        tip.style.opacity = '1'; tip.style.display = 'block';
-        const r = span.getBoundingClientRect();
-        let tx = r.left, ty = r.bottom + 6;
-        if (tx + 260 > window.innerWidth - 8) tx = window.innerWidth - 268;
-        ty = Math.min(ty, window.innerHeight - (tip.offsetHeight || 80) - 8);
-        tx = Math.max(8, tx);
-        tip.style.left = tx + 'px'; tip.style.top = ty + 'px';
-        e.stopPropagation();
-        setTimeout(() => { tip.style.display = 'none'; }, 4000);
-      });
-    });
 
     if (cvsFc) {
       cvsFc.addEventListener('mousemove', (e) => {
         if (!FORECAST_DATA || !FORECAST_DATA.resorts || !window.GLOBAL_RESORT || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
-        fcTouch = false; const rect = cvsFc.getBoundingClientRect(); 
+        const rect = cvsFc.getBoundingClientRect();
         const mouseX = (e.clientX - rect.left) * (cvsFc.width / rect.width);
         
         const actualWidth = cvsFc.clientWidth || cvsFc.width;
-        const pX = actualWidth < 500 ? 48 : 72;
-        const pRight = actualWidth < 500 ? 48 : 72;
+        const pX = 72, pRight = 72;
         const w = cvsFc.width - pX - pRight;
         
         const numDays = Math.floor((FORECAST_DATA.resorts[window.GLOBAL_RESORT].hourly || FORECAST_DATA.resorts[window.GLOBAL_RESORT]).temperature_2m.length / 24);
@@ -1605,26 +1472,8 @@
         window.repaintForecastCanvas();
       });
       cvsFc.addEventListener('mouseleave', () => { fcHoverIdx = null; window.repaintForecastCanvas(); });
-      // Pan/hover dual-mode: drag > 12px scrolls wrapper, smaller tap shows tooltip
-      makeCanvasTouchPan(cvsFc,
-        (clientX) => { // onHover
-          if (!FORECAST_DATA || !FORECAST_DATA.resorts || !window.GLOBAL_RESORT || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
-          fcTouch = true;
-          const rect = cvsFc.getBoundingClientRect();
-          const mouseX = (clientX - rect.left) * (cvsFc.width / rect.width);
-          const actualWidth = cvsFc.clientWidth || cvsFc.width;
-          const pX = actualWidth < 500 ? 48 : 72;
-          const w = cvsFc.width - pX - (actualWidth < 500 ? 48 : 72);
-          const numDays = Math.floor((FORECAST_DATA.resorts[window.GLOBAL_RESORT].hourly || FORECAST_DATA.resorts[window.GLOBAL_RESORT]).temperature_2m.length / 24);
-          if (numDays === 0) return;
-          fcHoverIdx = Math.max(0, Math.min(numDays - 1, Math.floor((mouseX - pX) / (w / numDays))));
-          window.repaintForecastCanvas();
-        },
-        () => { // onEnd (tap)
-          setTimeout(() => { fcHoverIdx = null; window.repaintForecastCanvas(); }, 1800);
-        }
-      );
-      window.addEventListener('resize', () => { if (cvsFc) setupScrollCanvas(cvsFc, 2000, 960, 960); window.repaintForecastCanvas(); });
+
+      window.addEventListener('resize', () => { if (cvsFc) setupHiDPI(cvsFc, 2000, 960); window.repaintForecastCanvas(); });
       setTimeout(window.repaintForecastCanvas, 100);
     }
 
@@ -2192,14 +2041,7 @@
         });
         cvs.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
 
-        // Touch: pan/hover dual-mode (drag > 12px scrolls heatmap section, tap shows tooltip)
-        makeCanvasTouchPan(cvs,
-          (clientX, clientY) => {
-            const rect = cvs.getBoundingClientRect();
-            showHmTip(clientX, clientY, (clientX - rect.left) / rect.width);
-          },
-          () => { setTimeout(() => { tip.style.display = 'none'; }, 1800); }
-        );
+
 
         drawBar._cvs = cvs;
         cvs._draw = drawBar;
@@ -2242,10 +2084,9 @@
     const monthMarkers = [ { label: "Nov 1", off: 0 }, { label: "Dec 1", off: 30 }, { label: "Jan 1", off: 61 }, { label: "Feb 1", off: 92 }, { label: "Mar 1", off: 120 }, { label: "Apr 1", off: 151 }, { label: "May 1", off: 181 } ];
 
     const cvs = document.getElementById('snow-canvas'), ctx = cvs.getContext('2d');
-    setupScrollCanvas(cvs, 2000, 800, 900);
+    setupHiDPI(cvs, 2000, 800);
     const legend = document.getElementById('canvas-legend'), avgBtn = document.getElementById('toggle-avg-btn');
     let hoverDayOffset = null, maWindow = 7, showHistoricalAvg = true;
-    let isSnowTouch = false;
     const SNOW_PAD_X = 120, SNOW_DAYS = 182;
     
     document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -2399,8 +2240,7 @@
           const scale = cvs.width / (cvs.clientWidth || 1000);
           const boxW = 280 * scale, boxH = 24*scale + (readouts.length * 36 * scale), padding = 15*scale;
           let boxX = hx + padding, boxY = pY;
-          if (isSnowTouch) { boxY = pY - (50*scale); if (boxY < 0) boxY = 0; }
-          if (boxX + boxW > pX + w) boxX = hx - boxW - padding;
+            if (boxX + boxW > pX + w) boxX = hx - boxW - padding;
           if (boxX < pX) boxX = pX; 
           
           ctx.fillStyle = getStyleVar('--bg-header');
@@ -2420,25 +2260,15 @@
       }
     };
     
-    cvs.addEventListener('mousemove', (e) => { isSnowTouch = false; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS); window.repaintCanvas(); });
+    cvs.addEventListener('mousemove', (e) => { const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS); window.repaintCanvas(); });
     cvs.addEventListener('mouseleave', () => { hoverDayOffset = null; window.repaintCanvas(); });
-    makeCanvasTouchPan(cvs,
-      (clientX) => { // onHover
-        isSnowTouch = true;
-        const rect = cvs.getBoundingClientRect();
-        hoverDayOffset = Math.max(0, Math.min(SNOW_DAYS - 1,
-          Math.floor((((clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS)));
-        window.repaintCanvas();
-      },
-      () => { setTimeout(() => { hoverDayOffset = null; window.repaintCanvas(); }, 1800); }
-    );
-    window.addEventListener('resize', () => { setupScrollCanvas(cvs, 2000, 800, 900); window.repaintCanvas(); });
+
+    window.addEventListener('resize', () => { setupHiDPI(cvs, 2000, 800); window.repaintCanvas(); });
     setTimeout(window.repaintCanvas, 50);
 
     const cvsA = document.getElementById('atmos-canvas'), ctxA = cvsA.getContext('2d'), lblSeason = document.getElementById('atmos-season-label');
-    setupScrollCanvas(cvsA, 2000, 600, 1100);
+    setupHiDPI(cvsA, 2000, 600);
     let atmosHoverDay = null;
-    let isAtmosTouch = false;
     let atmosSeasonIdx = 0;
     let atmosMAWindow = 3;
     const ATMOS_PAD_X = 120, ATMOS_DAYS = 182;
@@ -2469,7 +2299,7 @@
     });
 
     // ── helper: compute dynamic left pad (mirrors draw function) ──────────────
-    const _atmosPX = () => cvsA.clientWidth < 500 ? 56 : ATMOS_PAD_X;
+    const _atmosPX = () => ATMOS_PAD_X;
 
     window.repaintAtmosCanvas = () => {
       if(!cvsA) return;
@@ -2817,7 +2647,7 @@
         // Y: top half → anchor to top of temp zone; bottom half → anchor above bottom
         const hoverInTop = hx > pX && (d.sTMax === null || mapTempY(d.sTMax) > pY);
         let boxY;
-        if (isAtmosTouch) {
+        if (false) {
           boxY = pY + 2*sc; // always top on touch
         } else {
           boxY = pY + 4*sc; // default: top of chart
@@ -2876,22 +2706,14 @@
     };
 
     cvsA.addEventListener('mousemove', (e) => {
-      isAtmosTouch = false;
+     
       atmosHoverDay = _atmosHitX(e.clientX);
       if (atmosHoverDay < 0 || atmosHoverDay > ATMOS_DAYS) atmosHoverDay = null;
       window.repaintAtmosCanvas();
     });
     cvsA.addEventListener('mouseleave', () => { atmosHoverDay = null; window.repaintAtmosCanvas(); });
-    makeCanvasTouchPan(cvsA,
-      (clientX) => { // onHover
-        isAtmosTouch = true;
-        atmosHoverDay = _atmosHitX(clientX);
-        if (atmosHoverDay < 0 || atmosHoverDay > ATMOS_DAYS) atmosHoverDay = null;
-        window.repaintAtmosCanvas();
-      },
-      () => { setTimeout(() => { atmosHoverDay = null; window.repaintAtmosCanvas(); }, 1800); }
-    );
-    window.addEventListener('resize', () => { setupScrollCanvas(cvsA, 2000, 600, 1100); window.repaintAtmosCanvas(); });
+
+    window.addEventListener('resize', () => { setupHiDPI(cvsA, 2000, 600); window.repaintAtmosCanvas(); });
     setTimeout(window.repaintAtmosCanvas, 100);
   });
 </script>
