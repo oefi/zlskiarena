@@ -283,7 +283,7 @@
         </div>
 
         <div style="position: relative; flex-grow: 1; min-height: 300px;">
-          <canvas id="forecast-canvas" width="2000" height="960"></canvas>
+          <canvas id="forecast-canvas" width="2000" height="960" role="img" aria-label="16-day ski conditions forecast: temperature, snowfall, solar radiation and wind for the selected resort"></canvas>
         </div>
 
 
@@ -853,6 +853,22 @@
     const ctxFc = cvsFc ? cvsFc.getContext('2d') : null;
     let fcHoverIdx = null; let fcTouch = false;
 
+    // Parse Open-Meteo ISO strings as CET/CEST regardless of viewer's local timezone.
+    // Open-Meteo returns "YYYY-MM-DDTHH:MM" with no suffix — JS treats this as LOCAL,
+    // which is wrong for a UK/US user. We append the correct Alpine UTC offset.
+    const parseCET = (isoNoTz) => {
+      if (!isoNoTz) return null;
+      // Determine offset for this date: CET=+01:00, CEST=+02:00
+      // Europe/Vienna DST: last Sun Mar → last Sun Oct
+      const d = new Date(isoNoTz + 'Z'); // parse as UTC first to get the date
+      const y = d.getUTCFullYear();
+      // Last Sunday in March = DST start; Last Sunday in October = DST end
+      const lastSunMar = new Date(Date.UTC(y, 2, 31)); lastSunMar.setUTCDate(31 - lastSunMar.getUTCDay());
+      const lastSunOct = new Date(Date.UTC(y, 9, 31)); lastSunOct.setUTCDate(31 - lastSunOct.getUTCDay());
+      const isDST = d >= lastSunMar && d < lastSunOct;
+      return new Date(isoNoTz + (isDST ? '+02:00' : '+01:00'));
+    };
+
     window.repaintForecastCanvas = () => {
       if (!ctxFc || !window.GLOBAL_RESORT || !FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
       ctxFc.clearRect(0,0,cvsFc.width,cvsFc.height);
@@ -895,7 +911,7 @@
 
         // Single date object used for both sun calculation and label
         let exactDate;
-        if (hourly.time && hourly.time[start]) exactDate = new Date(hourly.time[start]);
+        if (hourly.time && hourly.time[start]) exactDate = parseCET(hourly.time[start]);
         else exactDate = new Date(localNow.getTime() + i*86400000);
 
         const doy = Math.floor((exactDate - new Date(exactDate.getFullYear(), 0, 0)) / 86400000);
@@ -1163,7 +1179,7 @@
         const probArr  = hourly.precipitation_probability ? hourly.precipitation_probability.slice(s,e).filter(v=>v!==null) : [];
         const probMax  = probArr.length ? Math.max(...probArr) : null;
         let exactDate;
-        if (hourly.time && hourly.time[s]) exactDate = new Date(hourly.time[s]);
+        if (hourly.time && hourly.time[s]) exactDate = parseCET(hourly.time[s]);
         else exactDate = new Date(localNow.getTime() + i*86400000);
         const ds = exactDate.toISOString().slice(0,10);
         // WMO: use raw hour 12 (midday) directly — filter()[12] would shift index if early hours are null
@@ -1199,8 +1215,14 @@
         const sc_val   = chipScores[i].score;
         const scoreColor = sc_val >= 0.75 ? '#16a34a' : sc_val >= 0.5 ? '#d97706' : sc_val >= 0.3 ? '#f97316' : '#ef4444';
 
-        // Chip background
-        ctxFc.fillStyle = getStyleVar('--bg-card');
+        // Chip background — dim today's chip after 14:00 CET (lifts closing)
+        // Get current hour in CET/CEST using Intl (avoids parseCET receiving a UTC string)
+        const cetHour = parseInt(new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Europe/Vienna', hour: 'numeric', hour12: false
+        }).format(new Date()), 10);
+        const isToday = i === 0;
+        const isDimmed = isToday && cetHour >= 14;
+        ctxFc.fillStyle = isDimmed ? getStyleVar('--bg-main') : getStyleVar('--bg-card');
         ctxFc.beginPath();
         ctxFc.roundRect
           ? ctxFc.roundRect(chipLeft+1, chipTop, chipW-2, chipH, 4)
@@ -1215,6 +1237,18 @@
           ? ctxFc.roundRect(chipLeft+1, chipTop, chipW-2, chipH, 4)
           : ctxFc.rect(chipLeft+1, chipTop, chipW-2, chipH);
         ctxFc.stroke();
+
+        // Weekend tint — Sat=6, Sun=0 in getDay()
+        const dow = chipScores[i].dateObj.getDay();
+        const isWeekend = dow === 0 || dow === 6;
+        if (isWeekend && !isDimmed) {
+          ctxFc.fillStyle = 'rgba(99,102,241,0.08)'; // faint indigo weekend wash
+          ctxFc.beginPath();
+          ctxFc.roundRect
+            ? ctxFc.roundRect(chipLeft+1, chipTop, chipW-2, chipH, 4)
+            : ctxFc.rect(chipLeft+1, chipTop, chipW-2, chipH);
+          ctxFc.fill();
+        }
 
         // Hover highlight
         if (i === fcHoverIdx) {
@@ -1437,6 +1471,24 @@
         window.repaintForecastCanvas();
       });
       cvsFc.addEventListener('mouseleave', () => { fcHoverIdx = null; window.repaintForecastCanvas(); });
+      // Touchstart: snap to nearest day on initial tap (not just drag)
+      cvsFc.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) {
+          e.preventDefault();
+          if (!FORECAST_DATA || !FORECAST_DATA.resorts || !window.GLOBAL_RESORT || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
+          fcTouch = true; const rect = cvsFc.getBoundingClientRect();
+          const mouseX = (e.touches[0].clientX - rect.left) * (cvsFc.width / rect.width);
+          const actualWidth = cvsFc.clientWidth || cvsFc.width;
+          const pX = actualWidth < 500 ? 48 : 72;
+          const pRight = actualWidth < 500 ? 48 : 72;
+          const w = cvsFc.width - pX - pRight;
+          const numDays = Math.floor((FORECAST_DATA.resorts[window.GLOBAL_RESORT].hourly || FORECAST_DATA.resorts[window.GLOBAL_RESORT]).temperature_2m.length / 24);
+          if (numDays === 0) return;
+          fcHoverIdx = Math.max(0, Math.min(numDays - 1, Math.floor((mouseX - pX) / (w / numDays))));
+          window.repaintForecastCanvas();
+        }
+      }, {passive: false});
+
       cvsFc.addEventListener('touchmove', (e) => {
         if (e.touches.length > 0) {
           e.preventDefault(); 
