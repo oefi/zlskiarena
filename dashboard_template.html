@@ -41,7 +41,7 @@
     --rain-yield:   rgba(37, 99, 235, 0.72);
     --cloud-base:   rgba(100, 116, 139, 0.20);
     color-scheme:   light;
-    scroll-padding-top: 5rem;
+    scroll-padding-top: 6.5rem;
     scroll-behavior: smooth;
   }
 
@@ -72,7 +72,7 @@
   .flash-update { animation: updatePulse 0.6s ease-out forwards; border-radius: 4px; }
 
   /* ── CONTROLS & HEADER ── */
-  #toc a { padding: 0.2rem 0.4rem; border-radius: 4px; transition: background 0.2s, color 0.2s; text-decoration: none; color: inherit; opacity: 0.7; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 0.2rem; }
+  #toc a { padding: 0.6rem 0.5rem; min-height: 44px; border-radius: 4px; transition: background 0.2s, color 0.2s; text-decoration: none; color: inherit; opacity: 0.7; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; display: inline-flex; align-items: center; gap: 0.2rem; }
   #toc a:hover { background: var(--brand-light); color: var(--brand); opacity: 1; }
   .toc-label { font-size: 0.7rem; }
   @media (max-width: 640px) { .toc-label { display: none; } }
@@ -185,7 +185,10 @@
   .tt-data-node { display: none; }
 
   /* ── CANVAS ── */
-  canvas { width: 100%; max-width: 100%; height: auto; display: block; border: 1px solid var(--border-color); border-radius: 6px; cursor: crosshair; touch-action: none; background: var(--bg-main); }
+  canvas { height: auto; display: block; border: 1px solid var(--border-color); border-radius: 6px; cursor: crosshair; touch-action: none; background: var(--bg-main); }
+  .canvas-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; width: 100%; }
+  .canvas-scroll-wrap::-webkit-scrollbar { height: 4px; }
+  .canvas-scroll-wrap::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
   .legend-item { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: var(--text-muted); margin-right: 1rem; font-weight: 600; }
   .legend-color { width: 16px; height: 4px; border-radius: 2px; }
   .legend-dotted { border-bottom: 3px dotted var(--text-main); background: transparent !important; height: 0; width: 16px; }
@@ -194,6 +197,11 @@
     header.main-header { display: flex !important; flex-direction: column; gap: 0.8rem; padding: 1rem !important; } 
     header.main-header > div { width: 100%; justify-content: center !important; text-align: center; }
     #toc { justify-content: center; width: 100%; flex-wrap: wrap; }
+  }
+  @media (max-width: 900px) {
+    header.main-header { display: flex !important; flex-direction: row; flex-wrap: wrap; gap: 0.4rem; padding: 0.6rem 1rem !important; justify-content: space-between; align-items: center; }
+    header.main-header > div { width: auto; justify-content: flex-start !important; text-align: left; }
+    header.main-header > div:last-child { font-size: 0.7rem; }
   }
   @media (max-width: 640px) {
     header.main-header { padding: 0.6rem 0.75rem !important; gap: 0.4rem; }
@@ -206,16 +214,18 @@
     .hm-season-row { grid-template-columns: 1fr; gap: 0.2rem; align-items: start; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; }
     .hm-season-row > div:first-child { text-align: left !important; font-size: 1rem; color: var(--text-main) !important; }
     section { padding: 1rem; }
-    #toc { display: none !important; }
+    /* toc stays visible on tablet — hidden only at phone width */
   }
   @media (max-width: 500px) {
     .resort-name-full { display: none; }
     .resort-name-short { display: inline; }
+    #toc { display: none !important; }
     .resort-tab-btn { padding: 0.5rem 0.6rem; font-size: 0.8rem; min-height: 44px; }
     .control-btn { min-height: 44px; }
     .atmos-nav-btn { min-height: 44px; min-width: 44px; }
     table { font-size: 0.75rem; min-width: 540px; }
     th, td { padding: 0.55rem 0.3rem; }
+    .container { gap: 1rem; padding: 0.75rem; }
   }
   @media print { 
     body { background: white !important; color: black !important; } 
@@ -292,9 +302,12 @@
           <span title="Mean direct solar beam (W/m²) over daylight hours. Intensity = amber depth. Zero under full cloud. High = bluebird, UV exposure, snow softening." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:rgba(255,145,10,0.85);border-radius:2px;"></span>Solar radiation</span>
           <span title="Peak wind gust speed (km/h) at 10 m. Dashed red line. Above ~65 km/h = lift holds likely." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #ef4444;"></span>Peak wind gust</span>
         </div>
+        <div style="font-size:0.65rem;color:var(--text-muted);margin-bottom:0.25rem;display:none;" id="fc-legend-tap-hint">Tap a legend item to see its description</div>
 
-        <div style="position: relative; flex-grow: 1; min-height: 380px;">
-          <canvas id="forecast-canvas" width="2000" height="960" role="img" aria-label="16-day ski conditions forecast: temperature, snowfall, solar radiation and wind for the selected resort"></canvas>
+        <div class="canvas-scroll-wrap" id="forecast-scroll-wrap">
+          <div style="position: relative;">
+            <canvas id="forecast-canvas" width="2000" height="960" role="img" aria-label="16-day ski conditions forecast: temperature, snowfall, solar radiation and wind for the selected resort"></canvas>
+          </div>
         </div>
 
 
@@ -324,10 +337,10 @@
     <div class="flex-between" style="margin-bottom: 1rem; flex-wrap: wrap; gap: 1rem;">
       <h2 style="margin:0; border:none; padding:0;">Daily Conditions 📅</h2>
       <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-        <button id="btn-prev-day" class="control-btn" title="Previous Day">◀ Prev</button>
+        <button id="btn-prev-day" class="control-btn" title="Previous Day" aria-label="Previous day">◀</button>
         <input type="date" id="date-picker">
-        <button id="btn-next-day" class="control-btn" title="Next Day">Next ▶</button>
-        <button id="btn-latest-day" class="control-btn toggle-btn" title="Jump to the most recent data">Jump to Latest</button>
+        <button id="btn-next-day" class="control-btn" title="Next Day" aria-label="Next day">▶</button>
+        <button id="btn-latest-day" class="control-btn toggle-btn" title="Jump to the most recent data">Latest</button>
       </div>
     </div>
     <div style="overflow-x: auto; padding-bottom: 1rem;">
@@ -342,7 +355,7 @@
             <th>Gusts</th>
             <th>Sun</th>
             <th style="text-align: right;">Bluebird Score
-              <div style="font-weight:400; font-size:0.65rem; opacity:0.65; text-transform:none; letter-spacing:0; margin-top:0.15rem;">0–100% · hover for breakdown</div>
+              <div style="font-weight:400; font-size:0.65rem; opacity:0.65; text-transform:none; letter-spacing:0; margin-top:0.15rem;">0–100% · tap for breakdown</div>
             </th>
           </tr>
         </thead>
@@ -376,8 +389,10 @@
       </div>
     </div>
     
-    <div style="position: relative;">
-      <canvas id="snow-canvas" width="2000" height="800"></canvas>
+    <div class="canvas-scroll-wrap" id="snow-scroll-wrap">
+      <div style="position: relative;">
+        <canvas id="snow-canvas" width="2000" height="800"></canvas>
+      </div>
     </div>
   </section>
 
@@ -404,14 +419,16 @@
         </div>
         <div style="display: flex; align-items: center; gap: 0.5rem;">
           <button class="atmos-nav-btn" id="atmos-prev-season" title="Previous season">◀</button>
-          <div style="font-size: 0.85rem; font-weight: bold; color: var(--brand); min-width: 100px; text-align: center;" id="atmos-season-label">Season: Loading...</div>
+          <div style="font-size: 0.85rem; font-weight: bold; color: var(--brand); min-width: 80px; max-width: 160px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" id="atmos-season-label">Season: Loading...</div>
           <button class="atmos-nav-btn" id="atmos-next-season" title="Next (more recent) season">▶</button>
         </div>
       </div>
     </div>
 
-    <div style="position: relative;">
-      <canvas id="atmos-canvas" width="2000" height="600"></canvas>
+    <div class="canvas-scroll-wrap" id="atmos-scroll-wrap">
+      <div style="position: relative;">
+        <canvas id="atmos-canvas" width="2000" height="600"></canvas>
+      </div>
     </div>
   </section>
 
@@ -427,8 +444,9 @@
         <button id="info-next" style="background:none; border:1px solid var(--border-color); border-radius:4px; padding:0.1rem 0.6rem; min-height:44px; min-width:44px; cursor:pointer; color:var(--text-muted); font-size:0.9rem; line-height:1.4;" aria-label="Next">▶</button>
       </div>
     </div>
-    <div style="overflow:hidden; position:relative;">
-      <div id="info-track" style="display:flex; gap:0.75rem; transition:transform 0.45s cubic-bezier(0.4,0,0.2,1); will-change:transform;"></div>
+    <div id="info-scroll" style="overflow-x:auto; -webkit-overflow-scrolling:touch; scroll-snap-type:x mandatory; scrollbar-width:none; position:relative;">
+    <style>#info-scroll::-webkit-scrollbar{display:none}</style>
+      <div id="info-track" style="display:flex; gap:0.75rem; min-height:180px;"></div>
     </div>
     <p style="font-size:0.72rem; color:var(--text-muted); margin:1rem 0 0; font-style:italic; line-height:1.6;">ERA5 is the dataset used to study 100-year climate trends. It is also what drives the bar chart above. This is fine.</p>
   </div>
@@ -466,7 +484,7 @@
   // Build cards
   CARDS.forEach(c => {
     const el = document.createElement('div');
-    el.style.cssText = 'flex:0 0 calc(25% - 0.57rem);min-width:220px;font-size:0.78rem;color:var(--text-muted);line-height:1.65;padding:0.75rem;background:var(--bg-main);border-radius:6px;border:1px solid var(--border-color);box-sizing:border-box;';
+    el.style.cssText = 'flex:0 0 clamp(220px, calc(100% - 1rem), calc(25% - 0.57rem));font-size:0.78rem;color:var(--text-muted);line-height:1.65;padding:0.75rem;background:var(--bg-main);border-radius:6px;border:1px solid var(--border-color);box-sizing:border-box;scroll-snap-align:start;';
     el.innerHTML = `<div style="font-weight:700;color:var(--text-main);margin-bottom:0.3rem;">${c.title}</div>${c.body}`;
     track.appendChild(el);
   });
@@ -475,7 +493,7 @@
   const pages = CARDS.length - VISIBLE + 1; // 5 stops: 0,1,2,3,4
   for (let i = 0; i < pages; i++) {
     const d = document.createElement('span');
-    d.style.cssText = 'display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--border-color);transition:background 0.3s;cursor:pointer;';
+    d.style.cssText = 'display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--border-color);transition:background 0.3s;cursor:pointer;padding:10px;margin:-10px;box-sizing:content-box;';
     d.addEventListener('click', () => { stopAuto(); go(i); });
     dots.appendChild(d);
   }
@@ -492,11 +510,24 @@
 
   function go(n) {
     offset = Math.max(0, Math.min(pages - 1, n));
-    // Each card is 25% of track width + gap. Compute pixel offset from card width.
-    const cardW = track.parentElement.offsetWidth;
-    const step  = (cardW - 0.75 * 16 * (VISIBLE - 1)) / VISIBLE + 0.75 * 16;
-    track.style.transform = `translateX(-${offset * step}px)`;
+    const scroller = document.getElementById('info-scroll');
+    const card = track.children[offset];
+    if (scroller && card) scroller.scrollTo({ left: card.offsetLeft, behavior: 'smooth' });
     updateDots();
+  }
+
+  // Swipe support — update dot indicator when user scrolls manually
+  const scroller = document.getElementById('info-scroll');
+  if (scroller) {
+    let _scrollTimer;
+    scroller.addEventListener('scroll', () => {
+      clearTimeout(_scrollTimer);
+      _scrollTimer = setTimeout(() => {
+        const cardWidth = track.children[0] ? track.children[0].offsetWidth + 12 : 1;
+        offset = Math.max(0, Math.min(pages - 1, Math.round(scroller.scrollLeft / cardWidth)));
+        updateDots();
+      }, 80);
+    }, { passive: true });
   }
 
   function startAuto() {
@@ -645,6 +676,29 @@
 
   // Tooltip engine — shows .tt-data-node contents in #global-tooltip on .has-tooltip hover.
   const gTooltip = document.getElementById('global-tooltip');
+  // Show tooltip on tap for mobile (toggle on click)
+  document.addEventListener('click', (e) => {
+    const node = e.target.closest('.has-tooltip');
+    if (node) {
+      const dataNode = node.querySelector('.tt-data-node');
+      if (dataNode) {
+        if (gTooltip.style.display === 'block') { gTooltip.style.display = 'none'; return; }
+        gTooltip.innerHTML = dataNode.innerHTML;
+        gTooltip.style.opacity = '1';
+        gTooltip.style.display = 'block';
+        const rect = node.getBoundingClientRect();
+        let x = rect.left, y = rect.bottom + 8;
+        if (x + 240 > window.innerWidth - 8) x = window.innerWidth - 248;
+        if (y + 120 > window.innerHeight - 8) y = rect.top - 130;
+        x = Math.max(8, x);
+        gTooltip.style.left = `${x}px`; gTooltip.style.top = `${y}px`;
+        setTimeout(() => gTooltip.style.display = 'none', 4000);
+      }
+    } else {
+      gTooltip.style.display = 'none';
+    }
+  });
+
   document.addEventListener('mouseenter', (e) => {
     const node = e.target.closest('.has-tooltip');
     if (node) {
@@ -659,10 +713,11 @@
   }, true);
   document.addEventListener('mousemove', (e) => {
     if (gTooltip.style.display === 'block') {
-      let x = e.pageX + 15; let y = e.pageY + 15;
+      let x = e.clientX + 15; let y = e.clientY + 15;
       const rect = gTooltip.getBoundingClientRect();
-      if (x + rect.width > window.innerWidth) x = window.innerWidth - rect.width - 20;
-      if (y + rect.height > window.innerHeight + window.scrollY) y = e.pageY - rect.height - 15;
+      if (x + rect.width > window.innerWidth - 8) x = e.clientX - rect.width - 15;
+      if (y + rect.height > window.innerHeight - 8) y = e.clientY - rect.height - 15;
+      x = Math.max(8, x); y = Math.max(8, y);
       gTooltip.style.left = `${x}px`; gTooltip.style.top = `${y}px`;
     }
   });
@@ -694,6 +749,49 @@
     canvas.style.height = logH + 'px';
     canvas.width  = Math.round(logW * dpr);
     canvas.height = Math.round(logH * dpr);
+  };
+
+  // Scrollable canvas: fixed CSS width >= viewport, user pans to see all content.
+  // minCssW: minimum canvas width in CSS pixels (determines scroll extent on small screens).
+  const setupScrollCanvas = (canvas, bufW, bufH, minCssW) => {
+    const dpr  = window.devicePixelRatio || 1;
+    const cssW = Math.max(window.innerWidth, minCssW);
+    const cssH = Math.round(bufH * cssW / bufW);
+    canvas.style.width  = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    canvas.width  = Math.round(cssW * dpr);
+    canvas.height = Math.round(cssH * dpr);
+  };
+
+  // Pan/hover dual-mode touch handler factory for scrollable canvases.
+  // dx > PAN_THRESHOLD = pan the scroll wrapper; smaller = hover tooltip.
+  const PAN_THRESHOLD = 12; // CSS px
+  const makeCanvasTouchPan = (canvas, onHover, onEnd) => {
+    let _sx, _sy, _lx, _panning = false;
+    const wrap = () => canvas.closest('.canvas-scroll-wrap');
+    canvas.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      _sx = _lx = e.touches[0].clientX;
+      _sy = e.touches[0].clientY;
+      _panning = false;
+    }, { passive: true });
+    canvas.addEventListener('touchmove', (e) => {
+      if (e.touches.length !== 1) return;
+      e.preventDefault();
+      const cx = e.touches[0].clientX, cy = e.touches[0].clientY;
+      const dx = cx - _sx, dy = cy - _sy;
+      if (!_panning && Math.abs(dx) > PAN_THRESHOLD && Math.abs(dx) > Math.abs(dy)) _panning = true;
+      if (_panning) {
+        const w = wrap(); if (w) w.scrollLeft -= (cx - _lx);
+      } else {
+        onHover(cx, cy);
+      }
+      _lx = cx;
+    }, { passive: false });
+    canvas.addEventListener('touchend', () => {
+      if (!_panning && onEnd) onEnd();
+      _panning = false;
+    }, { passive: true });
   };
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -859,7 +957,7 @@
     };
 
     const cvsFc = document.getElementById('forecast-canvas');
-    if (cvsFc) setupHiDPI(cvsFc, 2000, 960);
+    if (cvsFc) setupScrollCanvas(cvsFc, 2000, 960, 960);
     const ctxFc = cvsFc ? cvsFc.getContext('2d') : null;
     let fcHoverIdx = null; let fcTouch = false;
 
@@ -1219,19 +1317,20 @@
         return { score: scored.score, emoji: isPowder ? '🌨️' : emoji, probMax, dateObj: exactDate, ds };
       });
 
+      // Hoist CET hour check — called once, not 16× per repaint
+      const _cetHour = parseInt(new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Vienna', hour: 'numeric', hour12: false
+      }).format(new Date()), 10);
+
       daily.forEach((d, i) => {
         const chipLeft = pX + i * colW;
         const chipW    = colW;
         const sc_val   = chipScores[i].score;
         const scoreColor = sc_val >= 0.75 ? '#16a34a' : sc_val >= 0.5 ? '#d97706' : sc_val >= 0.3 ? '#f97316' : '#ef4444';
 
-        // Chip background — dim today's chip after 14:00 CET (lifts closing)
-        // Get current hour in CET/CEST using Intl (avoids parseCET receiving a UTC string)
-        const cetHour = parseInt(new Intl.DateTimeFormat('en-GB', {
-          timeZone: 'Europe/Vienna', hour: 'numeric', hour12: false
-        }).format(new Date()), 10);
-        const isToday = i === 0;
-        const isDimmed = isToday && cetHour >= 14;
+        // isDimmed uses _cetHour hoisted before loop (avoids 16× Intl calls per repaint)
+        const isToday  = i === 0;
+        const isDimmed = isToday && _cetHour >= 14;
         ctxFc.fillStyle = isDimmed ? getStyleVar('--bg-main') : getStyleVar('--bg-card');
         ctxFc.beginPath();
         ctxFc.roundRect
@@ -1463,6 +1562,31 @@
       }
     };
 
+    // Show legend tap hint on touch devices
+    if ('ontouchstart' in window) {
+      const hint = document.getElementById('fc-legend-tap-hint');
+      if (hint) hint.style.display = 'block';
+    }
+    // Make forecast legend items tappable — show title as alert-style tooltip
+    document.querySelectorAll('#powder-alarm span[title]').forEach(span => {
+      span.style.cursor = 'pointer';
+      span.addEventListener('click', (e) => {
+        const msg = span.getAttribute('title');
+        if (!msg) return;
+        const tip = document.getElementById('global-tooltip');
+        tip.innerHTML = `<div style="font-weight:700;margin-bottom:0.3rem;">${span.textContent.trim()}</div><div style="font-size:0.78rem;color:var(--text-muted);line-height:1.5;">${msg}</div>`;
+        tip.style.opacity = '1'; tip.style.display = 'block';
+        const r = span.getBoundingClientRect();
+        let tx = r.left, ty = r.bottom + 6;
+        if (tx + 260 > window.innerWidth - 8) tx = window.innerWidth - 268;
+        ty = Math.min(ty, window.innerHeight - (tip.offsetHeight || 80) - 8);
+        tx = Math.max(8, tx);
+        tip.style.left = tx + 'px'; tip.style.top = ty + 'px';
+        e.stopPropagation();
+        setTimeout(() => { tip.style.display = 'none'; }, 4000);
+      });
+    });
+
     if (cvsFc) {
       cvsFc.addEventListener('mousemove', (e) => {
         if (!FORECAST_DATA || !FORECAST_DATA.resorts || !window.GLOBAL_RESORT || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
@@ -1481,48 +1605,26 @@
         window.repaintForecastCanvas();
       });
       cvsFc.addEventListener('mouseleave', () => { fcHoverIdx = null; window.repaintForecastCanvas(); });
-      // Touchstart: snap to nearest day on initial tap (not just drag)
-      cvsFc.addEventListener('touchstart', (e) => {
-        if (e.touches.length > 0) {
-          e.preventDefault();
+      // Pan/hover dual-mode: drag > 12px scrolls wrapper, smaller tap shows tooltip
+      makeCanvasTouchPan(cvsFc,
+        (clientX) => { // onHover
           if (!FORECAST_DATA || !FORECAST_DATA.resorts || !window.GLOBAL_RESORT || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
-          fcTouch = true; const rect = cvsFc.getBoundingClientRect();
-          const mouseX = (e.touches[0].clientX - rect.left) * (cvsFc.width / rect.width);
+          fcTouch = true;
+          const rect = cvsFc.getBoundingClientRect();
+          const mouseX = (clientX - rect.left) * (cvsFc.width / rect.width);
           const actualWidth = cvsFc.clientWidth || cvsFc.width;
           const pX = actualWidth < 500 ? 48 : 72;
-          const pRight = actualWidth < 500 ? 48 : 72;
-          const w = cvsFc.width - pX - pRight;
+          const w = cvsFc.width - pX - (actualWidth < 500 ? 48 : 72);
           const numDays = Math.floor((FORECAST_DATA.resorts[window.GLOBAL_RESORT].hourly || FORECAST_DATA.resorts[window.GLOBAL_RESORT]).temperature_2m.length / 24);
           if (numDays === 0) return;
           fcHoverIdx = Math.max(0, Math.min(numDays - 1, Math.floor((mouseX - pX) / (w / numDays))));
           window.repaintForecastCanvas();
+        },
+        () => { // onEnd (tap)
+          setTimeout(() => { fcHoverIdx = null; window.repaintForecastCanvas(); }, 1800);
         }
-      }, {passive: false});
-
-      cvsFc.addEventListener('touchmove', (e) => {
-        if (e.touches.length > 0) {
-          e.preventDefault(); 
-          if (!FORECAST_DATA || !FORECAST_DATA.resorts || !window.GLOBAL_RESORT || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
-          fcTouch = true; const rect = cvsFc.getBoundingClientRect();
-          const mouseX = (e.touches[0].clientX - rect.left) * (cvsFc.width / rect.width);
-          
-          const actualWidth = cvsFc.clientWidth || cvsFc.width;
-          const pX = actualWidth < 500 ? 48 : 72;
-          const pRight = actualWidth < 500 ? 48 : 72;
-          const w = cvsFc.width - pX - pRight;
-          
-          const numDays = Math.floor((FORECAST_DATA.resorts[window.GLOBAL_RESORT].hourly || FORECAST_DATA.resorts[window.GLOBAL_RESORT]).temperature_2m.length / 24);
-          if (numDays === 0) return;
-          fcHoverIdx = Math.floor((mouseX - pX) / (w / numDays));
-          if (fcHoverIdx < 0 || fcHoverIdx >= numDays) fcHoverIdx = null;
-          window.repaintForecastCanvas();
-        }
-      }, {passive: false});
-      
-      cvsFc.addEventListener('touchend', () => {
-        setTimeout(() => { fcHoverIdx = null; window.repaintForecastCanvas(); }, 1800);
-      }, { passive: true });
-      window.addEventListener('resize', () => { if (cvsFc) setupHiDPI(cvsFc, 2000, 960); window.repaintForecastCanvas(); });
+      );
+      window.addEventListener('resize', () => { if (cvsFc) setupScrollCanvas(cvsFc, 2000, 960, 960); window.repaintForecastCanvas(); });
       setTimeout(window.repaintForecastCanvas, 100);
     }
 
@@ -2037,20 +2139,17 @@
 
         // ── Hover tooltip ───────────────────────────────────────────────────
         const fmtDate = iso => new Date(iso+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-        cvs.addEventListener('mousemove', e => {
-          const rect = cvs.getBoundingClientRect();
-          const pct = (e.clientX - rect.left) / rect.width;
+
+        // Shared tooltip builder — called from both mouse and touch handlers
+        const showHmTip = (clientX, clientY, pct) => {
           const dayOff = Math.max(0, Math.min(SEASON_DAYS, Math.floor(pct * SEASON_DAYS)));
           const scores = isAvg ? avgScores : sd?.scores;
           const entry = scores ? scores[dayOff] : null;
           const sc = entry ? entry.score : null;
           const shoulder = isShoulder(dayOff);
           const peak = isPeakOff(dayOff);
-
-          // Compute actual date from offset
           const seasonStartMs = Date.UTC(isAvg ? latestSeasonYear : sd.year, 10, 1);
-          const dateMs = seasonStartMs + dayOff * 86400000;
-          const dateStr = new Date(dateMs).toISOString().slice(0,10);
+          const dateStr = new Date(seasonStartMs + dayOff * 86400000).toISOString().slice(0,10);
 
           let body = '';
           if (!isAvg && entry && entry.metrics) {
@@ -2069,7 +2168,6 @@
           } else if (isAvg && sc !== null) {
             body = `<div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem;">Average across all recorded seasons for this date.</div>`;
           }
-
           tip.innerHTML = `
             <div style="font-weight:800;color:var(--brand);margin-bottom:0.15rem;">${fmtDate(dateStr)}</div>
             ${shoulder ? '<div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:0.2rem;">⛷ Lifts typically not running</div>' : ''}
@@ -2080,28 +2178,28 @@
               : `<div style="color:var(--text-muted);font-size:0.8rem;">No data${latestDataDate && dateStr > latestDataDate ? ' — future' : ''}</div>`}
             ${body}`;
           tip.style.display = 'block';
-          // Position tooltip
           const tipW = 210, tipH = tip.offsetHeight || 120;
-          let tx = e.clientX + 12, ty = e.clientY - 10;
-          if (tx + tipW > window.innerWidth - 16) tx = e.clientX - tipW - 12;
-          if (ty + tipH > window.innerHeight - 16) ty = e.clientY - tipH - 10;
+          let tx = clientX + 12, ty = clientY - 10;
+          if (tx + tipW > window.innerWidth - 8) tx = clientX - tipW - 12;
+          if (ty + tipH > window.innerHeight - 8) ty = clientY - tipH - 10;
+          tx = Math.max(8, tx); ty = Math.max(8, ty);
           tip.style.left = tx + 'px'; tip.style.top = ty + 'px';
+        };
+
+        cvs.addEventListener('mousemove', e => {
+          const rect = cvs.getBoundingClientRect();
+          showHmTip(e.clientX, e.clientY, (e.clientX - rect.left) / rect.width);
         });
         cvs.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
-        // Touch support for heatmap bars
-        const hmTouchMove = (e) => {
-          if (e.touches.length > 0) {
-            e.preventDefault();
+
+        // Touch: pan/hover dual-mode (drag > 12px scrolls heatmap section, tap shows tooltip)
+        makeCanvasTouchPan(cvs,
+          (clientX, clientY) => {
             const rect = cvs.getBoundingClientRect();
-            const pct = (e.touches[0].clientX - rect.left) / rect.width;
-            const dayOff = Math.max(0, Math.min(SEASON_DAYS, Math.floor(pct * SEASON_DAYS)));
-            const fakeMouse = { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY };
-            cvs.dispatchEvent(Object.assign(new MouseEvent('mousemove'), fakeMouse));
-          }
-        };
-        cvs.addEventListener('touchstart', hmTouchMove, { passive: false });
-        cvs.addEventListener('touchmove',  hmTouchMove, { passive: false });
-        cvs.addEventListener('touchend', () => { setTimeout(() => tip.style.display = 'none', 1800); }, { passive: true });
+            showHmTip(clientX, clientY, (clientX - rect.left) / rect.width);
+          },
+          () => { setTimeout(() => { tip.style.display = 'none'; }, 1800); }
+        );
 
         drawBar._cvs = cvs;
         cvs._draw = drawBar;
@@ -2144,7 +2242,7 @@
     const monthMarkers = [ { label: "Nov 1", off: 0 }, { label: "Dec 1", off: 30 }, { label: "Jan 1", off: 61 }, { label: "Feb 1", off: 92 }, { label: "Mar 1", off: 120 }, { label: "Apr 1", off: 151 }, { label: "May 1", off: 181 } ];
 
     const cvs = document.getElementById('snow-canvas'), ctx = cvs.getContext('2d');
-    setupHiDPI(cvs, 2000, 800);
+    setupScrollCanvas(cvs, 2000, 800, 900);
     const legend = document.getElementById('canvas-legend'), avgBtn = document.getElementById('toggle-avg-btn');
     let hoverDayOffset = null, maWindow = 7, showHistoricalAvg = true;
     let isSnowTouch = false;
@@ -2324,14 +2422,21 @@
     
     cvs.addEventListener('mousemove', (e) => { isSnowTouch = false; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.round((((e.clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS); window.repaintCanvas(); });
     cvs.addEventListener('mouseleave', () => { hoverDayOffset = null; window.repaintCanvas(); });
-    cvs.addEventListener('touchstart', (e) => { if (e.touches.length > 0) { e.preventDefault(); isSnowTouch = true; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.max(0, Math.min(SNOW_DAYS, Math.round((((e.touches[0].clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS))); window.repaintCanvas(); } }, {passive: false});
-    cvs.addEventListener('touchmove', (e) => { if (e.touches.length > 0) { e.preventDefault(); isSnowTouch = true; const rect = cvs.getBoundingClientRect(); hoverDayOffset = Math.max(0, Math.min(SNOW_DAYS, Math.round((((e.touches[0].clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS))); window.repaintCanvas(); } }, {passive: false});
-    cvs.addEventListener('touchend', () => { setTimeout(() => { hoverDayOffset = null; window.repaintCanvas(); }, 1800); }, {passive: true});
-    window.addEventListener('resize', () => { setupHiDPI(cvs, 2000, 800); window.repaintCanvas(); });
+    makeCanvasTouchPan(cvs,
+      (clientX) => { // onHover
+        isSnowTouch = true;
+        const rect = cvs.getBoundingClientRect();
+        hoverDayOffset = Math.max(0, Math.min(SNOW_DAYS - 1,
+          Math.floor((((clientX - rect.left) * (cvs.width / rect.width)) - SNOW_PAD_X) / (cvs.width - SNOW_PAD_X*2) * SNOW_DAYS)));
+        window.repaintCanvas();
+      },
+      () => { setTimeout(() => { hoverDayOffset = null; window.repaintCanvas(); }, 1800); }
+    );
+    window.addEventListener('resize', () => { setupScrollCanvas(cvs, 2000, 800, 900); window.repaintCanvas(); });
     setTimeout(window.repaintCanvas, 50);
 
     const cvsA = document.getElementById('atmos-canvas'), ctxA = cvsA.getContext('2d'), lblSeason = document.getElementById('atmos-season-label');
-    setupHiDPI(cvsA, 2000, 600);
+    setupScrollCanvas(cvsA, 2000, 600, 1100);
     let atmosHoverDay = null;
     let isAtmosTouch = false;
     let atmosSeasonIdx = 0;
@@ -2777,20 +2882,16 @@
       window.repaintAtmosCanvas();
     });
     cvsA.addEventListener('mouseleave', () => { atmosHoverDay = null; window.repaintAtmosCanvas(); });
-    const _atmosTouchHandle = (e) => {
-      if (e.touches.length > 0) {
-        e.preventDefault(); isAtmosTouch = true;
-        atmosHoverDay = _atmosHitX(e.touches[0].clientX);
+    makeCanvasTouchPan(cvsA,
+      (clientX) => { // onHover
+        isAtmosTouch = true;
+        atmosHoverDay = _atmosHitX(clientX);
         if (atmosHoverDay < 0 || atmosHoverDay > ATMOS_DAYS) atmosHoverDay = null;
         window.repaintAtmosCanvas();
-      }
-    };
-    cvsA.addEventListener('touchstart', _atmosTouchHandle, {passive: false});
-    cvsA.addEventListener('touchmove',  _atmosTouchHandle, {passive: false});
-    cvsA.addEventListener('touchend', () => {
-      setTimeout(() => { atmosHoverDay = null; window.repaintAtmosCanvas(); }, 1800);
-    }, {passive: true});
-    window.addEventListener('resize', () => { setupHiDPI(cvsA, 2000, 600); window.repaintAtmosCanvas(); });
+      },
+      () => { setTimeout(() => { atmosHoverDay = null; window.repaintAtmosCanvas(); }, 1800); }
+    );
+    window.addEventListener('resize', () => { setupScrollCanvas(cvsA, 2000, 600, 1100); window.repaintAtmosCanvas(); });
     setTimeout(window.repaintAtmosCanvas, 100);
   });
 </script>
