@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Zwei Länder Skiarena — Daily ski conditions for 5 resorts across Reschenpass (AUT/ITA). 6 seasons of historical data · mid-Dec to Easter · updated every 6 hours.">
+<meta name="description" content="Zwei Länder Skiarena — Daily ski conditions for 5 resorts across Reschenpass (AUT/ITA). Multiple seasons of historical data · Nov–Apr · updated every 6 hours.">
 <title>Zwei Länder Skiarena · Ski Conditions</title>
 
 <meta name="author" content="Zwei Länder Skiarena Dashboard">
@@ -107,6 +107,9 @@
 
   /* ── FORECAST CARDS ── */
   #forecast-wrapper { display: grid; grid-template-columns: 260px 1fr; gap: 1rem; align-items: start; }
+  @media (max-width: 680px) {
+    #forecast-wrapper { grid-template-columns: 1fr; }
+  }
   #tactical-summary-board { display: flex; flex-direction: column; gap: 0.65rem; min-width: 0; }
   .fc-card { background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.85rem 1rem; display: flex; flex-direction: column; justify-content: flex-start; min-width: 0; }
 
@@ -247,7 +250,7 @@
         
         <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; font-size: 0.72rem; font-weight: 600; color: var(--text-muted); flex-wrap: wrap; align-items: center; padding-bottom: 0.25rem;">
           <span title="Daily air temperature range at base elevation (valley station). Red line = daily max, blue line = daily min. Snow/wind data comes from the summit." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:12px;height:10px;background:linear-gradient(to bottom,rgba(239,68,68,0.5),rgba(59,130,246,0.5));border-radius:2px;"></span>Temperature — base (max/min)</span>
-          <span title="Summit soil surface temperature (0 cm depth). Stays negative = snowpack frozen and stable. Above 0°C = melt pressure from below." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #a16207;"></span>Soil temp — summit (snowpack indicator)</span>
+          <span title="Summit soil surface temperature (0 cm depth). Stays negative = snowpack frozen and stable. Above 0°C = basal melt — wet slide risk, icy refreeze overnight." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:16px;height:0;border-bottom:2px dashed #a16207;"></span>Soil temp — summit (snowpack indicator)</span>
           <span title="24h snowfall accumulation (cm). Plotted as water-equivalent mm on precip axis." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:var(--snow-yield);border-radius:2px;"></span>Snowfall</span>
           <span title="24h liquid rainfall (mm)." style="display:flex;align-items:center;gap:0.3rem;cursor:help;"><span style="display:inline-block;width:10px;height:10px;background:var(--rain-yield);border-radius:2px;"></span>Rainfall</span>
           <span title="Cloud cover by altitude. High (cirrus): harmless. Mid (altostratus): flat grey light, poor visibility. Low (stratus/fog): whiteout risk, lifts may close. Darker = more cloud." style="display:flex;align-items:center;gap:0.2rem;cursor:help;"><span style="display:inline-block;width:8px;height:5px;background:rgba(185,210,240,0.9);border-radius:1px;"></span><span style="display:inline-block;width:8px;height:5px;background:rgba(105,130,160,0.9);border-radius:1px;"></span><span style="display:inline-block;width:8px;height:5px;background:rgba(50,70,95,0.9);border-radius:1px;"></span> Cloud: High · Mid · Low (darker = more)</span>
@@ -269,7 +272,7 @@
     <div style="margin-bottom: 1rem;">
       <h2 style="margin:0; border:none; padding:0; border-bottom: none;">Best Time to Go 📅</h2>
       <p style="font-size: 0.82rem; color: var(--text-muted); margin: 0.25rem 0 0 0;">
-        6 seasons of daily ski conditions — hover any bar to see that day &nbsp;·&nbsp;
+        Historical ski conditions, Nov–Apr · hover any bar to see that day &nbsp;·&nbsp;
         <span style="display:inline-flex;align-items:center;gap:3px;vertical-align:middle;">
           <span style="display:inline-block;width:32px;height:8px;border-radius:2px;background:linear-gradient(to right,#ef4444,#eab308,#84cc16,#16a34a);"></span>
         </span>&nbsp; poor → great
@@ -350,11 +353,11 @@
     <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
       <div style="display: flex; flex-wrap: wrap; gap: 1.2rem; padding: 0.5rem 0.75rem; background: var(--bg-main); border-radius: 6px; border: 1px solid var(--border-color); align-items: center;">
         <div class="legend-item"><span style="display:inline-block;width:20px;height:3px;background:linear-gradient(to right,#ef4444,#3b82f6);border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Mountain temp</div>
-        <div class="legend-item"><span style="display:inline-block;width:20px;height:0;border-bottom:2px dashed rgba(239,68,68,0.55);vertical-align:middle;margin-right:4px;"></span>Feels-like (apparent) †</div>
+        <div class="legend-item"><span style="display:inline-block;width:20px;height:0;border-bottom:2px dashed rgba(239,68,68,0.55);vertical-align:middle;margin-right:4px;"></span>Feels-like · summit (apparent) †</div>
         <div class="legend-item"><div class="legend-color" style="background:var(--sun-yield);height:12px;"></div>Clear sky hrs †</div>
         <div class="legend-item"><div class="legend-color" style="background:var(--snow-yield);height:12px;"></div>New snow</div>
         <div class="legend-item"><span style="display:inline-block;width:20px;height:0;border-bottom:2px dashed rgba(239,68,68,0.7);vertical-align:middle;margin-right:4px;"></span>Peak gust</div>
-        <span style="font-size:0.65rem;color:var(--text-muted);opacity:0.8;">† estimated from daily aggregates</span>
+        <span style="font-size:0.65rem;color:var(--text-muted);opacity:0.8;">† ERA5 native · cloud-corrected via shortwave radiation</span>
       </div>
       <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
         <div style="display: flex; gap: 0; align-items: center; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden;">
@@ -401,19 +404,19 @@
     { title: '🛰 Historical data',
       body:  'ERA5-Seamless is a climate reanalysis — physics model output constrained by real observations, not station measurements. Grid resolution: ~9 km. Base and summit elevations within the same resort typically fall in the same grid cell; temperature differences are lapse-rate corrections, not independent readings. Accuracy: roughly ±1–2°C for temperature, ±20% for sunshine duration.' },
     { title: '☀ Clear sky hours',
-      body:  'Sunshine duration (ERA5) corrected by actual surface shortwave radiation vs theoretical clear-sky: <code style="font-size:0.72rem;background:rgba(0,0,0,0.06);padding:0 3px;border-radius:2px;">sun × √(srad / Ra)</code>. ERA5 overestimates Alpine sunshine by 10–30%; the shortwave term partially corrects this using a second ERA5 variable. It is ERA5 correcting ERA5. Temperature and wind are shown separately on the same chart.' },
+      body:  'Sunshine duration (ERA5) corrected by actual surface shortwave radiation vs theoretical clear-sky: <code style="font-size:0.72rem;background:rgba(0,0,0,0.06);padding:0 3px;border-radius:2px;">sun × √(srad / Ra)</code>. ERA5 overestimates Alpine sunshine by 10–30%; the shortwave term partially corrects this using a second ERA5 variable. It is ERA5 correcting ERA5. This correction is applied in the <strong>Season Overview</strong> canvas only. The <strong>Bluebird Score</strong> uses raw ERA5 sunshine_duration directly, for consistency with the historical normalisation bounds.' },
     { title: '🔵 Bluebird Score',
-      body:  'Optimised for piste skiers (groomed trails, ~80% of resort visitors). Normal weights: sun 45%, snow depth 30%, temperature 25%, wind as a global multiplier. Depth uses a sigmoid curve — 50cm scores 80%, not 40%, because a groomed 50cm base skis identically to 200cm. Temperature is date-aware: +6°C is penalised in January but correct in April (Firn skiing). Powder override: when fresh snow ≥ 15cm and gust &lt; 60 km/h, sunshine weight drops to 0% and depth/intensity carry the score — a 30cm storm day now scores 0.90+, not 0.65.' },
+      body:  'Optimised for piste skiers (groomed trails, ~80% of resort visitors). Normal weights: sun 45%, summit snow depth 30%, temperature 25%, wind as a global multiplier. Depth uses a sigmoid curve — 50cm scores 80%, not 40%, because a groomed 50cm base skis identically to 200cm. Temperature is date-aware: +6°C is penalised in January but correct in April (Firn skiing). Powder override: when fresh snow ≥ 15cm and gust &lt; 60 km/h, sunshine weight drops to 0% and depth/intensity carry the score — a 30cm storm day now scores 0.90+, not 0.65.' },
     { title: '📡 Forecast',
       body:  'Days 1–3: useful. Days 4–7: synoptic signal present, details uncertain. Days 8–16: the ECMWF ensemble spread for Alpine precipitation at this range covers most outcomes. Projected scores beyond day 5 indicate a plausible weather pattern, not a confirmed one. The confidence multiplier narrows the displayed scores; it does not narrow the atmosphere.' },
     { title: '🗂 Which model, where',
-      body:  '<dl style="margin:0;display:flex;flex-direction:column;gap:0.45rem;font-size:0.75rem;"><div><dt style="font-weight:700;color:var(--text-main);margin-bottom:0.1rem;">Heatmap · Daily · Snowpack · Season Overview</dt><dd style="margin:0;color:var(--text-muted)">ERA5-Seamless (Call A) + ERA5-Land (Call B for snow depth). Reanalysis, ~9 km, ~6-day publishing lag.</dd></div><div><dt style="font-weight:700;color:var(--text-main);margin-bottom:0.1rem;">Forecast canvas · Tactical cards · Best-days strip</dt><dd style="margin:0;color:var(--text-muted)"><code style="font-size:0.7rem;background:rgba(0,0,0,0.06);padding:0 3px;border-radius:2px">best_match</code> — ICON-D2/AROME days 1–5 (~2 km), ECMWF IFS + GFS beyond day 5. 16 days, summit elevation only.</dd></div><div><dt style="font-weight:700;color:var(--text-main);margin-bottom:0.1rem;">Village temps in forecast</dt><dd style="margin:0;color:var(--text-muted)">Not fetched. Derived from summit data via standard lapse rate 6.5°C / 1000 m. Labelled "(est.)" in the UI.</dd></div></dl>' },
+      body:  '<dl style="margin:0;display:flex;flex-direction:column;gap:0.45rem;font-size:0.75rem;"><div><dt style="font-weight:700;color:var(--text-main);margin-bottom:0.1rem;">Heatmap · Daily · Snowpack · Season Overview</dt><dd style="margin:0;color:var(--text-muted)">ERA5-Seamless (Call A) + ERA5-Land (Call B for snow depth). Reanalysis, ~9 km, ~6-day publishing lag.</dd></div><div><dt style="font-weight:700;color:var(--text-main);margin-bottom:0.1rem;">Forecast canvas · Tactical cards · Best-days strip</dt><dd style="margin:0;color:var(--text-muted)"><code style="font-size:0.7rem;background:rgba(0,0,0,0.06);padding:0 3px;border-radius:2px">best_match</code> — ICON-D2/AROME days 1–5 (~2 km), ECMWF IFS + GFS beyond day 5. 16 days. Two elevation calls per resort: summit (snow · wind · cloud · radiation) + base (temperature · rain · precip probability).</dd></div><div><dt style="font-weight:700;color:var(--text-main);margin-bottom:0.1rem;">Base (village) temps in forecast</dt><dd style="margin:0;color:var(--text-muted)">Fetched directly — separate API call at base elevation. Shown in the chip T range and hover tooltip as "base (max/min)".</dd></div></dl>' },
     { title: '❄ Snow depth — a special case',
       body:  'Snow depth exists only in ERA5-Land (Call B). It is fetched hourly and the daily maximum is taken — a conservative choice for ski purposes. ERA5-Land snow depth is notoriously imprecise in steep Alpine terrain; the model\'s snowpack depends heavily on wind redistribution and aspect, neither of which the ~9 km grid resolves. The values are directionally correct. Treat centimetre-level precision as decorative.' },
     { title: '⏱ Data freshness',
       body:  'Historical pipeline runs every 6 hours via GitHub Actions. ERA5-Seamless has an ~6-day publishing lag; the most recent days in the Heatmap and Daily table are therefore always 6 days behind today. The forecast payload is fetched at the same interval and is current to the last pipeline run. The countdown in the header shows time to the next scheduled refresh, not time since last data update.' },
     { title: '📐 Presentational choices',
-      body:  'The clear-sky-hours axis is capped at 8 h — a good alpine day, not the theoretical maximum. The Bluebird Score heatmap is normalised per resort against that resort\'s own historical peak, so a 70% score means the same thing in Nauders and Sulden even though Sulden is 500 m higher. The 3-day temperature smoothing default reduces noise; switching to Raw shows the underlying daily variance ERA5 actually produces.' },
+      body:  'The clear-sky-hours axis is capped at 12 h — the practical Alpine daylight maximum; the astronomical maximum at 47°N in late April is ~13.5 h. The Bluebird Score heatmap is normalised per resort against that resort\'s own historical peak, so a 70% score means the same thing in Nauders and Sulden even though Sulden is 500 m higher. The 3-day temperature smoothing default reduces noise; switching to Raw shows the underlying daily variance ERA5 actually produces.' },
   ];
 
   const VISIBLE = 4;
@@ -482,13 +485,6 @@
 <script>
   // ── CONSTANTS & COLOR UTILITIES ──
 
-  const RESORT_ABBREVIATIONS = {
-    'nauders': 'naud',
-    'schoeneben': 'schoen',
-    'watles': 'wat',
-    'sulden': 'suld',
-    'trafoi': 'traf'
-  };
 
   const getColor = (s) => {
     if (s === null || s === undefined) return '#f1f5f9';
@@ -573,10 +569,6 @@
 
   const getStyleVar = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const seasonColors = ['#64748b', '#d946ef', '#0ea5e9', '#f59e0b', '#10b981', '#f43f5e', '#8b5cf6'];
-  // Per-resort functional snow depth cap (m) — mirrors compute_metrics.py OPTIMAL_DEPTH_CM.
-  // Full marks above cap; a freak record season never devalues a good normal one.
-  const OPTIMAL_DEPTH_M = { nauders: 1.50, schoeneben: 1.30, watles: 1.20, sulden: 2.00, trafoi: 1.60 };
-
   // ── 6-HOUR SYNC CHRONOMETER (matches CI schedule) ──
   // Triggers a reload within 2 seconds of each 6-hour boundary (0h, 6h, 12h, 18h).
   // totalSecLeft can never reach 0 (min=1s) so we fire on crossing: detect when
@@ -672,7 +664,7 @@
       b.className = 'resort-tab-btn' + (r === window.GLOBAL_RESORT ? ' active' : '');
       b.setAttribute('role', 'tab');
       b.setAttribute('aria-selected', r === window.GLOBAL_RESORT ? 'true' : 'false');
-      b.innerHTML = `${r.toUpperCase()}`;
+      b.innerHTML = `${STATIC_METADATA[r]?.label ?? r.charAt(0).toUpperCase() + r.slice(1)}`;
       
       b.onclick = () => { 
         document.querySelectorAll('.resort-tab-btn').forEach(btn => { btn.classList.remove('active'); btn.setAttribute('aria-selected','false'); });
@@ -696,7 +688,7 @@
     const renderTacticalSummary = (resort) => {
       if (fcSubtitle) {
         const meta = STATIC_METADATA[resort.toLowerCase()] || {};
-        fcSubtitle.innerHTML = `<strong style="color:var(--text-main);">📍 ${meta.label ?? resort} &nbsp;<span style="font-weight:400;color:var(--text-muted);font-size:0.8rem;">${meta.region ?? ''}</span></strong>&ensp;·&ensp;${(meta.base ?? '?')}m base (temps) &nbsp;/&nbsp; ${(meta.summit ?? '?')}m summit (snow/wind)&ensp;·&ensp;ICON-D2/AROME days 1–5 · ECMWF/GFS days 6–16`;
+        fcSubtitle.innerHTML = `<strong style="color:var(--text-main);">📍 ${meta.label ?? resort} &nbsp;<span style="font-weight:400;color:var(--text-muted);font-size:0.8rem;">${meta.region ?? ''}</span></strong>&ensp;·&ensp;${(meta.base ?? '?')}m base (temps · rain · precip %) &nbsp;/&nbsp; ${(meta.summit ?? '?')}m summit (snow · wind · cloud · radiation)&ensp;·&ensp;ICON-D2/AROME days 1–5 · ECMWF/GFS days 6–16`;
       }
       if (!FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[resort]) {
         fcBoard.innerHTML = `<div style="color:#ef4444;padding:1rem;border:1px dashed #ef4444;border-radius:6px;width:100%;">No forecast payload for ${resort}</div>`;
@@ -746,7 +738,28 @@
           <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.3rem;">${snowLabel}</div>
         </div>`;
 
-      fcBoard.innerHTML = snowWeekCard + liveCard;
+      // Current summit snow depth — midday hour 12 of day 0 (most representative ski-time reading).
+      const summitHourly = (resortData.summit || resortData).hourly || resortData.hourly || resortData;
+      const depthNow = summitHourly.snow_depth?.[12] ?? summitHourly.snow_depth?.[0] ?? null;
+      const depthCm  = depthNow !== null ? Math.round(depthNow * 100) : null;
+      const depthLabel = depthCm !== null
+        ? (depthCm >= 150 ? '❄ Excellent' : depthCm >= 80 ? '✓ Good' : depthCm >= 30 ? '~ OK' : '⚠ Thin')
+        : null;
+      const depthLabelColor = depthCm !== null
+        ? (depthCm >= 150 ? '#15803d' : depthCm >= 80 ? '#d97706' : depthCm >= 30 ? '#b45309' : '#ef4444')
+        : 'var(--text-muted)';
+      const elev = STATIC_METADATA[resort.toLowerCase()] || {};
+      const snowDepthCard = depthCm !== null ? `
+        <div class="fc-card">
+          ${cardLabel(`Summit Snow Depth 🏔️`)}
+          <div style="display:flex;align-items:baseline;gap:0.4rem;">
+            <div style="font-size:2.2rem;font-weight:800;color:#2563eb;line-height:1;">${depthCm}<span style="font-size:1rem;color:var(--text-muted);margin-left:0.2rem;">cm</span></div>
+            <div style="font-size:0.85rem;font-weight:700;color:${depthLabelColor};">${depthLabel}</div>
+          </div>
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.3rem;">at ${elev.summit ?? '?'}m — today midday</div>
+        </div>` : '';
+
+      fcBoard.innerHTML = snowWeekCard + snowDepthCard + liveCard;
     };
 
     if (FORECAST_DATA && FORECAST_DATA.resorts && Object.keys(FORECAST_DATA.resorts).length > 0) {
@@ -785,7 +798,7 @@
       }
 
       // Date-aware temperature bands
-      const ds = dateStr || new Date().toISOString().slice(0,10);
+      const ds = dateStr || new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Vienna'});
       const month = parseInt(ds.slice(5,7)), day = parseInt(ds.slice(8,10));
       let optLo, optHi, tooWarm;
       if (month >= 11 || month <= 2)     { optLo=-12; optHi=-2; tooWarm=15; }
@@ -885,7 +898,7 @@
         
         // Precip total and soil temp from base tier
         const precipArr = tH.precipitation ? tH.precipitation.slice(start, end).filter(v => v !== null) : [];
-        const totalPrecip = precipArr.length ? precipArr.reduce((a,b)=>a+b, 0) : rn + (sn / 10); // sn cm snow-height → mm SWE using standard 10:1 ratio
+        const totalPrecip = precipArr.length ? precipArr.reduce((a,b)=>a+b, 0) : rn + (sn / 7); // sn cm snow-height → mm SWE (Open-Meteo 7:1 ratio)
         
         // Soil temp from summit tier — snowpack stability is relevant at slope elevation.
         // Base soil thawing at 1400m tells you about valley roads, not piste conditions.
@@ -932,7 +945,7 @@
         const gustArr = sH.wind_gusts_10m ? sH.wind_gusts_10m.slice(start, end).filter(v => v !== null) : [];
         const gust = gustArr.length ? Math.max(...gustArr) : null; // null = no data, not 0 km/h
 
-        const dateStr = exactDate.toLocaleDateString('en-GB', {weekday: 'short', month: 'short', day: 'numeric'});
+        const dateStr = exactDate.toLocaleDateString('en-GB', {weekday: 'short', month: 'short', day: 'numeric', timeZone: 'Europe/Vienna'});
         
         // Cloud layers — daily mean per altitude band (graceful zero if not fetched)
         const ccLowArr  = sH.cloud_cover_low  ? sH.cloud_cover_low.slice(start, end).filter(v=>v!==null)  : [];
@@ -1009,7 +1022,7 @@
 
       // Precip axis: unified mm SWE. Snow bars stack above rain so axis max must
       // cover rain + snowSWE, not just totalPrecip (which may be base-tier only).
-      const maxPrecip = Math.max(5, ...daily.map(d => Math.max(d.precip, d.rain + d.snow / 10)));
+      const maxPrecip = Math.max(5, ...daily.map(d => Math.max(d.precip, d.rain + d.snow / 7)));
       const mapYPrecip = val => Math.max(yP1, zeroY - (val / maxPrecip) * (zeroY - yP1));
 
       // Direct radiation axis — mean W/m² over lit hours.
@@ -1204,7 +1217,8 @@
         let exactDate;
         if (sH.time && sH.time[s]) exactDate = parseCET(sH.time[s]);
         else exactDate = new Date(localNow.getTime() + i*86400000);
-        const ds = exactDate.toISOString().slice(0,10);
+        // CET-local ISO date — toISOString() would give UTC which is one day behind for midnight CET
+        const ds = exactDate.toLocaleDateString('sv-SE', {timeZone: 'Europe/Vienna'});
         // WMO: use raw hour 12 (midday) directly — filter()[12] would shift index if early hours are null
         const wmoRaw = sH.weather_code ? sH.weather_code[s + 12] : null;
         const wmo = (wmoRaw !== null && wmoRaw !== undefined) ? wmoRaw : null;
@@ -1228,7 +1242,8 @@
           : wmo <= 86               ? '🌨️'   // snow showers
           :                          '⛈️';   // thunderstorm
         const scored = computeForecastDayScore(d.tMax, d.tMin, d.sun, depthM, d.gust, d.snow, probMax, maxSunForScore, minSunForScore, ds);
-        const isPowder = d.snow > 10 && (d.gust === null || d.gust < 60);
+        // isPowder matches powder_override trigger (≥15cm) so the emoji reflects the score formula used
+        const isPowder = d.snow >= 15 && (d.gust === null || d.gust < 60);
         return { score: scored.score, emoji: isPowder ? '🌨️' : emoji, probMax, dateObj: exactDate, ds };
       });
 
@@ -1268,7 +1283,7 @@
           ctxFc.font = `600 ${badgeFont}px system-ui`;
           ctxFc.fillStyle = cv.textMuted;
           ctxFc.textAlign = 'right'; ctxFc.textBaseline = 'top';
-          ctxFc.fillText('pm', chipLeft + chipW - 3, chipTop + 3);
+          ctxFc.fillText('½ day', chipLeft + chipW - 3, chipTop + 3);
           ctxFc.textAlign = 'center'; ctxFc.textBaseline = 'top';
         }
 
@@ -1303,13 +1318,13 @@
 
         // Row 1: weekday bold
         const dateObj = chipScores[i].dateObj;
-        const wkday = dateObj.toLocaleDateString('en-GB', {weekday:'short'}).toUpperCase();
+        const wkday = dateObj.toLocaleDateString('en-GB', {weekday:'short', timeZone:'Europe/Vienna'}).toUpperCase();
         ctxFc.font = `700 ${fBase}px system-ui`;
         ctxFc.fillStyle = cv.textMuted;
         ctxFc.fillText(wkday, cx2, chipTop + chipPad);
 
         // Row 2: date (Mon D)
-        const dateLabel = dateObj.toLocaleDateString('en-GB',{month:'short',day:'numeric'});
+        const dateLabel = dateObj.toLocaleDateString('en-GB',{month:'short',day:'numeric', timeZone:'Europe/Vienna'});
         ctxFc.font = `${fSm}px system-ui`;
         ctxFc.fillStyle = cv.textMuted;
         ctxFc.fillText(dateLabel, cx2, chipTop + chipPad + fBase + 2);
@@ -1427,8 +1442,8 @@
             ctxFc.fillRect(bX, rY, bWr, Math.round(zeroY) - rY);
         }
         if (d.snow > 0) {
-            // Snow: cm → mm SWE using standard 10:1 ratio (100 kg/m³ fresh snow density)
-            const snowSWE = d.snow / 10;
+            // Snow: cm → mm SWE. Open-Meteo uses 7:1 (143 kg/m³), not the generic 10:1.
+            const snowSWE = d.snow / 7;
             const sY = Math.round(mapYPrecip(d.rain + snowSWE));
             const rY = Math.round(mapYPrecip(d.rain));
             ctxFc.fillStyle = cv.snowYield;
@@ -1478,6 +1493,7 @@
         if (d.sTMax !== null) rows++;           // summit temp row
         if (d.soil !== null) rows++;
         if (d.ccLow > 5 || d.ccMid > 5 || d.ccHigh > 5) rows += 2; // cloud: label + % breakdown
+        if (fcHoverIdx === 0 && _cetHour >= 14) rows++;              // partial-day note
         const boxW = 280 * scale, boxH = (35 + (rows * 20)) * scale, padding = 14 * scale;
         
         let boxX = hx + padding, boxY = pY;
@@ -1528,9 +1544,14 @@
           ctxFc.fillText(`  Lo:${Math.round(d.ccLow)}%  Mid:${Math.round(d.ccMid)}%  Hi:${Math.round(d.ccHigh)}%`, boxX + padding, currentY); currentY += yStep;
         }
         ctxFc.fillStyle = '#3b82f6'; ctxFc.fillText(`Rain: ${d.rain.toFixed(1)} mm  (base)`, boxX + padding, currentY); currentY += yStep;
-        ctxFc.fillStyle = '#60a5fa'; ctxFc.fillText(`Snow: ${d.snow.toFixed(1)} cm summit  (${(d.snow/10).toFixed(1)} mm SWE)`, boxX + padding, currentY); currentY += yStep;
+        ctxFc.fillStyle = '#60a5fa'; ctxFc.fillText(`Snow: ${d.snow.toFixed(1)} cm summit  (${(d.snow/7).toFixed(1)} mm SWE)`, boxX + padding, currentY); currentY += yStep;
         
         ctxFc.fillStyle = '#ef4444'; ctxFc.fillText(`Peak gust: ${d.gust !== null ? d.gust.toFixed(0) + ' km/h' : 'no data'}`, boxX + padding, currentY);
+        if (fcHoverIdx === 0 && _cetHour >= 14) {
+          currentY += yStep;
+          ctxFc.fillStyle = cv.textMuted;
+          ctxFc.fillText('½ day — score less reliable after 14:00 CET', boxX + padding, currentY);
+        }
       }
     };
 
@@ -1636,6 +1657,14 @@
         return { score: null, metrics: { fSun:0, fDepth:0, fTemp:0, windMult:1, powderBonus:0 } };
       }
 
+      // Null-sun weight redistribution — mirrors compute_metrics.py exactly:
+      // if sunshine_duration is missing, spread its 45% weight to depth(+25%) and temp(+20%).
+      let wSun, wDepth, wTemp;
+      if (sunSec !== null) {
+        wSun = 0.45; wDepth = 0.30; wTemp = 0.25;
+      } else {
+        wSun = 0.00; wDepth = 0.55; wTemp = 0.45;
+      }
       const sunHours = (sunSec ?? 0) / 3600;
       let fSun = bounds.maxSun > bounds.minSun
         ? (sunHours - bounds.minSun) / (bounds.maxSun - bounds.minSun)
@@ -1692,10 +1721,10 @@
       let raw;
       if (freshCm >= 15 && gustKmh < 60) {
         const powderIntensity = Math.min(1.0, freshCm / 40);
-        raw = 0.0 * fSun + 0.60 * fDepth + 0.25 * fTemp + 0.15 * powderIntensity;
+        raw = 0.60 * fDepth + 0.25 * fTemp + 0.15 * powderIntensity;
         powderBonus = 0;
       } else {
-        raw = 0.45 * fSun + 0.30 * fDepth + 0.25 * fTemp;
+        raw = wSun * fSun + wDepth * fDepth + wTemp * fTemp;
       }
 
       const powderOverrideActive = freshCm >= 15 && gustKmh < 60;
@@ -1715,8 +1744,10 @@
       const pC = (m.powderBonus || 0) >= 0.10 ? '#22c55e' : (m.powderBonus || 0) > 0 ? '#60a5fa' : 'var(--text-muted)';
 
       // Contextual temperature label — tell skiers what the score means, not the maths
-      const dateMonth = title.length >= 7 ? parseInt(title.slice(5,7)) : 1;
-      const dateDayN  = title.length >= 10 ? parseInt(title.slice(8,10)) : 1;
+      // Title format: "ResortLabel · YYYY-MM-DD"; split on " · " to get the ISO date reliably.
+      const _datePart  = title.includes(' · ') ? title.split(' · ').pop() : title;
+      const dateMonth = parseInt(_datePart.slice(5,7)) || 1;
+      const dateDayN  = parseInt(_datePart.slice(8,10)) || 1;
       const isSpring  = dateMonth > 3 || (dateMonth === 3 && dateDayN >= 21);
       const isTrans   = !isSpring && (dateMonth === 3);
       const tempLabel = isSpring  ? '🌸 Snow quality (spring)' :
@@ -1741,7 +1772,7 @@
         <div style="color:var(--text-muted); font-size:0.7rem; margin-top:0.4rem; text-transform:uppercase;">Bluebird Score · higher = better ski day</div>
         <div class="tt-grid">
           <span style="color:var(--text-muted)">☀️ Sunshine (45%)</span>   <span class="tt-val" style="color:${sC}">${(m.fSun*100).toFixed(0)}%</span>
-          <span style="color:var(--text-muted)">❄️ Base depth (30%)</span> <span class="tt-val" style="color:${dC}">${(m.fDepth*100).toFixed(0)}%</span>
+          <span style="color:var(--text-muted)">❄️ Summit depth (30%)</span> <span class="tt-val" style="color:${dC}">${(m.fDepth*100).toFixed(0)}%</span>
           <span style="color:var(--text-muted)">${tempLabel} (25%)</span>  <span class="tt-val" style="color:${tC}">${(m.fTemp*100).toFixed(0)}%</span>
           <span style="color:var(--text-muted)">💨 Wind factor</span>       <span class="tt-val" style="color:${wC}">${(m.windMult*100).toFixed(0)}%</span>
           ${powderRow}
@@ -1803,7 +1834,7 @@
             <span>New Snow: <b style="color:var(--text-main)">${fs>0?'+'+fs.toFixed(1)+'cm':'0'}</b></span>
           </div>`;
           
-        const tooltipPayload = generateRichTooltipHTML(`${r.resort.toUpperCase()} · ${dStr}`, dScore, finalSc, extrasHtml);
+        const tooltipPayload = generateRichTooltipHTML(`${meta.label ?? r.resort} · ${dStr}`, dScore, finalSc, extrasHtml);
 
         let snHtml = '—';
         if (rawSn !== null && rawSn !== undefined) {
@@ -1826,7 +1857,7 @@
         const sunHtml  = rawSunH  !== null ? `<span style="font-weight:700;">${rawSunH.toFixed(1)}</span><span style="font-size:0.7rem;color:var(--text-muted);"> h</span>` : '—';
 
         return `<tr>
-          <td><div style="font-weight:bold;text-transform:capitalize;">${warn}${r.resort}</div><div style="font-size:0.7rem; color:var(--text-muted);">${meta.base}m · ${meta.summit}m</div></td>
+          <td><div style="font-weight:bold;">${warn}${meta.label ?? r.resort}</div><div style="font-size:0.7rem; color:var(--text-muted);">${meta.base}m · ${meta.summit}m</div></td>
           <td>${fmtTemp(tb)}</td>
           <td>${fmtTemp(tSummit)}</td>
           <td>${snHtml}</td>
@@ -2020,7 +2051,7 @@
         const lbl = document.createElement('div');
         lbl.style.cssText = 'text-align:right;font-size:0.72rem;font-weight:700;color:var(--text-muted);white-space:nowrap;padding-right:4px;';
         if (isAvg) {
-          lbl.innerHTML = `<span style="color:var(--brand);font-size:0.7rem;font-weight:800;">🏆 6-yr avg</span>`;
+          lbl.innerHTML = `<span style="color:var(--brand);font-size:0.7rem;font-weight:800;">🏆 ${seasons.length - 1}-yr avg</span>`;
         } else {
           const yr = sd.year;
           const ss = `${yr}/${String(yr+1).slice(2)}`;
@@ -2058,8 +2089,6 @@
             let [r,g,b] = scoreToRGB(entry ? entry.score : null);
             const shoulder = isShoulder(d);
             if (shoulder) { r=Math.round(r*0.5+200*0.5); g=Math.round(g*0.5+210*0.5); b=Math.round(b*0.5+220*0.5); }
-            // Future days: light stipple
-            const startDate = `${d < 30 ? sd?.year ?? 2025 : (sd?.year ?? 2025)+1}-${String(d < 30 ? 11 : d < 61 ? 12 : d < 92 ? 1 : d < 120 ? 2 : d < 151 ? 3 : 4).padStart(2,'0')}-01`;
             if (entry === null && !shoulder) { r=225; g=230; b=238; }
             ctx.fillStyle = `rgb(${r},${g},${b})`;
             ctx.fillRect(x1, 0, Math.max(1, x2-x1), H);
@@ -2129,7 +2158,7 @@
             const wC = m.windMult <= 0.5 ? '#ef4444' : m.windMult <= 0.8 ? '#d97706' : '#15803d';
             body = `<div class="tt-grid" style="margin-top:0.35rem;">
               <span style="color:var(--text-muted)">☀️ Sunshine</span><span class="tt-val" style="color:${sC}">${(m.fSun*100).toFixed(0)}%</span>
-              <span style="color:var(--text-muted)">❄️ Base depth</span><span class="tt-val" style="color:${dC}">${(m.fDepth*100).toFixed(0)}%</span>
+              <span style="color:var(--text-muted)">❄️ Summit depth</span><span class="tt-val" style="color:${dC}">${(m.fDepth*100).toFixed(0)}%</span>
               <span style="color:var(--text-muted)">🌡️ Snow quality</span><span class="tt-val" style="color:${tC}">${(m.fTemp*100).toFixed(0)}%</span>
               <span style="color:var(--text-muted)">💨 Wind</span><span class="tt-val" style="color:${wC}">${(m.windMult*100).toFixed(0)}%</span>
               ${(m.powderBonus||0)>0 ? `<span style="color:var(--text-muted)">🌨️ Powder</span><span class="tt-val" style="color:#2563eb">+${((m.powderBonus||0)*100).toFixed(0)}%</span>` : ''}
@@ -2163,15 +2192,14 @@
 
 
 
-        drawBar._cvs = cvs;
         cvs._draw = drawBar;
         return row;
       };
 
       // Add resort label
       const resortH3 = document.createElement('h3');
-      resortH3.style.cssText = 'margin:0 0 0.4rem 0;font-size:1.1rem;text-transform:capitalize;color:var(--brand);';
-      resortH3.textContent = window.GLOBAL_RESORT.charAt(0).toUpperCase() + window.GLOBAL_RESORT.slice(1);
+      resortH3.style.cssText = 'margin:0 0 0.4rem 0;font-size:1.1rem;font-weight:700;color:var(--brand);';
+      resortH3.textContent = STATIC_METADATA[window.GLOBAL_RESORT]?.label ?? (window.GLOBAL_RESORT.charAt(0).toUpperCase() + window.GLOBAL_RESORT.slice(1));
       wrap.appendChild(resortH3);
       wrap.appendChild(headerRow);
 
@@ -2215,13 +2243,13 @@
     });
     avgBtn.onclick = () => { showHistoricalAvg = !showHistoricalAvg; avgBtn.classList.toggle('active', showHistoricalAvg); window.repaintCanvas(); };
 
-    const applyMA = (data, window) => {
-      if (window === 1) return data;
+    const applyMA = (data, winSize) => {
+      if (winSize === 1) return data;
       const res = [];
       for (let i = 0; i < data.length; i++) {
         if (data[i].y === null) { res.push({x: data[i].x, y: null}); continue; }
         let sum = 0, count = 0;
-        for (let j = Math.max(0, i - window + 1); j <= i; j++) { if (data[j] && data[j].y !== null) { sum += data[j].y; count++; } }
+        for (let j = Math.max(0, i - winSize + 1); j <= i; j++) { if (data[j] && data[j].y !== null) { sum += data[j].y; count++; } }
         res.push({x: data[i].x, y: count > 0 ? sum/count : null});
       }
       return res;
@@ -2368,23 +2396,32 @@
 
         if (readouts.length > 0) {
           const scale = cvs.width / (cvs.clientWidth || 1000);
-          const boxW = 280 * scale, boxH = 24*scale + (readouts.length * 36 * scale), padding = 15*scale;
+          // Derive a human-readable date from the hovered day offset + the current season start.
+          // Use currentSeason (e.g. "2024/25") to get the Nov-1 anchor year.
+          const anchorYear = parseInt(currentSeason.slice(0,4));
+          const hovDate = new Date(Date.UTC(anchorYear, 10, 1) + hoverDayOffset * 86400000);
+          const hovDateLabel = hovDate.toLocaleDateString('en-GB', {day:'numeric', month:'short', timeZone:'UTC'});
+          const boxW = 280 * scale, boxH = 24*scale + 20*scale + (readouts.length * 36 * scale), padding = 15*scale;
           let boxX = hx + padding, boxY = pY;
             if (boxX + boxW > pX + w) boxX = hx - boxW - padding;
-          if (boxX < pX) boxX = pX; 
-          
+          if (boxX < pX) boxX = pX;
+
           ctx.fillStyle = cv2.bgHeader;
           ctx.fillRect(boxX, boxY, boxW, boxH); ctx.strokeStyle = cv2.borderColor; ctx.strokeRect(boxX, boxY, boxW, boxH);
           ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.font = fonts.tooltip;
+          // Date header
+          ctx.fillStyle = cv2.textMuted;
+          ctx.fillText(hovDateLabel, boxX + padding, boxY + padding);
           readouts.sort((a,b) => b.yMtn - a.yMtn).forEach((r, i) => {
             const dep = r.yMtn;
             const cond = dep >= 150 ? '❄ Excellent' : dep >= 80 ? '✓ Good' : dep >= 30 ? '~ OK' : '✗ Low';
             const condColor = dep >= 150 ? '#15803d' : dep >= 80 ? '#d97706' : dep >= 30 ? '#b45309' : '#ef4444';
-            ctx.fillStyle = r.c; ctx.fillText(`■`, boxX + padding, boxY + padding + (i*36*scale));
+            const rowY = boxY + padding + 20*scale + (i*36*scale);
+            ctx.fillStyle = r.c; ctx.fillText(`■`, boxX + padding, rowY);
             ctx.fillStyle = cv2.textMain;
-            ctx.fillText(`${r.s}:  ${dep.toFixed(0)} cm`, boxX + padding*3, boxY + padding + (i*36*scale));
+            ctx.fillText(`${r.s}:  ${dep.toFixed(0)} cm`, boxX + padding*3, rowY);
             ctx.fillStyle = condColor;
-            ctx.fillText(cond, boxX + padding*3 + 120*scale, boxY + padding + (i*36*scale));
+            ctx.fillText(cond, boxX + padding*3 + 120*scale, rowY);
           });
         }
       }
@@ -2695,9 +2732,15 @@
       for (let g = 40; g <= atmGustMax; g += 40) {
         const y = mapGustY(g);
         ctxA.beginPath(); ctxA.moveTo(pX, y); ctxA.lineTo(pX+w, y);
-        ctxA.strokeStyle = g === 65 ? 'rgba(239,68,68,0.25)' : 'rgba(239,68,68,0.08)';
-        ctxA.lineWidth = g === 65 ? 1.5 : 1;
-        ctxA.setLineDash(g === 65 ? [5,4] : []); ctxA.stroke(); ctxA.setLineDash([]);
+        ctxA.strokeStyle = 'rgba(239,68,68,0.08)';
+        ctxA.lineWidth = 1; ctxA.setLineDash([]); ctxA.stroke();
+      }
+      // 65 km/h = lift-hold threshold — draw as distinct red dashed marker
+      if (atmGustMax >= 65) {
+        const y65 = mapGustY(65);
+        ctxA.beginPath(); ctxA.moveTo(pX, y65); ctxA.lineTo(pX+w, y65);
+        ctxA.strokeStyle = 'rgba(239,68,68,0.25)'; ctxA.lineWidth = 1.5;
+        ctxA.setLineDash([5,4]); ctxA.stroke(); ctxA.setLineDash([]);
       }
 
       // ── 7. Right-side axis labels — each anchored to its own scale ──────────
@@ -2709,15 +2752,13 @@
       ctxA.fillStyle = 'rgba(140,90,0,0.85)';
       ctxA.fillText('12h ☀', pX+w+5, mapBBY(12));
 
-      // Gust: right axis — anchored to actual gridlines
+      // Gust: right axis — anchored to actual gridlines (step=40: 40, 80, 120…)
       ctxA.fillStyle = 'rgba(200,50,50,0.85)';
       for (let g = 40; g <= atmGustMax; g += 40) {
-        const y = mapGustY(g);
-        const lbl = g === 65 ? '65⚠' : `${g}`;
-        ctxA.fillText(lbl, pX+w+5, y);
+        ctxA.fillText(`${g}`, pX+w+5, mapGustY(g));
       }
-      if (atmGustMax >= 65 && ![40,80,120,160].includes(65)) {
-        // 65 km/h is not on a 40-step grid — add explicit label if not already there
+      // 65 km/h threshold never falls on a 40-step tick — always add it explicitly
+      if (atmGustMax >= 65) {
         ctxA.fillText('65⚠', pX+w+5, mapGustY(65));
       }
       // "km/h" unit label at the very top of gust scale, smaller, muted
@@ -2806,20 +2847,8 @@
         if (boxX + boxW > pX+w) boxX = hx - boxW - pad;
         boxX = Math.max(pX, Math.min(pX+w-boxW, boxX));
 
-        // Y: top half → anchor to top of temp zone; bottom half → anchor above bottom
-        const hoverInTop = hx > pX && (d.sTMax === null || mapTempY(d.sTMax) > pY);
-        let boxY;
-        {
-          boxY = pY + 4*sc; // top of chart
-          // if cursor is in bar zone and box would overlap data there, push down
-          if (atmosHoverDay !== null) {
-            const cursorCanvasX = hx;
-            const cursorFraction = (cursorCanvasX - pX) / w;
-            if (cursorFraction > 0 && cursorFraction < 1) {
-              // tooltip in top zone unless it'd clip — always fine there
-            }
-          }
-        }
+        // Y: anchor near top of chart; clamp to never overflow bottom
+        let boxY = pY + 4*sc;
         // Hard clamp: never overflow bottom of canvas
         if (boxY + boxH > botY0+botH) boxY = botY0+botH - boxH - pad;
         if (boxY < pY) boxY = pY;
@@ -2841,11 +2870,11 @@
 
         ln(d.date, cv3.textMuted);
         ln(`⛰ ${elev.summit}m   ${d.sTMax!==null?d.sTMax.toFixed(1):'—'} / ${d.sTMin!==null?d.sTMin.toFixed(1):'—'}°C   (max/min)`);
-        if (hasAp) ln(`🧤 Feels-like   ${d.apMax!==null?d.apMax.toFixed(1):'—'} / ${d.apMin!==null?d.apMin.toFixed(1):'—'}°C`, 'rgba(100,116,139,0.9)');
+        if (hasAp) ln(`🧤 Feels-like (summit)   ${d.apMax!==null?d.apMax.toFixed(1):'—'} / ${d.apMin!==null?d.apMin.toFixed(1):'—'}°C`, 'rgba(100,116,139,0.9)');
         if (hasVill) ln(`🏘 ${elev.base}m   ${d.vMax!==null?d.vMax.toFixed(1):'—'} / ${d.vMin!==null?d.vMin.toFixed(1):'—'}°C`, cv3.textMuted);
         ln(`☀ Clear sky   ${d.bbH.toFixed(1)} h   (${d.sunH.toFixed(1)}h sun × cloud correction)`, 'rgba(160,100,0,0.9)');
         ln(`❄ New snow   ${d.snow.toFixed(1)} cm`, '#2563eb');
-        ln(`💨 Peak gust   ${d.gust.toFixed(0)} km/h${d.gust>65?' — ⚠ lift holds likely':''}`, d.gust>65?'#ef4444':'var(--text-main)');
+        ln(`💨 Peak gust   ${d.gust.toFixed(0)} km/h${d.gust>65?' — ⚠ lift holds likely':''}`, d.gust>65?'#ef4444':cv3.textMain);
 
         // Dot markers
         if (d.sTMax!==null){ctxA.beginPath();ctxA.arc(hx,mapTempY(smSTMax(atmosHoverDay)??d.sTMax),5,0,2*Math.PI);ctxA.fillStyle='#ef4444';ctxA.fill();}
