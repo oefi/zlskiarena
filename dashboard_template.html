@@ -695,6 +695,102 @@
     const fcBoard = document.getElementById('tactical-summary-board');
     const fcSubtitle = document.getElementById('forecast-subtitle');
 
+    // ── DST-safe ISO parser — hoisted here so all forecast functions can use it. ──
+    // Open-Meteo hourly timestamps are "YYYY-MM-DDTHH:MM" with NO timezone suffix.
+    // JS would parse these as browser-local time, which is wrong for non-Alpine viewers.
+    // We compute the correct CET (+01:00) / CEST (+02:00) offset for the exact moment
+    // and append it, producing a fully-qualified Date that is correct in all timezones.
+    //
+    // DST rules for Europe/Vienna (and all of Central Europe):
+    //   Spring forward: last Sunday of March  at 02:00 CET → 03:00 CEST  (01:00 UTC)
+    //   Fall back:      last Sunday of October at 03:00 CEST → 02:00 CET  (01:00 UTC)
+    //
+    // The transition moment is 01:00 UTC, NOT midnight UTC — using midnight would
+    // misclassify the 00:00 UTC slot (= 01:00 CET, still pre-transition) as CEST.
+    const parseCET = (isoNoTz) => {
+      if (!isoNoTz) return null;
+      const d = new Date(isoNoTz + 'Z');        // parse as UTC to get calendar values
+      const y = d.getUTCFullYear();
+      const lastSunMar = new Date(Date.UTC(y, 2, 31));
+      lastSunMar.setUTCDate(31 - lastSunMar.getUTCDay());
+      const lastSunOct = new Date(Date.UTC(y, 9, 31));
+      lastSunOct.setUTCDate(31 - lastSunOct.getUTCDay());
+      const dstStart = new Date(lastSunMar.getTime() + 3600000); // 01:00 UTC = exact spring-forward
+      const dstEnd   = new Date(lastSunOct.getTime() + 3600000); // 01:00 UTC = exact fall-back
+      const isDST = d >= dstStart && d < dstEnd;
+      return new Date(isoNoTz + (isDST ? '+02:00' : '+01:00'));
+    };
+
+    // ── Forecast score — mirrors compute_metrics.py, adds precip-probability confidence. ──
+    // Hoisted here so renderTacticalSummary and repaintForecastCanvas both share one copy.
+    const computeForecastDayScore = (tMax, _tMin, sunH, depthM, gustKmh, freshCm, probPct, maxSun, minSun, dateStr) => {
+      const sunPeak = (maxSun && maxSun > 0) ? maxSun : 10;
+      const sunMin  = (minSun > 0) ? minSun : 0;
+      const fSun = sunPeak > sunMin
+        ? Math.max(0, Math.min(1, (sunH - sunMin) / (sunPeak - sunMin)))
+        : Math.min(1, sunH / sunPeak);
+
+      let fDepth = 0;
+      if (depthM !== null && depthM !== undefined) {
+        const cm = (depthM || 0) * 100;
+        if      (cm <= 0)  fDepth = 0;
+        else if (cm <= 20) fDepth = 0.20 * (cm / 20);
+        else if (cm <= 50) fDepth = 0.20 + 0.60 * ((cm - 20) / 30);
+        else               fDepth = Math.min(1.0, 0.80 + 0.20 * Math.log(1 + (cm-50)/50) / Math.log(3));
+      }
+
+      // Date-aware temperature bands (matches compute_metrics.py exactly)
+      const ds = dateStr || new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Vienna'});
+      const month = parseInt(ds.slice(5,7)), day = parseInt(ds.slice(8,10));
+      let optLo, optHi, tooWarm;
+      if (month >= 11 || month <= 2)  { optLo=-12; optHi=-2; tooWarm=15; }
+      else if (month===3 && day<=20)  { optLo=-6;  optHi= 2; tooWarm=18; }
+      else                            { optLo=-2;  optHi= 8; tooWarm=22; }
+
+      let fTemp = 0.5;
+      if (tMax !== null) {
+        if      (tMax <= -20)     fTemp = 0.3;
+        else if (tMax <= optLo)   fTemp = 0.7 + 0.3*(tMax-(-20))/(optLo-(-20));
+        else if (tMax <= optHi)   fTemp = 1.0;
+        else if (tMax <= tooWarm) fTemp = 1.0 - 0.6*(tMax-optHi)/(tooWarm-optHi);
+        else                      fTemp = 0.05;
+        fTemp = Math.max(0, Math.min(1, fTemp));
+      }
+
+      let wMult = 1.0;
+      if (gustKmh !== null) {
+        if      (gustKmh <= 30) wMult = 1.0;
+        else if (gustKmh <= 50) wMult = 1.0 - 0.1*(gustKmh-30)/20;
+        else if (gustKmh <= 80) wMult = 0.9 - 0.4*(gustKmh-50)/30;
+        else                    wMult = 0.3;
+      }
+
+      let pBonus = 0;
+      if (freshCm > 10) {
+        const sf = Math.min(1,(freshCm-10)/20);
+        const wf = (gustKmh===null||gustKmh<=30)?1 : gustKmh<=50?1-(gustKmh-30)/20 : 0;
+        pBonus = 0.15 * sf * wf;
+      }
+
+      // probFactor discounts uncertain heavy-snow forecasts (≥15cm threshold mirrors
+      // powder_override trigger — lighter snow is already handled via depth/snowfall weights).
+      const probFactor = (probPct !== null && freshCm >= 15)
+        ? Math.min(1, 0.4 + (probPct/100)*0.6)
+        : 1.0;
+
+      let raw;
+      if (freshCm >= 15 && (gustKmh === null || gustKmh < 60)) {
+        const powderIntensity = Math.min(1.0, freshCm / 40);
+        raw = 0.60*fDepth + 0.25*fTemp + 0.15*powderIntensity;
+        pBonus = 0;
+      } else {
+        raw = 0.45*fSun + 0.30*fDepth + 0.25*fTemp;
+      }
+
+      const score = Math.max(0, Math.min(1, (raw + pBonus) * wMult * probFactor));
+      return { score: Math.round(score*1000)/1000, fSun, fDepth, fTemp, wMult, pBonus, probFactor };
+    };
+
     const renderTacticalSummary = (resort) => {
       if (fcSubtitle) {
         const meta = STATIC_METADATA[resort.toLowerCase()] || {};
@@ -729,6 +825,9 @@
 
       const snow = daily?.snowfall_sum
         ? daily.snowfall_sum.slice(snowStart, snowStart + days7).reduce((a,b)=>a+(b||0),0)
+        // Hourly fallback for legacy payloads without daily.snowfall_sum.
+        // i*24 indexing may undercount by 1 hour on the DST spring-forward day (23-hr day),
+        // but the primary daily path above is immune. Acceptable legacy edge-case.
         : (hourly.snowfall ? hourly.snowfall.slice(snowStart*24, (snowStart+days7)*24).reduce((a,b)=>a+(b||0),0) : 0);
       const snowLabel = snowStart === 1 ? 'Next 7 full days' : 'Total snowfall forecast — next 7 days';
 
@@ -867,117 +966,15 @@
       fcBoard.innerHTML = `<div style="color:#ef4444; padding: 1rem; border: 1px dashed #ef4444; border-radius:6px; width: 100%;">Forecast Payload Missing</div>`;
     }
 
+
     // ── BEST DAYS STRIP ──────────────────────────────────────────────────
-    // Projected Score (not Bluebird): same sun/depth/temp/wind/powder formula multiplied
-    // by a precipitation-probability confidence factor (probFactor) on heavy storm days.
-    // maxSun: resort's historical peak sunshine hours from getResortBounds — normalises forecast
-    //         sun hours onto the same scale as historical bounds. Falls back to 10h.
-    // probPct: precipitation probability 0–100; high probability on storm days reduces confidence.
-    const computeForecastDayScore = (tMax, _tMin, sunH, depthM, gustKmh, freshCm, probPct, maxSun, minSun, dateStr) => {
-      // tMax: base daily max temp (°C). Mirrors compute_metrics.py which uses
-      //       b.get("temperature_2m_max") so forecast and historical scores are comparable.
-      const sunPeak = (maxSun && maxSun > 0) ? maxSun : 10;
-      // Mirrors computeDynamicScore: (sun - minSun) / (maxSun - minSun)
-      // minSun passed from call site (minSunForScore) so no hidden closure dependency.
-      const sunMin = (minSun > 0) ? minSun : 0;
-      const fSun = sunPeak > sunMin
-        ? Math.max(0, Math.min(1, (sunH - sunMin) / (sunPeak - sunMin)))
-        : Math.min(1, sunH / sunPeak);
-
-      // Sigmoid depth — piste-optimised (mirrors compute_metrics.py)
-      let fDepth = 0;
-      if (depthM !== null && depthM !== undefined) {
-        const cm = (depthM || 0) * 100;
-        if      (cm <= 0)  fDepth = 0;
-        else if (cm <= 20) fDepth = 0.20 * (cm / 20);
-        else if (cm <= 50) fDepth = 0.20 + 0.60 * ((cm - 20) / 30);
-        else               fDepth = Math.min(1.0, 0.80 + 0.20 * Math.log(1 + (cm-50)/50) / Math.log(3));
-      }
-
-      // Date-aware temperature bands
-      const ds = dateStr || new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Vienna'});
-      const month = parseInt(ds.slice(5,7)), day = parseInt(ds.slice(8,10));
-      let optLo, optHi, tooWarm;
-      if (month >= 11 || month <= 2)     { optLo=-12; optHi=-2; tooWarm=15; }
-      else if (month===3 && day<=20)     { optLo=-6;  optHi= 2; tooWarm=18; }
-      else                               { optLo=-2;  optHi= 8; tooWarm=22; }
-
-      let fTemp = 0.5;
-      if (tMax !== null) {
-        if      (tMax <= -20)      fTemp = 0.3;
-        else if (tMax <= optLo)    fTemp = 0.7 + 0.3*(tMax-(-20))/(optLo-(-20));
-        else if (tMax <= optHi)    fTemp = 1.0;
-        else if (tMax <= tooWarm)  fTemp = 1.0 - 0.6*(tMax-optHi)/(tooWarm-optHi);
-        else                       fTemp = 0.05;
-        fTemp = Math.max(0, Math.min(1, fTemp));
-      }
-
-      let wMult = 1.0;
-      if (gustKmh !== null) {
-        if      (gustKmh <= 30) wMult = 1.0;
-        else if (gustKmh <= 50) wMult = 1.0 - 0.1*(gustKmh-30)/20;
-        else if (gustKmh <= 80) wMult = 0.9 - 0.4*(gustKmh-50)/30;
-        else                    wMult = 0.3;
-      }
-
-      let pBonus = 0;
-      if (freshCm > 10) {
-        const sf = Math.min(1,(freshCm-10)/20);
-        const wf = (gustKmh===null||gustKmh<=30)?1 : gustKmh<=50?1-(gustKmh-30)/20 : 0;
-        pBonus = 0.15 * sf * wf;
-      }
-
-      // probFactor: discount uncertain heavy-snow forecasts on storm days only.
-      // Threshold matches powder_override trigger (≥15cm) — light snow (<15cm) is
-      // already modelled via the depth/snowfall weights; adding a prob penalty there
-      // double-penalises days that are likely to verify fine.
-      const probFactor = (probPct !== null && freshCm >= 15)
-        ? Math.min(1, 0.4 + (probPct/100)*0.6)
-        : 1.0;
-
-      // Powder override
-      let raw;
-      if (freshCm >= 15 && (gustKmh === null || gustKmh < 60)) {
-        const powderIntensity = Math.min(1.0, freshCm / 40);
-        raw = 0.60*fDepth + 0.25*fTemp + 0.15*powderIntensity;
-        pBonus = 0;
-      } else {
-        raw = 0.45*fSun + 0.30*fDepth + 0.25*fTemp;
-      }
-
-      const score = Math.max(0, Math.min(1, (raw + pBonus) * wMult * probFactor));
-      return { score: Math.round(score*1000)/1000, fSun, fDepth, fTemp, wMult, pBonus, probFactor };
-    };
+    // parseCET and computeForecastDayScore are defined at the top of MODULE 1.
 
     const cvsFc = document.getElementById('forecast-canvas');
     if (cvsFc) setupHiDPI(cvsFc, 2000, 960);
     const ctxFc = cvsFc ? cvsFc.getContext('2d') : null;
     let fcHoverIdx = null;
 
-    // Parse Open-Meteo ISO strings as CET/CEST regardless of viewer's local timezone.
-    // Open-Meteo returns "YYYY-MM-DDTHH:MM" with no suffix — JS treats this as LOCAL,
-    // which is wrong for a UK/US user. We append the correct Alpine UTC offset.
-    const parseCET = (isoNoTz) => {
-      if (!isoNoTz) return null;
-      // Determine offset for this date: CET=+01:00, CEST=+02:00
-      // Europe/Vienna DST: last Sun Mar → last Sun Oct
-      const d = new Date(isoNoTz + 'Z'); // parse as UTC first to get the date
-      const y = d.getUTCFullYear();
-      // Last Sunday in March = DST start; Last Sunday in October = DST end.
-      // DST begins at 02:00 CET = 01:00 UTC on that Sunday (clocks spring to 03:00 CEST).
-      // DST ends   at 03:00 CEST = 01:00 UTC on that Sunday (clocks fall to 02:00 CET).
-      // Using midnight UTC as the threshold is 1 hour early: the 00:00 UTC slot
-      // (= 01:00 CET, still pre-DST) would incorrectly receive the CEST +02:00 offset.
-      // Fix: add 3600000 ms (1 hour) so the threshold is the actual transition moment.
-      const lastSunMar = new Date(Date.UTC(y, 2, 31)); lastSunMar.setUTCDate(31 - lastSunMar.getUTCDay());
-      const lastSunOct = new Date(Date.UTC(y, 9, 31)); lastSunOct.setUTCDate(31 - lastSunOct.getUTCDay());
-      const dstStart = new Date(lastSunMar.getTime() + 3600000); // 01:00 UTC = exact spring-forward
-      const dstEnd   = new Date(lastSunOct.getTime() + 3600000); // 01:00 UTC = exact fall-back
-      const isDST = d >= dstStart && d < dstEnd;
-      return new Date(isoNoTz + (isDST ? '+02:00' : '+01:00'));
-    };
-
-    window.repaintForecastCanvas = () => {
       if (!ctxFc || !window.GLOBAL_RESORT || !FORECAST_DATA || !FORECAST_DATA.resorts || !FORECAST_DATA.resorts[window.GLOBAL_RESORT]) return;
       ctxFc.clearRect(0,0,cvsFc.width,cvsFc.height);
 
@@ -1042,7 +1039,11 @@
         if (sH.time && sH.time[start]) exactDate = parseCET(sH.time[start]);
         else exactDate = new Date(localNow.getTime() + i*86400000);
 
-        const doy = Math.floor((exactDate - new Date(exactDate.getFullYear(), 0, 0)) / 86400000);
+        // Day-of-year for astronomical max-sun calculation.
+        // Use UTC anchors: parseCET returns a Date whose .getUTC* values are reliable;
+        // mixing with browser-local new Date(year,0,0) would introduce a ±1h offset
+        // for non-UTC viewers. Both anchors in UTC = consistent across all timezones.
+        const doy = Math.floor((exactDate.getTime() - Date.UTC(exactDate.getUTCFullYear(), 0, 0)) / 86400000);
         const decl = -23.45 * Math.cos((360/365 * (doy + 10)) * Math.PI/180) * Math.PI/180;
         const lat = 47 * Math.PI/180;
         const cosHA = -Math.tan(lat) * Math.tan(decl);
@@ -2697,7 +2698,13 @@
       // ── Clear sky hours: sun × √(srad/Ra) ─────────────────────────────────
       for (let i = 0; i <= ATMOS_DAYS; i++) {
         const d = atmosData[i]; if (!d) continue;
-        const doy = Math.floor((new Date(d.date) - new Date(new Date(d.date).getFullYear(), 0, 0)) / 86400000);
+        // Parse the ISO date string as UTC noon to avoid browser-local anchor mismatch.
+        // new Date("YYYY-MM-DD") is UTC midnight per spec, but new Date(year,0,0) is
+        // browser-local midnight — the gap between them shifts doy by ±1 for non-UTC
+        // browsers near midnight. Using Date.UTC for both anchors eliminates the offset.
+        const _dUTC = new Date(d.date + 'T12:00:00Z');
+        const _jan0 = Date.UTC(_dUTC.getUTCFullYear(), 0, 0);
+        const doy = Math.floor((_dUTC.getTime() - _jan0) / 86400000);
         const dr = 1 + 0.033*Math.cos(2*Math.PI*doy/365);
         const decl = 0.409*Math.sin(2*Math.PI*doy/365 - 1.39);
         const lat = 47*Math.PI/180;
