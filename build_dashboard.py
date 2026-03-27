@@ -35,7 +35,8 @@ def main():
             fc_str = (json.dumps(json.loads(FORECAST.read_text(encoding="utf-8")))
                       .replace("</", "<\\/")
                       .replace("\u2028", "\\u2028")
-                      .replace("\u2029", "\\u2029"))            html = html.replace("__FORECAST_DATA_PLACEHOLDER__", fc_str)
+                      .replace("\u2029", "\\u2029"))
+            html = html.replace("__FORECAST_DATA_PLACEHOLDER__", fc_str)
             print("  ✓ Injected high-res forecast data")
         else:
             print("  ⚠ No forecast data found, injecting empty object.")
